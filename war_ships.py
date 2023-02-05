@@ -28,7 +28,15 @@ class Ship:
     def move(self, go):
         pass
 
-    def is_collide(self, ship: Ship):
+    def is_collide(self, ship):
+        if self is ship:
+            return False
+        if any(
+                map(
+                    lambda x: x is None, (ship._x, ship._y)
+                )
+        ):
+            return False
         x_1 = self._x
         y_1 = self._y
         t_1 = self.tp
@@ -128,27 +136,35 @@ class GamePole:
             while True:
                 current_x = random.randint(0, 9)
                 current_y = random.randint(0, 9)
+                ship.set_start_coords(current_x, current_y)
                 if self.__field[current_x][current_y] == 0:
-                    if ship.tp == 1:  # horizontal orientation
-                        if all(
-                                map(
-                                    lambda x: x == 0, self.__field[current_x][current_y:current_y + ship.length]
-                                )
-                        ) and not any(
+                    if not any(
                             map(
-                                ship.is_collide(x), self._ships
+                                lambda x: ship.is_collide(x), self._ships
                             )
-                        ) and not ship.is_out_pole(self._size):
+                    ) and not ship.is_out_pole(self._size):
+                        if ship.tp == 1:  # horizontal orientation
+                            if all(
+                                    map(
+                                        lambda x: x == 0, self.__field[current_x][current_y:current_y + ship.length]
+                                    )
+                            ):
+                                self.__field = [
+                                    [1 if j in range(ship._y, ship._y + ship.length) and ship._x == i
+                                     else self.__field[i][j]
+                                     for j in range(self._size)]
+                                    for i in range(self._size)
+                                ]
+                            else:
+                                continue
+                        else:  # vertical orientation
                             self.__field = [
-                                [1 if j in range(y_1, y_1 + l_1) and x_1 == i else field[i][j] for j in
-                                 range(self._size)]
+                                [1 if i in range(ship._x, ship._x + ship.length) and ship._y == j else self.__field[i][j]
+                                 for j in range(self._size)]
                                 for i in range(self._size)
                             ]
 
-                    else:  # vertical orientation
-                        pass
-
-                    break
+                        break
                 else:
                     continue
 
@@ -169,10 +185,7 @@ class GamePole:
 
 g = GamePole(10)
 g.init()
-for s in g._ships:
-    print(
-        s
-    )
-print(
-    g.get_pole()
-)
+for r in g.get_pole():
+    for e in r:
+        print(e, end='')
+    print()
