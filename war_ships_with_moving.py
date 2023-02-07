@@ -48,62 +48,56 @@ class Ship:
                 )
         ):
             return False
-        x_1 = self.x
-        y_1 = self.y
-        t_1 = self.tp
-        l_1 = self.length
-        x_1_l = x_1 + l_1 if t_1 == 1 else x_1
-        y_1_l = y_1 + l_1 if t_1 == 2 else y_1
 
-        x_2 = ship.x
-        y_2 = ship.y
-        t_2 = ship.tp
-        l_2 = ship.length
-        x_2_l = x_2 + l_2 if t_2 == 1 else x_2
-        y_2_l = y_2 + l_2 if t_2 == 2 else y_2
+        if self.x == ship.y and self.y == ship.x:
+            return True
 
-        x_max = max(x_1_l, x_2_l)
-        y_max = max(y_1_l, y_2_l)
+        # self
+        xl_1 = (self.x + self.length) if self.tp == 1 else (self.x + 1)
+        yl_1 = (self.y + self.length) if self.tp == 2 else (self.y + 1)
 
-        field = [
-            [0 for _ in range(x_max + 1)]
-            for _ in range(y_max + 1)
-        ]
-        if t_1 == 1:  # horizontal orientation
+        # ship
+        xl_2 = ship.x + ship.length if ship.tp == 1 else ship.x + 1
+        yl_2 = ship.y + ship.length if ship.tp == 2 else ship.y + 1
+
+        size_x = max(xl_1, xl_2) + 1
+        size_y = max(yl_1, yl_2) + 1
+
+        field = [[0 for _ in range(size_x)]
+                 for _ in range(size_y)]
+
+        # self
+        if self.tp == 1:  # horizontal orientation
             field = [
-                [1 if j in range(x_1, x_1 + l_1) and y_1 == i else field[i][j] for j in range(x_max + 1)]
-                for i in range(y_max + 1)
+                [self.length if j in range(self.x, xl_1) and self.y == i else field[i][j] for j in range(size_x)]
+                for i in range(size_y)
             ]
-        elif t_1 == 2:  # vertical orientation
+        elif self.tp == 2:  # vertical orientation
             field = [
-                [1 if i in range(y_1, y_1 + l_1) and x_1 == j else field[i][j] for j in range(x_max + 1)]
-                for i in range(y_max + 1)
-            ]
-        if t_2 == 1:  # horizontal orientation
-            field = [
-                [1 if j in range(x_2, x_2 + l_2) and y_2 == i else field[i][j] for j in range(x_max + 1)]
-                for i in range(y_max + 1)
-            ]
-        if t_2 == 2:  # vertical orientation
-            field = [
-                [1 if i in range(y_2, y_2 + l_2) and x_2 == j else field[i][j] for j in range(x_max + 1)]
-                for i in range(y_max + 1)
+                [self.length if i in range(self.y, yl_1) and self.x == j else field[i][j] for j in range(size_x)]
+                for i in range(size_y)
             ]
 
-        def is_cross(x, x_l, y, y_l, t):
-            for i in range(y - 1, y_l + 2):
-                if i in range(len(field)):
-                    for j in range(x - 1, x_l + 2):
-                        if j in range(len(field[i])):
-                            if i in range(y, y_l + (1 if t == 2 else 0)) and j in range(x, x_l + (1 if t == 1 else 0)):
-                                pass
-                            else:
-                                if field[i][j] != 0:
-                                    return True
+        # ship
+        if ship.tp == 1:  # horizontal orientation
+            field = [
+                [ship.length if j in range(ship.x, xl_2) and ship.y == i else field[i][j] for j in range(size_x)]
+                for i in range(size_y)
+            ]
+        elif ship.tp == 2:  # vertical orientation
+            field = [
+                [ship.length if i in range(ship.y, yl_2) and ship.x == j else field[i][j] for j in range(size_x)]
+                for i in range(size_y)
+            ]
 
-            return False
+        def is_cross():
+            ship_sum = 0
+            for i in range(self.y - 1, yl_1 + 1):
+                for j in range(self.x - 1, xl_1 + 1):
+                    ship_sum += field[i][j]
+            return ship_sum
 
-        return is_cross(x_1, x_1_l, y_1, y_1_l, t_1)
+        return is_cross() != pow(self.length, 2)
 
     def is_out_pole(self, size):
         x = self._x
@@ -270,10 +264,8 @@ g.init()
 g.show()
 print()
 
-#
-# g.move_ships()
-# g.show()
 
-# print(
-#     Ship(4, 1, 0, 0).is_collide(Ship(3, 2, 0, 2))
-# )
+# ship = Ship(3, 2, 2, 0)
+#
+# a = ship.is_collide(Ship(1, 2, 0, 0))
+# print(a)
