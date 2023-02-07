@@ -155,8 +155,7 @@ class GamePole:
                                 lambda x: ship.is_collide(x), self._ships
                             )
                     ) and not ship.is_out_pole(self._size):
-                        if ship.tp == 2:  # vertical orientation
-
+                        if ship.tp == 1:  # horizontal orientation
                             self.__field = [
                                 [1 if j in range(ship.x, ship.x + ship.length) and ship.y == i
                                  else self.__field[i][j]
@@ -164,7 +163,7 @@ class GamePole:
                                 for i in range(self._size)
                             ]
 
-                        elif ship.tp == 1:  # horizontal orientation
+                        elif ship.tp == 2:  # vertical orientation
                             self.__field = [
                                 [1 if i in range(ship.y, ship.y + ship.length) and ship.x == j else self.__field[i][j]
                                  for j in range(self._size)]
@@ -250,7 +249,7 @@ class GamePole:
     def show(self):
         for row in self.__field:
             for elem in row:
-                print(elem, end=' ')
+                print(elem, end='')
             print()
 
     def get_pole(self):
@@ -263,8 +262,7 @@ g = GamePole(10)
 g.init()
 g.show()
 print()
-
-
+print(g.get_ships())
 # ship = Ship(3, 2, 2, 0)
 #
 # a = ship.is_collide(Ship(1, 2, 0, 0))
