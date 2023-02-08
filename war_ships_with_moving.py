@@ -143,7 +143,7 @@ class GamePole:
     def __init__(self, size):
         self._size = size
         self._ships = list()
-
+        self.ships_coordinates = {}
         self.__field = [
             [0 for _ in range(self._size)] for _ in range(self._size)
         ]
@@ -179,12 +179,16 @@ class GamePole:
                                 for i in range(self._size)
                             ]
 
+                            self.ships_coordinates[ship] = [(x, ship.y) for x in range(ship.x, ship.x + ship.length)]
+
                         elif ship.tp == 2:  # vertical orientation
                             self.__field = [
                                 [1 if i in range(ship.y, ship.y + ship.length) and ship.x == j else self.__field[i][j]
                                  for j in range(self._size)]
                                 for i in range(self._size)
                             ]
+
+                            self.ships_coordinates[ship] = [(ship.x, y) for y in range(ship.y, ship.y + ship.length)]
 
                         break
                 else:
@@ -228,6 +232,8 @@ class GamePole:
                             for i in range(self._size)
                         ]
 
+                        self.ships_coordinates[ship] = [(x, ship.y) for x in range(ship.x, ship.x + ship.length)]
+
                     elif ship.tp == 2:  # vertical orientation
                         self.__field = [
                             [1 if i in range(ship.y, ship.y + ship.length) and ship.x == j else self.__field[i][
@@ -235,6 +241,8 @@ class GamePole:
                              for j in range(self._size)]
                             for i in range(self._size)
                         ]
+
+                        self.ships_coordinates[ship] = [(ship.x, y) for y in range(ship.y, ship.y + ship.length)]
 
                     break  # success
 
@@ -294,43 +302,38 @@ class SeaBattle:
                 print(self.computer_field[i][j], end=' ' if j != self._size - 1 else '')
             print()
 
+    def find_x(self, ship_object: Ship):
+        current_x, current_y = ship_object.get_start_coords()
+        for _ in range(ship_object.length):
+            if self.computer_field[current_y][current_x] == 'X':
+                return current_x, current_y
+            else:
+                current_x += (1 if ship_object.tp == 1 else 0)
+                current_y += (1 if ship_object.tp == 2 else 0)
+
+    def find_damaged_ship(self, field_object: GamePole):
+        for ship in field_object.get_ships():
+            if not ship.is_move:  # ship is damaged
+                coord_x, coord_y = self.find_x(ship)
+
     def the_game(self):
-        def computer_running():
-            def find_x():
-                ships_with_x = list(filter(lambda ship: not ship.is_move, self.computer.get_ships()))
-                
-                for i in range(self._size):
-                    for j in range(self._size):
-                        if self.computer_field[i][j] == 'X':
-                            return True, (j, i)
-
-            resolution, coordinates = find_x()
-            if resolution:
-                coord_x, coord_y = coordinates
-            #
-            #     current_x = random.choice(
-            #         [coord_x + k for k in range(-1, 2) if self.computer_field[i][j] not in ('.', 'X')])
-            #
-            #     ship_sum += field[i][j]
-            # return ship_sum
-
         count = 0
         while True:
             if count % 2:
-                computer_running()
-                current_x = random.randint(0, self._size - 1)
-                current_y = random.randint(0, self._size - 1)
-
+                count += 1
             else:
-                pass
-
-            count += 1
+                count += 1
 
 
 sb = SeaBattle(10)
 
 g1 = GamePole(10)
 g1.init()
-g2 = GamePole(10)
-g2.init()
-sb.show_two_fields()
+g1.show()
+print(
+    g1.ships_coordinates
+)
+g1.move_ships()
+print(
+    g1.ships_coordinates
+)
