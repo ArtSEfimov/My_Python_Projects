@@ -302,24 +302,45 @@ class SeaBattle:
                 print(self.computer_field[i][j], end=' ' if j != self._size - 1 else '')
             print()
 
-    def find_x(self, ship_object: Ship):
-        current_x, current_y = ship_object.get_start_coords()
-        for _ in range(ship_object.length):
-            if self.computer_field[current_y][current_x] == 'X':
-                return current_x, current_y
-            else:
-                current_x += (1 if ship_object.tp == 1 else 0)
-                current_y += (1 if ship_object.tp == 2 else 0)
-
-    def find_damaged_ship(self, field_object: GamePole):
-        for ship in field_object.get_ships():
-            if not ship.is_move:  # ship is damaged
-                coord_x, coord_y = self.find_x(ship)
+    # def find_x(self, ship_object: Ship):
+    #     current_x, current_y = ship_object.get_start_coords()
+    #     for _ in range(ship_object.length):
+    #         if self.computer_field[current_y][current_x] == 'X':
+    #             return current_x, current_y
+    #         else:
+    #             current_x += (1 if ship_object.tp == 1 else 0)
+    #             current_y += (1 if ship_object.tp == 2 else 0)
+    #
+    # def find_damaged_ship(self, field_object: GamePole):
+    #     for ship in field_object.get_ships():
+    #         if not ship.is_move:  # ship is damaged
+    #             coord_x, coord_y = self.find_x(ship)
 
     def the_game(self):
         count = 0
         while True:
-            if count % 2:
+            if count % 2 or not count % 2:  # computer`s step
+                while True:
+                    # if there are no damaged ships
+                    current_x = random.randint(0, self._size - 1)
+                    current_y = random.randint(0, self._size - 1)
+                    current_cell = self.human_field[current_y][current_x]
+                    if current_cell == '.':
+                        continue
+                    elif current_cell == 0:
+                        self.human_field[current_y][current_x] = '.'
+                        count += 1
+                        break
+                    elif current_cell == 1:
+                        self.human_field[current_y][current_x] = 'X'
+                        # put points around my 'X' diagonally
+                        for ship, coords in self.human.ships_coordinates.items():
+                            if (current_x, current_y) in coords:
+                                ship[coords.index((current_x, current_y))] = 'X'
+                                coords.pop((current_x, current_y))
+                                break  # breaking the 'for' cycle
+                        continue
+
                 count += 1
             else:
                 count += 1
@@ -327,13 +348,5 @@ class SeaBattle:
 
 sb = SeaBattle(10)
 
-g1 = GamePole(10)
-g1.init()
-g1.show()
-print(
-    g1.ships_coordinates
-)
-g1.move_ships()
-print(
-    g1.ships_coordinates
-)
+sb.human.show()
+sb.computer.show()
