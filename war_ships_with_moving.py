@@ -148,6 +148,9 @@ class GamePole:
             [0 for _ in range(self._size)] for _ in range(self._size)
         ]
 
+    def get_link_to_the_field(self):
+        return self.__field
+
     def init(self):
         n = 4
         count = 1
@@ -197,7 +200,7 @@ class GamePole:
     def get_ships(self):
         return self._ships
 
-    def move_ships(self):
+    def move_ships(self, field):
         for ship in self._ships:
             if not ship.is_move:
                 continue
@@ -205,14 +208,14 @@ class GamePole:
             if ship.tp == 1:  # horizontal orientation
                 self.__field = [
                     [0 if j in range(ship.x, ship.x + ship.length) and ship.y == i
-                     else self.__field[i][j]
+                     else field[i][j]
                      for j in range(self._size)]
                     for i in range(self._size)
                 ]
             elif ship.tp == 2:  # vertical orientation
                 self.__field = [
                     [0 if i in range(ship.y, ship.y + ship.length) and ship.x == j
-                     else self.__field[i][j]
+                     else field[i][j]
                      for j in range(self._size)]
                     for i in range(self._size)
                 ]
@@ -268,6 +271,7 @@ class GamePole:
                          for j in range(self._size)]
                         for i in range(self._size)
                     ]
+        return self.__field
 
     def show(self):
         for row in self.__field:
@@ -293,8 +297,8 @@ class SeaBattle:
         self.computer.init()
         self.human.init()
 
-        self.computer_field = [list(element) for element in self.computer.get_pole()]
-        self.human_field = [list(element) for element in self.human.get_pole()]
+        self.computer_field = self.computer.get_link_to_the_field()
+        self.human_field = self.human.get_link_to_the_field()
 
     def show_two_fields(self):
         for i in range(self._size):
@@ -385,10 +389,12 @@ class SeaBattle:
                     elif current_cell == 0:
                         self.human_field[current_y][current_x] = '.'
                         count += 1
-                        self.human.move_ships()
                         self.human.show()
-                        self.show_two_fields()
                         print()
+                        self.human_field = self.human.move_ships(self.human_field)
+                        self.human.show()
+                        print()
+
                         break
                     elif current_cell == 1:
                         self.human_field[current_y][current_x] = 'X'
@@ -409,10 +415,12 @@ class SeaBattle:
                                     self.human.get_ships().remove(ship)
                                     del self.human.ships_coordinates[ship]
                                 break  # breaking the 'for' cycle
-
-                        self.human.move_ships()
-                        self.show_two_fields()
+                        self.human.show()
                         print()
+                        self.human_field = self.human.move_ships(self.human_field)
+                        self.human.show()
+                        print()
+
 
                         continue
 
@@ -426,4 +434,3 @@ class SeaBattle:
 sb = SeaBattle(10)
 
 sb.the_game()
-
