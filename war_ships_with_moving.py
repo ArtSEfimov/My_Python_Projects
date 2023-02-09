@@ -297,7 +297,7 @@ class SeaBattle:
     def show_two_fields(self):
         for i in range(self._size):
             for j in range(self._size):
-                print(self.computer_field[i][j], end=' ' if j != self._size - 1 else 3 * '\t')
+                print(self.human_field[i][j], end=' ' if j != self._size - 1 else 3 * '\t')
             for j in range(self._size):
                 print(self.computer_field[i][j], end=' ' if j != self._size - 1 else '')
             print()
@@ -315,12 +315,40 @@ class SeaBattle:
     #     for ship in field_object.get_ships():
     #         if not ship.is_move:  # ship is damaged
     #             coord_x, coord_y = self.find_x(ship)
+    @staticmethod
+    def put_points(field, size, x, y):
+        tmp_x = x - 1
+        tmp_y = y - 1
+        if all(
+                map(lambda x: x in range(size), (tmp_y, tmp_x))
+        ):
+            field[tmp_y][tmp_x] = '.'
+        tmp_x = x - 1
+        tmp_y = y + 1
+        if all(
+                map(lambda x: x in range(size), (tmp_y, tmp_x))
+        ):
+            field[tmp_y][tmp_x] = '.'
+        tmp_x = x + 1
+        tmp_y = y - 1
+        if all(
+                map(lambda x: x in range(size), (tmp_y, tmp_x))
+        ):
+            field[tmp_y][tmp_x] = '.'
+        tmp_x = x + 1
+        tmp_y = y + 1
+        if all(
+                map(lambda x: x in range(size), (tmp_y, tmp_x))
+        ):
+            field[tmp_y][tmp_x] = '.'
 
     def the_game(self):
         count = 0
         while True:
             if count % 2 or not count % 2:  # computer`s step
                 while True:
+                    self.show_two_fields()
+                    print()
                     # if there are no damaged ships
                     current_x = random.randint(0, self._size - 1)
                     current_y = random.randint(0, self._size - 1)
@@ -334,19 +362,21 @@ class SeaBattle:
                     elif current_cell == 1:
                         self.human_field[current_y][current_x] = 'X'
                         # put points around my 'X' diagonally
+                        self.put_points(self.human_field, self._size, current_x, current_y)
                         for ship, coords in self.human.ships_coordinates.items():
                             if (current_x, current_y) in coords:
                                 ship[coords.index((current_x, current_y))] = 'X'
-                                coords.pop((current_x, current_y))
+                                coords.remove((current_x, current_y))
                                 break  # breaking the 'for' cycle
                         continue
 
                 count += 1
             else:
                 count += 1
+        self.show_two_fields()
+        print()
 
 
 sb = SeaBattle(10)
 
-sb.human.show()
-sb.computer.show()
+sb.the_game()
