@@ -199,6 +199,8 @@ class GamePole:
 
     def move_ships(self):
         for ship in self._ships:
+            if not ship.is_move:
+                continue
             reserve_coords = ship.get_start_coords()
             if ship.tp == 1:  # horizontal orientation
                 self.__field = [
@@ -315,8 +317,9 @@ class SeaBattle:
     #     for ship in field_object.get_ships():
     #         if not ship.is_move:  # ship is damaged
     #             coord_x, coord_y = self.find_x(ship)
-    @staticmethod
-    def put_points(field, size, x, y):
+
+    @staticmethod  # maybe doing in with a cycle
+    def put_points(field, size, x, y, killed_flag=False):
         tmp_x = x - 1
         tmp_y = y - 1
         if all(
@@ -341,14 +344,38 @@ class SeaBattle:
                 map(lambda x: x in range(size), (tmp_y, tmp_x))
         ):
             field[tmp_y][tmp_x] = '.'
+        if killed_flag:
+            tmp_x = x
+            tmp_y = y + 1
+            if all(
+                    map(lambda x: x in range(size), (tmp_y, tmp_x))
+            ) and field[tmp_y][tmp_x] != 'X':
+                field[tmp_y][tmp_x] = '.'
+            tmp_x = x
+            tmp_y = y - 1
+            if all(
+                    map(lambda x: x in range(size), (tmp_y, tmp_x))
+            ) and field[tmp_y][tmp_x] != 'X':
+                field[tmp_y][tmp_x] = '.'
+            tmp_x = x - 1
+            tmp_y = y
+            if all(
+                    map(lambda x: x in range(size), (tmp_y, tmp_x))
+            ) and field[tmp_y][tmp_x] != 'X':
+                field[tmp_y][tmp_x] = '.'
+            tmp_x = x + 1
+            tmp_y = y
+            if all(
+                    map(lambda x: x in range(size), (tmp_y, tmp_x))
+            ) and field[tmp_y][tmp_x] != 'X':
+                field[tmp_y][tmp_x] = '.'
 
     def the_game(self):
         count = 0
         while True:
             if count % 2 or not count % 2:  # computer`s step
-                while True:
-                    self.show_two_fields()
-                    print()
+                while self.human.get_ships():
+
                     # if there are no damaged ships
                     current_x = random.randint(0, self._size - 1)
                     current_y = random.randint(0, self._size - 1)
@@ -358,16 +385,35 @@ class SeaBattle:
                     elif current_cell == 0:
                         self.human_field[current_y][current_x] = '.'
                         count += 1
+                        self.human.move_ships()
+                        self.human.show()
+                        self.show_two_fields()
+                        print()
                         break
                     elif current_cell == 1:
                         self.human_field[current_y][current_x] = 'X'
-                        # put points around my 'X' diagonally
+
+                        # put points around human 'X' diagonally
                         self.put_points(self.human_field, self._size, current_x, current_y)
+
                         for ship, coords in self.human.ships_coordinates.items():
                             if (current_x, current_y) in coords:
+                                ship.is_move = False
                                 ship[coords.index((current_x, current_y))] = 'X'
                                 coords.remove((current_x, current_y))
+                                if not coords:
+                                    # put points around killed ship
+                                    self.put_points(self.human_field, self._size, current_x, current_y,
+                                                    killed_flag=True)
+
+                                    self.human.get_ships().remove(ship)
+                                    del self.human.ships_coordinates[ship]
                                 break  # breaking the 'for' cycle
+
+                        self.human.move_ships()
+                        self.show_two_fields()
+                        print()
+
                         continue
 
                 count += 1
@@ -380,3 +426,4 @@ class SeaBattle:
 sb = SeaBattle(10)
 
 sb.the_game()
+
