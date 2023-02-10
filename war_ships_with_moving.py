@@ -148,8 +148,19 @@ class GamePole:
             [0 for _ in range(self._size)] for _ in range(self._size)
         ]
 
-    def get_link_to_the_field(self):
+    @property
+    def field(self):
         return self.__field
+
+    @field.setter
+    def field(self, value):
+        self.__field = value
+
+    # def __getitem__(self, item):
+    #     return self.__field[item]
+    #
+    # def __setitem__(self, key, value):
+    #     pass
 
     def init(self):
         n = 4
@@ -167,7 +178,7 @@ class GamePole:
                 current_x = random.randint(0, self._size - 1)
                 current_y = random.randint(0, self._size - 1)
                 ship.set_start_coords(current_x, current_y)
-                if self.__field[current_x][current_y] == 0:
+                if self.field[current_x][current_y] == 0:
                     if not any(
                             map(
                                 lambda x: ship.is_collide(x), self._ships
@@ -175,9 +186,9 @@ class GamePole:
                     ) and not ship.is_out_pole(self._size):
                         if ship.tp == 1:  # horizontal orientation
 
-                            self.__field = [
+                            self.field = [
                                 [1 if j in range(ship.x, ship.x + ship.length) and ship.y == i
-                                 else self.__field[i][j]
+                                 else self.field[i][j]
                                  for j in range(self._size)]
                                 for i in range(self._size)
                             ]
@@ -185,8 +196,8 @@ class GamePole:
                             self.ships_coordinates[ship] = [(x, ship.y) for x in range(ship.x, ship.x + ship.length)]
 
                         elif ship.tp == 2:  # vertical orientation
-                            self.__field = [
-                                [1 if i in range(ship.y, ship.y + ship.length) and ship.x == j else self.__field[i][j]
+                            self.field = [
+                                [1 if i in range(ship.y, ship.y + ship.length) and ship.x == j else self.field[i][j]
                                  for j in range(self._size)]
                                 for i in range(self._size)
                             ]
@@ -200,22 +211,22 @@ class GamePole:
     def get_ships(self):
         return self._ships
 
-    def move_ships(self, field):
+    def move_ships(self):
         for ship in self._ships:
             if not ship.is_move:
                 continue
             reserve_coords = ship.get_start_coords()
             if ship.tp == 1:  # horizontal orientation
-                self.__field = [
+                self.field = [
                     [0 if j in range(ship.x, ship.x + ship.length) and ship.y == i
-                     else field[i][j]
+                     else self.field[i][j]
                      for j in range(self._size)]
                     for i in range(self._size)
                 ]
             elif ship.tp == 2:  # vertical orientation
-                self.__field = [
+                self.field = [
                     [0 if i in range(ship.y, ship.y + ship.length) and ship.x == j
-                     else field[i][j]
+                     else self.field[i][j]
                      for j in range(self._size)]
                     for i in range(self._size)
                 ]
@@ -230,22 +241,23 @@ class GamePole:
                         )
                 ) and not ship.is_out_pole(self._size):
                     if ship.tp == 1:  # horizontal orientation
-                        self.__field = [
+                        self.field = [
                             [1 if j in range(ship.x, ship.x + ship.length) and ship.y == i
-                             else self.__field[i][j]
+                             else self.field[i][j]
                              for j in range(self._size)]
                             for i in range(self._size)
                         ]
-
+                        print(self.field)
                         self.ships_coordinates[ship] = [(x, ship.y) for x in range(ship.x, ship.x + ship.length)]
 
                     elif ship.tp == 2:  # vertical orientation
-                        self.__field = [
-                            [1 if i in range(ship.y, ship.y + ship.length) and ship.x == j else self.__field[i][
+                        self.field = [
+                            [1 if i in range(ship.y, ship.y + ship.length) and ship.x == j else self.field[i][
                                 j]
                              for j in range(self._size)]
                             for i in range(self._size)
                         ]
+                        print(self.field)
 
                         self.ships_coordinates[ship] = [(ship.x, y) for y in range(ship.y, ship.y + ship.length)]
 
@@ -258,30 +270,29 @@ class GamePole:
             else:
                 ship.set_start_coords(*reserve_coords)
                 if ship.tp == 1:  # horizontal orientation
-                    self.__field = [
+                    self.field = [
                         [1 if j in range(ship.x, ship.x + ship.length) and ship.y == i
-                         else self.__field[i][j]
+                         else self.field[i][j]
                          for j in range(self._size)]
                         for i in range(self._size)
                     ]
 
                 elif ship.tp == 2:  # vertical orientation
-                    self.__field = [
-                        [1 if i in range(ship.y, ship.y + ship.length) and ship.x == j else self.__field[i][j]
+                    self.field = [
+                        [1 if i in range(ship.y, ship.y + ship.length) and ship.x == j else self.field[i][j]
                          for j in range(self._size)]
                         for i in range(self._size)
                     ]
-        return self.__field
 
     def show(self):
-        for row in self.__field:
+        for row in self.field:
             for elem in row:
                 print(elem, end=' ')
             print()
 
     def get_pole(self):
         return tuple(
-            tuple(row) for row in self.__field
+            tuple(row) for row in self.field
         )
 
 
@@ -297,15 +308,12 @@ class SeaBattle:
         self.computer.init()
         self.human.init()
 
-        self.computer_field = self.computer.get_link_to_the_field()
-        self.human_field = self.human.get_link_to_the_field()
-
     def show_two_fields(self):
         for i in range(self._size):
             for j in range(self._size):
-                print(self.human_field[i][j], end=' ' if j != self._size - 1 else 3 * '\t')
+                print(self.human.field[i][j], end=' ' if j != self._size - 1 else 3 * '\t')
             for j in range(self._size):
-                print(self.computer_field[i][j], end=' ' if j != self._size - 1 else '')
+                print(self.computer.field[i][j], end=' ' if j != self._size - 1 else '')
             print()
 
     # def find_x(self, ship_object: Ship):
@@ -383,24 +391,25 @@ class SeaBattle:
                     # if there are no damaged ships
                     current_x = random.randint(0, self._size - 1)
                     current_y = random.randint(0, self._size - 1)
-                    current_cell = self.human_field[current_y][current_x]
+                    current_cell = self.human.field[current_y][current_x]
                     if current_cell == '.':
                         continue
                     elif current_cell == 0:
-                        self.human_field[current_y][current_x] = '.'
+                        self.human.field[current_y][current_x] = '.'
                         count += 1
                         self.human.show()
                         print()
-                        self.human_field = self.human.move_ships(self.human_field)
+                        self.human.move_ships()
                         self.human.show()
                         print()
 
                         break
                     elif current_cell == 1:
-                        self.human_field[current_y][current_x] = 'X'
+                        self.human.field[current_y][current_x] = 'X'
+                        self.human.show()
 
                         # put points around human 'X' diagonally
-                        self.put_points(self.human_field, self._size, current_x, current_y)
+                        self.put_points(self.human.field, self._size, current_x, current_y)
 
                         for ship, coords in self.human.ships_coordinates.items():
                             if (current_x, current_y) in coords:
@@ -409,7 +418,7 @@ class SeaBattle:
                                 coords.remove((current_x, current_y))
                                 if not coords:
                                     # put points around killed ship
-                                    self.put_points(self.human_field, self._size, current_x, current_y,
+                                    self.put_points(self.human.field, self._size, current_x, current_y,
                                                     killed_flag=True)
 
                                     self.human.get_ships().remove(ship)
@@ -417,17 +426,18 @@ class SeaBattle:
                                 break  # breaking the 'for' cycle
                         self.human.show()
                         print()
-                        self.human_field = self.human.move_ships(self.human_field)
+                        self.human.move_ships()
                         self.human.show()
                         print()
-
 
                         continue
 
                 count += 1
             else:
                 count += 1
-        self.show_two_fields()
+            print(self.human.get_ships())
+            if not self.human.ships_coordinates:
+                break
         print()
 
 
