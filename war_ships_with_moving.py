@@ -287,11 +287,12 @@ class GamePole:
 
 
 class SeaBattle:
-    alphabet = string.ascii_lowercase
+    alphabet = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЭЮЯ'
 
     def __init__(self, size):
         self._size = size
         self.accordance_coordinates = {self.alphabet[i]: i for i in range(size)}
+        self.alphabet_for_field = {i[1]: i[0] for i in self.accordance_coordinates.items()}
         self.computer = GamePole(size)
         self.human = GamePole(size)
 
@@ -299,12 +300,27 @@ class SeaBattle:
         self.human.init()
 
     def show_two_fields(self):
-        for i in range(self._size):
-            for j in range(self._size):
-                print(self.human.field[i][j], end=' ' if j != self._size - 1 else 3 * '\t')
-            for j in range(self._size):
-                print(self.computer.field[i][j], end=' ' if j != self._size - 1 else '')
-            print()
+        for i in range(self._size + 1):
+            if i == 0:
+                print('\t', ' '.join([self.alphabet_for_field[i] for i in range(self._size)]), 4 * '\t',
+                      ' '.join([self.alphabet_for_field[i] for i in range(self._size)]), sep='')
+            else:
+                for j in range(self._size + 2):
+                    if j == 0:
+                        print(i, end='')
+                    elif j == 1:
+                        print(end='\t')
+                    else:
+                        print(self.human.field[i - 1][j - 2], end=' ' if j != self._size + 1 else 3 * '\t')
+
+                for j in range(self._size + 2):
+                    if j == 0:
+                        print(i, end='')
+                    elif j == 1:
+                        print(end='\t')
+                    else:
+                        print(self.computer.field[i - 1][j - 2], end=' ' if j != self._size + 1 else 3 * '\t')
+                print()
 
     # def find_x(self, ship_object: Ship):
     #     current_x, current_y = ship_object.get_start_coords()
@@ -329,8 +345,8 @@ class SeaBattle:
                 ) and tmp_y != y and tmp_x != x:
                     field[tmp_y][tmp_x] = '.'
         if killed_flag:
-            xl = (x0 + length) if tp == 1 else x0
-            yl = (y0 + length) if tp == 2 else y0
+            xl = (x0 + length) if tp == 1 else x0 + 1
+            yl = (y0 + length) if tp == 2 else y0 + 1
             for i in range(y0 - 1, yl + 1):
                 for j in range(x0 - 1, xl + 1):
                     if all(
@@ -340,62 +356,69 @@ class SeaBattle:
 
     def the_game(self):
         count = 0
+        self.show_two_fields()
+        print()
         while True:
             if count % 2 or not count % 2:  # computer`s step
                 while self.human.get_ships():
+                    # I'll make an damaged_dict and put {ship: deleted coords} there
 
-                    # if there are no damaged ships
-                    current_x = random.randint(0, self._size - 1)
-                    current_y = random.randint(0, self._size - 1)
-                    current_cell = self.human.field[current_y][current_x]
-                    if current_cell == '.':
-                        continue
-                    elif current_cell == 0:
-                        self.human.field[current_y][current_x] = '.'
-                        count += 1
-                        self.human.move_ships()
-                        self.show_two_fields()
-                        print(
-                            self.human.ships_coordinates
-                        )
-                        print()
+                    # damaged_ships = list(filter(lambda ship: ship[0].length != len(ship[1]),
+                    #                        self.human.ships_coordinates.items()))
+                    if damaged_ships:  # if there are damaged ships
+                    # for ship in damaged_ships:
+                    #     if abs(len(self.human.ships_coordinates[ship]) - ship.length) > 1:
+                    #         if ship.tp == 2:
+                    #             current_x = ship.x
+                    #             current_y = list(range(-))
 
-                        break
-                    elif current_cell == 1:
-                        self.human.field[current_y][current_x] = 'X'
-                        self.show_two_fields()
-                        print()
+                    else:  # if there are no damaged ships
 
-                        # put points around human 'X' diagonally
-                        self.put_points(self.human.field, self._size, current_x, current_y)
+                        current_x = random.randint(0, self._size - 1)
+                        current_y = random.randint(0, self._size - 1)
+                        current_cell = self.human.field[current_y][current_x]
+                        if current_cell == '.':
+                            continue
+                        elif current_cell == 0:
+                            self.human.field[current_y][current_x] = '.'
+                            count += 1
+                            self.human.move_ships()
+                            self.show_two_fields()
+                            print()
+                            break
+                        elif current_cell == 1:
+                            self.human.field[current_y][current_x] = 'X'
 
-                        for ship, coords in self.human.ships_coordinates.items():
-                            if (current_x, current_y) in coords:
-                                ship.is_move = False
-                                ship[coords.index((current_x, current_y))] = 'X'
-                                coords.remove((current_x, current_y))
-                                if not coords:
-                                    # put points around killed ship
-                                    self.put_points(self.human.field, self._size, current_x, current_y,
-                                                    killed_flag=True, length=ship.length,
-                                                    tp=ship.tp, x0=ship.x, y0=ship.y)
+                            # put points around human 'X' diagonally
+                            self.put_points(self.human.field, self._size, current_x, current_y)
 
-                                    del self.human.ships_coordinates[ship]
-                                break  # breaking the 'for' cycle
-                        self.show_two_fields()
-                        print()
-                        self.human.move_ships()
-                        self.show_two_fields()
-                        print()
+                            for ship, coords in self.human.ships_coordinates.items():
+                                if (current_x, current_y) in coords:
+                                    ship.is_move = False
+                                    ship[coords.index((current_x, current_y))] = 'X'
+                                    coords.remove((current_x, current_y))
+                                    if not coords:
+                                        # put points around killed ship
+                                        self.put_points(self.human.field, self._size, current_x, current_y,
+                                                        killed_flag=True, length=ship.length,
+                                                        tp=ship.tp, x0=ship.x, y0=ship.y)
 
-                        continue
+                                        del self.human.ships_coordinates[ship]
+
+                                    break  # breaking the 'for' cycle
+                            self.human.move_ships()
+                            self.show_two_fields()
+                            print()
+
+                            continue
 
                 count += 1
-            else:
+            else:  # human`s step
                 count += 1
-            print(self.human.get_ships())
-            print()
-            if not self.human.ships_coordinates:
+
+            if any(
+                    map(lambda x: not x, (self.human.ships_coordinates, self.computer.ships_coordinates))
+            ):
                 break
         print()
 
