@@ -156,12 +156,6 @@ class GamePole:
     def field(self, value):
         self.__field = value
 
-    # def __getitem__(self, item):
-    #     return self.__field[item]
-    #
-    # def __setitem__(self, key, value):
-    #     pass
-
     def init(self):
         n = 4
         count = 1
@@ -247,7 +241,7 @@ class GamePole:
                              for j in range(self._size)]
                             for i in range(self._size)
                         ]
-                        print(self.field)
+
                         self.ships_coordinates[ship] = [(x, ship.y) for x in range(ship.x, ship.x + ship.length)]
 
                     elif ship.tp == 2:  # vertical orientation
@@ -257,7 +251,6 @@ class GamePole:
                              for j in range(self._size)]
                             for i in range(self._size)
                         ]
-                        print(self.field)
 
                         self.ships_coordinates[ship] = [(ship.x, y) for y in range(ship.y, ship.y + ship.length)]
 
@@ -332,37 +325,19 @@ class SeaBattle:
 
     @staticmethod  # maybe doing in with a cycle
     def put_points(field, size, x, y, killed_flag=False):
-        tmp_x = x - 1
-        tmp_y = y - 1
-        if all(
-                map(lambda x: x in range(size), (tmp_y, tmp_x))
-        ):
-            field[tmp_y][tmp_x] = '.'
-        tmp_x = x - 1
-        tmp_y = y + 1
-        if all(
-                map(lambda x: x in range(size), (tmp_y, tmp_x))
-        ):
-            field[tmp_y][tmp_x] = '.'
-        tmp_x = x + 1
-        tmp_y = y - 1
-        if all(
-                map(lambda x: x in range(size), (tmp_y, tmp_x))
-        ):
-            field[tmp_y][tmp_x] = '.'
-        tmp_x = x + 1
-        tmp_y = y + 1
-        if all(
-                map(lambda x: x in range(size), (tmp_y, tmp_x))
-        ):
-            field[tmp_y][tmp_x] = '.'
+        for tmp_y in range(y - 1, y + 2):
+            for tmp_x in range(x - 1, x + 2):
+                if all(
+                        map(lambda s: s in range(size), (tmp_y, tmp_x))
+                ) and tmp_y != y and tmp_x != x:
+                    field[tmp_y][tmp_x] = '.'
         if killed_flag:
-            tmp_x = x
-            tmp_y = y + 1
-            if all(
-                    map(lambda x: x in range(size), (tmp_y, tmp_x))
-            ) and field[tmp_y][tmp_x] != 'X':
-                field[tmp_y][tmp_x] = '.'
+            for tmp_y in range(y - 1, y + 2):
+                for tmp_x in range(x - 1, x + 2):
+                    if all(
+                            map(lambda x: x in range(size), (tmp_y, tmp_x))
+                    ) and field[tmp_y][tmp_x] != 'X' and (any(map(lambda s: s in (x, y), (tmp_y, tmp_x)))):
+                        field[tmp_y][tmp_x] = '.'
             tmp_x = x
             tmp_y = y - 1
             if all(
@@ -397,17 +372,15 @@ class SeaBattle:
                     elif current_cell == 0:
                         self.human.field[current_y][current_x] = '.'
                         count += 1
-                        self.human.show()
-                        print()
                         self.human.move_ships()
-                        self.human.show()
+                        self.show_two_fields()
                         print()
 
                         break
                     elif current_cell == 1:
                         self.human.field[current_y][current_x] = 'X'
-                        self.human.show()
-
+                        self.show_two_fields()
+                        print()
                         # put points around human 'X' diagonally
                         self.put_points(self.human.field, self._size, current_x, current_y)
 
@@ -421,13 +394,13 @@ class SeaBattle:
                                     self.put_points(self.human.field, self._size, current_x, current_y,
                                                     killed_flag=True)
 
-                                    self.human.get_ships().remove(ship)
+                                    # self.human.get_ships().remove(ship)
                                     del self.human.ships_coordinates[ship]
                                 break  # breaking the 'for' cycle
-                        self.human.show()
+                        self.show_two_fields()
                         print()
                         self.human.move_ships()
-                        self.human.show()
+                        self.show_two_fields()
                         print()
 
                         continue
@@ -436,6 +409,7 @@ class SeaBattle:
             else:
                 count += 1
             print(self.human.get_ships())
+            print()
             if not self.human.ships_coordinates:
                 break
         print()
