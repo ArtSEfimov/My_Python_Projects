@@ -64,9 +64,6 @@ class Ship:
         ):
             return False
 
-        if self.x == ship.y and self.y == ship.x:
-            return True
-
         # self
         xl_1 = (self.x + self.length) if self.tp == 1 else (self.x + 1)
         yl_1 = (self.y + self.length) if self.tp == 2 else (self.y + 1)
@@ -172,7 +169,7 @@ class GamePole:
                 current_x = random.randint(0, self._size - 1)
                 current_y = random.randint(0, self._size - 1)
                 ship.set_start_coords(current_x, current_y)
-                if self.field[current_x][current_y] == 0:
+                if self.field[current_y][current_x] == 0:
                     if not any(
                             map(
                                 lambda x: ship.is_collide(x), self._ships
@@ -323,8 +320,8 @@ class SeaBattle:
     #         if not ship.is_move:  # ship is damaged
     #             coord_x, coord_y = self.find_x(ship)
 
-    @staticmethod  # maybe doing in with a cycle
-    def put_points(field, size, x, y, killed_flag=False):
+    @staticmethod
+    def put_points(field, size, x, y, killed_flag=False, length=None, tp=None, x0=None, y0=None):
         for tmp_y in range(y - 1, y + 2):
             for tmp_x in range(x - 1, x + 2):
                 if all(
@@ -332,30 +329,14 @@ class SeaBattle:
                 ) and tmp_y != y and tmp_x != x:
                     field[tmp_y][tmp_x] = '.'
         if killed_flag:
-            for tmp_y in range(y - 1, y + 2):
-                for tmp_x in range(x - 1, x + 2):
+            xl = (x0 + length) if tp == 1 else x0
+            yl = (y0 + length) if tp == 2 else y0
+            for i in range(y0 - 1, yl + 1):
+                for j in range(x0 - 1, xl + 1):
                     if all(
-                            map(lambda x: x in range(size), (tmp_y, tmp_x))
-                    ) and field[tmp_y][tmp_x] != 'X' and (any(map(lambda s: s in (x, y), (tmp_y, tmp_x)))):
-                        field[tmp_y][tmp_x] = '.'
-            tmp_x = x
-            tmp_y = y - 1
-            if all(
-                    map(lambda x: x in range(size), (tmp_y, tmp_x))
-            ) and field[tmp_y][tmp_x] != 'X':
-                field[tmp_y][tmp_x] = '.'
-            tmp_x = x - 1
-            tmp_y = y
-            if all(
-                    map(lambda x: x in range(size), (tmp_y, tmp_x))
-            ) and field[tmp_y][tmp_x] != 'X':
-                field[tmp_y][tmp_x] = '.'
-            tmp_x = x + 1
-            tmp_y = y
-            if all(
-                    map(lambda x: x in range(size), (tmp_y, tmp_x))
-            ) and field[tmp_y][tmp_x] != 'X':
-                field[tmp_y][tmp_x] = '.'
+                            map(lambda s: s in range(size), (i, j))
+                    ) and field[i][j] != 'X':
+                        field[i][j] = '.'
 
     def the_game(self):
         count = 0
@@ -374,6 +355,9 @@ class SeaBattle:
                         count += 1
                         self.human.move_ships()
                         self.show_two_fields()
+                        print(
+                            self.human.ships_coordinates
+                        )
                         print()
 
                         break
@@ -381,6 +365,7 @@ class SeaBattle:
                         self.human.field[current_y][current_x] = 'X'
                         self.show_two_fields()
                         print()
+
                         # put points around human 'X' diagonally
                         self.put_points(self.human.field, self._size, current_x, current_y)
 
@@ -392,9 +377,9 @@ class SeaBattle:
                                 if not coords:
                                     # put points around killed ship
                                     self.put_points(self.human.field, self._size, current_x, current_y,
-                                                    killed_flag=True)
+                                                    killed_flag=True, length=ship.length,
+                                                    tp=ship.tp, x0=ship.x, y0=ship.y)
 
-                                    # self.human.get_ships().remove(ship)
                                     del self.human.ships_coordinates[ship]
                                 break  # breaking the 'for' cycle
                         self.show_two_fields()
