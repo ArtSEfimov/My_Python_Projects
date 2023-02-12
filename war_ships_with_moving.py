@@ -1,4 +1,5 @@
 import random
+import secrets
 import string
 
 
@@ -10,6 +11,10 @@ class Ship:
         self._y = y
         self._is_move = True
         self._cells = [1] * length
+
+    @property
+    def cells(self):
+        return self._cells
 
     def __getitem__(self, item):
         return self._cells[item]
@@ -141,6 +146,7 @@ class GamePole:
         self._size = size
         self._ships = list()
         self.ships_coordinates = {}
+        self.damaged_ships_coordinates = {}
         self.__field = [
             [0 for _ in range(self._size)] for _ in range(self._size)
         ]
@@ -361,16 +367,20 @@ class SeaBattle:
         while True:
             if count % 2 or not count % 2:  # computer`s step
                 while self.human.get_ships():
-                    # I'll make an damaged_dict and put {ship: deleted coords} there
 
-                    # damaged_ships = list(filter(lambda ship: ship[0].length != len(ship[1]),
-                    #                        self.human.ships_coordinates.items()))
-                    if damaged_ships:  # if there are damaged ships
-                    # for ship in damaged_ships:
-                    #     if abs(len(self.human.ships_coordinates[ship]) - ship.length) > 1:
-                    #         if ship.tp == 2:
-                    #             current_x = ship.x
-                    #             current_y = list(range(-))
+                    if self.human.damaged_ships_coordinates:  # if there are damaged ships
+                        print(self.human.damaged_ships_coordinates)
+                        for ship in self.human.damaged_ships_coordinates:
+                            if len(self.human.damaged_ships_coordinates[ship]) == 1:
+                                x, y = self.human.damaged_ships_coordinates[ship][0]
+                                max_possible_radius = max(self.human.ships_coordinates.keys(),
+                                                          key=lambda x: x.length).length
+                                possible_radius = 1 if secrets.randbelow(100) < 25 \
+                                    else random.randint(1, max_possible_radius - 1)
+
+                                possible_coords = []
+
+                                print(possible_coords)
 
                     else:  # if there are no damaged ships
 
@@ -396,6 +406,8 @@ class SeaBattle:
                                 if (current_x, current_y) in coords:
                                     ship.is_move = False
                                     ship[coords.index((current_x, current_y))] = 'X'
+                                    self.human.damaged_ships_coordinates.setdefault(ship, []).append(
+                                        (current_x, current_y))
                                     coords.remove((current_x, current_y))
                                     if not coords:
                                         # put points around killed ship
@@ -404,6 +416,7 @@ class SeaBattle:
                                                         tp=ship.tp, x0=ship.x, y0=ship.y)
 
                                         del self.human.ships_coordinates[ship]
+                                        self.human.damaged_ships_coordinates.pop(ship, None)
 
                                     break  # breaking the 'for' cycle
                             self.human.move_ships()
