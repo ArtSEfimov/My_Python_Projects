@@ -369,18 +369,59 @@ class SeaBattle:
                 while self.human.get_ships():
 
                     if self.human.damaged_ships_coordinates:  # if there are damaged ships
-                        print(self.human.damaged_ships_coordinates)
                         for ship in self.human.damaged_ships_coordinates:
                             if len(self.human.damaged_ships_coordinates[ship]) == 1:
-                                x, y = self.human.damaged_ships_coordinates[ship][0]
+                                point_x, point_y = self.human.damaged_ships_coordinates[ship][0]
                                 max_possible_radius = max(self.human.ships_coordinates.keys(),
                                                           key=lambda x: x.length).length
-                                possible_radius = 1 if secrets.randbelow(100) < 25 \
+                                possible_radius = 1 if secrets.randbelow(100) > 25 \
                                     else random.randint(1, max_possible_radius - 1)
+                                x = point_x
+                                y = point_y
+                                possible_coords = [(x, y)
+                                                   for x in
+                                                   range(point_x - possible_radius, point_x + possible_radius + 1)
+                                                   for y in
+                                                   range(point_y - possible_radius, point_y + possible_radius + 1)
+                                                   if x in range(self._size) and y in range(self._size) and
+                                                   (x == point_x or y == point_y) and
+                                                   self.human.field[y][x] not in ('.', 'X')]
 
-                                possible_coords = []
+                        current_x, current_y = random.choice(possible_coords)
+                        current_cell = self.human.field[current_y][current_x]
+                        if current_cell == 0:
+                            self.human.field[current_y][current_x] = '.'
+                            count += 1
+                            self.human.move_ships()
+                            self.show_two_fields()
+                            print()
+                            break
+                        elif current_cell == 1:
+                            self.human.field[current_y][current_x] = 'X'
 
-                                print(possible_coords)
+                            # put points around human 'X' diagonally
+                            self.put_points(self.human.field, self._size, current_x, current_y)
+
+                            for ship, coords in self.human.ships_coordinates.items():
+                                if (current_x, current_y) in coords:
+                                    ship.is_move = False
+                                    ship[coords.index((current_x, current_y))] = 'X'
+                                    self.human.damaged_ships_coordinates.setdefault(ship, []).append(
+                                        (current_x, current_y))
+                                    coords.remove((current_x, current_y))
+                                    if not coords:
+                                        # put points around killed ship
+                                        self.put_points(self.human.field, self._size, current_x, current_y,
+                                                        killed_flag=True, length=ship.length,
+                                                        tp=ship.tp, x0=ship.x, y0=ship.y)
+
+                                        del self.human.ships_coordinates[ship]
+                                        self.human.damaged_ships_coordinates.pop(ship, None)
+
+                                    break  # breaking the 'for' cycle
+                            self.human.move_ships()
+                            self.show_two_fields()
+                            print()
 
                     else:  # if there are no damaged ships
 
