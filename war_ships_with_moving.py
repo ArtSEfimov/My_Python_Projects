@@ -150,6 +150,7 @@ class GamePole:
         self.__field = [
             [0 for _ in range(self._size)] for _ in range(self._size)
         ]
+        self.missed_cells = tuple()
 
     @property
     def field(self):
@@ -240,7 +241,7 @@ class GamePole:
                     if ship.tp == 1:  # horizontal orientation
                         self.field = [
                             [1 if j in range(ship.x, ship.x + ship.length) and ship.y == i
-                             else self.field[i][j]
+                             else self.field[i][j] if (j, i) not in self.missed_cells else '.'
                              for j in range(self._size)]
                             for i in range(self._size)
                         ]
@@ -249,8 +250,8 @@ class GamePole:
 
                     elif ship.tp == 2:  # vertical orientation
                         self.field = [
-                            [1 if i in range(ship.y, ship.y + ship.length) and ship.x == j else self.field[i][
-                                j]
+                            [1 if i in range(ship.y, ship.y + ship.length) and ship.x == j
+                             else self.field[i][j] if (j, i) not in self.missed_cells else '.'
                              for j in range(self._size)]
                             for i in range(self._size)
                         ]
@@ -365,77 +366,84 @@ class SeaBattle:
                 while self.human.get_ships():
 
                     if self.human.damaged_ships_coordinates:  # if there are damaged ships
-                        possible_coords = list()
-                        ship = random.choice(list(self.human.damaged_ships_coordinates))
-                        if len(self.human.damaged_ships_coordinates[ship]) == 1:
-                            point_x, point_y = self.human.damaged_ships_coordinates[ship][0]
-                            max_possible_radius = max(self.human.ships_coordinates.keys(),
-                                                      key=lambda x: x.length).length
-                            while True:
-                                possible_radius = 1 if secrets.randbelow(100) > 25 \
-                                    else random.randint(1, max_possible_radius - 1)
-                                possible_coords = [(x, y)
-                                                   for x in
-                                                   range(point_x - possible_radius, point_x + possible_radius + 1)
-                                                   for y in
-                                                   range(point_y - possible_radius, point_y + possible_radius + 1)
-                                                   if x in range(self._size) and y in range(self._size) and
-                                                   (x == point_x or y == point_y) and
-                                                   self.human.field[y][x] not in ('.', 'X')]
-                                if not possible_coords:
-                                    continue
-                                else:
+                        while True:
+                            possible_coords = list()
+                            if self.human.damaged_ships_coordinates:
+                                ship = random.choice(list(self.human.damaged_ships_coordinates))
+                                if len(self.human.damaged_ships_coordinates[ship]) == 1:
+                                    point_x, point_y = self.human.damaged_ships_coordinates[ship][0]
+                                    max_possible_radius = max(self.human.ships_coordinates.keys(),
+                                                              key=lambda x: x.length).length
+                                    while True:
+                                        possible_radius = 1 if secrets.randbelow(100) > 25 \
+                                            else random.randint(1, max_possible_radius - 1)
+                                        possible_coords = [(x, y)
+                                                           for x in
+                                                           range(point_x - possible_radius,
+                                                                 point_x + possible_radius + 1)
+                                                           for y in
+                                                           range(point_y - possible_radius,
+                                                                 point_y + possible_radius + 1)
+                                                           if x in range(self._size) and y in range(self._size) and
+                                                           (x == point_x or y == point_y) and
+                                                           self.human.field[y][x] not in ('.', 'X')]
+                                        if not possible_coords:
+                                            continue
+                                        else:
+                                            break
+                                elif len(self.human.damaged_ships_coordinates[ship]) >= 2:
+                                    if self.coordinates_go_in_a_row(self.human.damaged_ships_coordinates[ship],
+                                                                    ship.tp):
+                                        possible_coords = self.human.ships_coordinates[ship]
+                                    else:
+                                        possible_coords = list()
+                                        for i in range(2):
+                                            k = i * (-1)
+                                            tmp_x = (self.human.ships_coordinates[ship][k][0] - (
+                                                1 if ship.tp == 1 else 0))
+                                            tmp_y = (self.human.ships_coordinates[ship][k][1] - (
+                                                1 if ship.tp == 2 else 0))
+                                            if self.human.field[tmp_y][tmp_x] not in ('X', '.'):
+                                                possible_coords.append((tmp_x, tmp_y))
+                                        for c in self.human.ships_coordinates[ship]:
+                                            if secrets.randbelow(100) < 50:
+                                                possible_coords.append(c)
+
+                                current_x, current_y = random.choice(possible_coords)
+                                current_cell = self.human.field[current_y][current_x]
+                                if current_cell == 0:
+                                    self.human.field[current_y][current_x] = '.'
+                                    self.human.missed_cells += (current_x, current_y),
+                                    count += 1
+                                    self.human.move_ships()
+                                    self.show_two_fields()
+                                    print()
                                     break
-                        elif len(self.human.damaged_ships_coordinates[ship]) >= 2:
-                            if self.coordinates_go_in_a_row(self.human.damaged_ships_coordinates[ship], ship.tp):
-                                possible_coords = self.human.ships_coordinates[ship]
-                            else:
-                                possible_coords = list()
-                                for i in range(2):
-                                    k = i * (-1)
-                                    tmp_x = (self.human.ships_coordinates[ship][k][0] - (1 if ship.tp == 1 else 0))
-                                    tmp_y = (self.human.ships_coordinates[ship][k][1] - (1 if ship.tp == 2 else 0))
-                                    if self.human.field[tmp_y][tmp_x] not in ('X', '.'):
-                                        possible_coords.append((tmp_x, tmp_y))
-                                for c in self.human.ships_coordinates[ship]:
-                                    if secrets.randbelow(100) < 50:
-                                        possible_coords.append(c)
+                                elif current_cell == 1:
+                                    self.human.field[current_y][current_x] = 'X'
 
-                        current_x, current_y = random.choice(possible_coords)
-                        current_cell = self.human.field[current_y][current_x]
-                        if current_cell == 0:
-                            self.human.field[current_y][current_x] = '.'
-                            count += 1
-                            self.human.move_ships()
-                            self.show_two_fields()
-                            print()
-                            break
-                        elif current_cell == 1:
-                            self.human.field[current_y][current_x] = 'X'
+                                    # put points around human 'X' diagonally
+                                    self.put_points(self.human.field, self._size, current_x, current_y)
 
-                            # put points around human 'X' diagonally
-                            self.put_points(self.human.field, self._size, current_x, current_y)
+                                    for ship, coords in self.human.ships_coordinates.items():
+                                        if (current_x, current_y) in coords:
+                                            ship.is_move = False
+                                            ship[coords.index((current_x, current_y))] = 'X'
+                                            self.human.damaged_ships_coordinates.setdefault(ship, []).append(
+                                                (current_x, current_y))
+                                            coords.remove((current_x, current_y))
+                                            if not coords:
+                                                # put points around killed ship
+                                                self.put_points(self.human.field, self._size, current_x, current_y,
+                                                                killed_flag=True, length=ship.length,
+                                                                tp=ship.tp, x0=ship.x, y0=ship.y)
 
-                            for ship, coords in self.human.ships_coordinates.items():
-                                if (current_x, current_y) in coords:
-                                    ship.is_move = False
-                                    ship[coords.index((current_x, current_y))] = 'X'
-                                    self.human.damaged_ships_coordinates.setdefault(ship, []).append(
-                                        (current_x, current_y))
-                                    coords.remove((current_x, current_y))
-                                    if not coords:
-                                        # put points around killed ship
-                                        self.put_points(self.human.field, self._size, current_x, current_y,
-                                                        killed_flag=True, length=ship.length,
-                                                        tp=ship.tp, x0=ship.x, y0=ship.y)
+                                                self.human.damaged_ships_coordinates.pop(ship, None)
 
-                                        del self.human.ships_coordinates[ship]
-                                        self.human.damaged_ships_coordinates.pop(ship, None)
-
-                                    break  # breaking the 'for' cycle
-                            self.human.move_ships()
-                            self.show_two_fields()
-                            print()
+                                            break  # breaking the 'for' cycle
+                                    self.human.move_ships()
+                                    self.show_two_fields()
+                                    print()
 
                     else:  # if there are no damaged ships
 
@@ -446,6 +454,7 @@ class SeaBattle:
                             continue
                         elif current_cell == 0:
                             self.human.field[current_y][current_x] = '.'
+                            self.human.missed_cells += (current_x, current_y),
                             count += 1
                             self.human.move_ships()
                             self.show_two_fields()
@@ -470,7 +479,6 @@ class SeaBattle:
                                                         killed_flag=True, length=ship.length,
                                                         tp=ship.tp, x0=ship.x, y0=ship.y)
 
-                                        del self.human.ships_coordinates[ship]
                                         self.human.damaged_ships_coordinates.pop(ship, None)
 
                                     break  # breaking the 'for' cycle
