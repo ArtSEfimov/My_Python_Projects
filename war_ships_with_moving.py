@@ -404,7 +404,8 @@ class SeaBattle:
                                     for c in self.human.ships_coordinates[ship]:
                                         if secrets.randbelow(100) < 50:
                                             possible_coordinates.append(c)
-
+                            print(possible_coordinates)
+                            c=1
                             current_x, current_y = random.choice(possible_coordinates)
                             current_cell = self.human.field[current_y][current_x]
                             if current_cell == 0:
@@ -435,6 +436,8 @@ class SeaBattle:
                                                             killed_flag=True, length=ship.length,
                                                             tp=tmp_ship.tp, x0=tmp_ship.x, y0=tmp_ship.y)
 
+                                            self.human.damaged_ships_coordinates[tmp_ship].clear()
+
                                         else:
                                             self.human.damaged_ships_coordinates.setdefault(ship, []).append(
                                                 (current_x, current_y)
@@ -442,10 +445,12 @@ class SeaBattle:
                                         break
                                     else:
                                         continue
-
-                                self.human.move_ships()
-                                self.show_two_fields()
-                                print()
+                        self.human.damaged_ships_coordinates = {item[0]: item[1]
+                                                                for item in self.human.damaged_ships_coordinates.items()
+                                                                if item[1]}
+                        self.human.move_ships()
+                        self.show_two_fields()
+                        print()
 
                     else:  # if there are no damaged ships
 
@@ -479,6 +484,9 @@ class SeaBattle:
                                         self.put_points(self.human.field, self._size, current_x, current_y,
                                                         killed_flag=True, length=ship.length,
                                                         tp=ship.tp, x0=ship.x, y0=ship.y)
+
+                                        if ship in self.human.damaged_ships_coordinates:
+                                            self.human.damaged_ships_coordinates[ship].clear()
 
                                     else:
                                         self.human.damaged_ships_coordinates.setdefault(ship, []).append(
