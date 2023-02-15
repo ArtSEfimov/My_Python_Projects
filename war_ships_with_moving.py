@@ -357,6 +357,34 @@ class SeaBattle:
                 return False
         return True
 
+    def find_point_near_the_ship(self, ship_coordinates: tuple, ship):
+        def inner_func(another_coordinates: tuple):
+
+            ship_x, ship_y = ship_coordinates
+            another_x, another_y = another_coordinates
+            if ship.tp == 1:
+                if another_x > ship_x:
+                    for x in range(ship_x + 1, another_x + 1):
+                        if self.human.field[ship_y][x] == '.':
+                            return False
+                else:
+                    for x in range(another_x, ship_x):
+                        if self.human.field[ship_y][x] == '.':
+                            return False
+                return True
+            else:
+                if another_y > ship_y:
+                    for y in range(ship_y + 1, another_y + 1):
+                        if self.human.field[y][ship_x] == '.':
+                            return False
+                else:
+                    for y in range(another_y, ship_y):
+                        if self.human.field[y][ship_x] == '.':
+                            return False
+                return True
+
+        return inner_func
+
     def the_game(self):
         count = 0
         self.show_two_fields()
@@ -374,6 +402,7 @@ class SeaBattle:
                                 while True:
                                     possible_radius = 1 if secrets.randbelow(100) > 25 \
                                         else random.randint(1, max_possible_radius - 1)
+
                                     possible_coordinates = [(x, y)
                                                             for x in
                                                             range(point_x - possible_radius,
@@ -384,6 +413,12 @@ class SeaBattle:
                                                             if x in range(self._size) and y in range(self._size) and
                                                             (x == point_x or y == point_y) and
                                                             self.human.field[y][x] not in ('.', 'X')]
+
+                                    if possible_radius > 1:
+                                        possible_coordinates = list(filter(
+                                            self.find_point_near_the_ship((point_x, point_y), ship),
+                                            possible_coordinates)
+                                        )
                                     if not possible_coordinates:
                                         continue
                                     else:
@@ -405,7 +440,7 @@ class SeaBattle:
                                         if secrets.randbelow(100) < 50:
                                             possible_coordinates.append(c)
                             print(possible_coordinates)
-                            c=1
+                            c = 1
                             current_x, current_y = random.choice(possible_coordinates)
                             current_cell = self.human.field[current_y][current_x]
                             if current_cell == 0:
