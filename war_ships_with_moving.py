@@ -423,20 +423,16 @@ class SeaBattle:
                                                             (x == point_x or y == point_y) and
                                                             self.human.field[y][x] not in ('.', 'X')]
                                     if possible_radius > 1:
-                                        possible_coordinates = list(filter(
-                                            self.find_point_near_the_ship((point_x, point_y), ship),
-                                            possible_coordinates)
-                                        )
+                                        possible_coordinates = list(
+                                            filter(self.find_point_near_the_ship((point_x, point_y), ship),
+                                                   possible_coordinates))
                                     if not possible_coordinates:
                                         continue
                                     else:
                                         break
                             elif len(coordinates) >= 2:
                                 if not self.coordinates_go_in_a_row(coordinates, ship.tp):
-                                    # -------------------------------------------------------------------------------------------#
-                                    possible_coordinates = self.human.ships_coordinates[
-                                        ship].copy()  # modify this block later
-                                    # -------------------------------------------------------------------------------------------#
+                                    possible_coordinates = self.human.ships_coordinates[ship].copy()
                                 else:
                                     possible_coordinates = list()
                                     if ship.tp == 1:
@@ -477,13 +473,7 @@ class SeaBattle:
                                             possible_coordinates = list(filter(
                                                 self.find_point_near_the_ship((ship.x, y), ship),
                                                 possible_coordinates))
-
-
-                            c = 1
-                            if not possible_coordinates:
-                                c = 0
                             print(possible_coordinates)
-                            print(c)
                             current_x, current_y = random.choice(possible_coordinates)
                             current_cell = self.human.field[current_y][current_x]
                             if current_cell == 0:
@@ -521,12 +511,12 @@ class SeaBattle:
                                             self.human.damaged_ships_coordinates.setdefault(ship, []).append(
                                                 (current_x, current_y)
                                             )
+                                        print('point 1')
                                         break
                                     else:
                                         continue
-                        self.human.damaged_ships_coordinates = {item[0]: item[1]
-                                                                for item in self.human.damaged_ships_coordinates.items()
-                                                                if item[1]}
+
+
                         self.human.move_ships()
                         self.show_two_fields()
                         print()
@@ -541,10 +531,10 @@ class SeaBattle:
                         elif current_cell == 0:
                             self.human.field[current_y][current_x] = '.'
                             self.human.missed_cells += (current_x, current_y),
-                            count += 1
                             self.human.move_ships()
                             self.show_two_fields()
                             print()
+                            count += 1
                             break
                         elif current_cell == 1:
                             self.human.field[current_y][current_x] = 'X'
@@ -558,7 +548,6 @@ class SeaBattle:
                                     ship[coordinates.index((current_x, current_y))] = 'X'
                                     coordinates.remove((current_x, current_y))
                                     if not coordinates:
-
                                         # put points around killed ship
                                         self.put_points(self.human.field, self._size, current_x, current_y,
                                                         killed_flag=True, length=ship.length,
@@ -571,18 +560,21 @@ class SeaBattle:
                                         self.human.damaged_ships_coordinates.setdefault(ship, []).append(
                                             (current_x, current_y)
                                         )
-
+                                    print(self.human.ships_coordinates)
                                     break  # breaking the 'for' cycle
                             self.human.move_ships()
                             self.show_two_fields()
                             print()
+                            print('in middle')
+                    self.human.ships_coordinates = {item[0]: item[1]
+                                                    for item in self.human.ships_coordinates.items()
+                                                    if item[1]}
 
-                            continue
-
+                print("in inner")
                 count += 1
             else:  # human`s step
                 count += 1
-
+            print('in outher')
             if any(
                     map(lambda x: not x, (self.human.ships_coordinates, self.computer.ships_coordinates))
             ):
@@ -590,5 +582,6 @@ class SeaBattle:
         print()
 
 
-sb = SeaBattle(10)
-sb.the_game()
+for _ in range(100):
+    sb = SeaBattle(10)
+    sb.the_game()
