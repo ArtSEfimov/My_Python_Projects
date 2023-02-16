@@ -443,31 +443,42 @@ class SeaBattle:
                                         min_x = min(
                                             [t[0] for t in coordinates]
                                         )
-                                        tmp_y = coordinates[0][1]
                                         for x in range(min_x - (max_possible_radius - len(coordinates)), min_x):
-                                            if all(map(lambda c: c in range(self._size), (x, tmp_y))):
-                                                possible_coordinates.append((x, tmp_y))
+                                            if all(map(lambda c: c in range(self._size), (x, ship.y))):
+                                                possible_coordinates.append((x, ship.y))
                                         max_x = max(
                                             [t[0] for t in coordinates]
                                         )
                                         for x in range(max_x + 1, max_x + (max_possible_radius - len(coordinates)) + 1):
-                                            if all(map(lambda c: c in range(self._size), (x, tmp_y))):
-                                                possible_coordinates.append((x, tmp_y))
+                                            if all(map(lambda c: c in range(self._size), (x, ship.y))):
+                                                possible_coordinates.append((x, ship.y))
+
+                                        for x in (max_x, min_x):
+                                            possible_coordinates = list(filter(
+                                                self.find_point_near_the_ship((x, ship.y), ship),
+                                                possible_coordinates))
+
                                     else:
                                         min_y = min(
                                             [t[1] for t in coordinates]
                                         )
-                                        tmp_x = coordinates[0][0]
                                         for y in range(min_y - (max_possible_radius - len(coordinates)), min_y):
-                                            if all(map(lambda c: c in range(self._size), (tmp_x, y))):
-                                                possible_coordinates.append((tmp_x, y))
+                                            if all(map(lambda c: c in range(self._size), (ship.x, y))):
+                                                possible_coordinates.append((ship.x, y))
 
                                         max_y = max(
                                             [t[1] for t in coordinates]
                                         )
                                         for y in range(max_y + 1, max_y + (max_possible_radius - len(coordinates)) + 1):
-                                            if all(map(lambda c: c in range(self._size), (tmp_x, y))):
-                                                possible_coordinates.append((tmp_x, y))
+                                            if all(map(lambda c: c in range(self._size), (ship.x, y))):
+                                                possible_coordinates.append((ship.x, y))
+
+                                        for y in range(min_y, max_y):
+                                            possible_coordinates = list(filter(
+                                                self.find_point_near_the_ship((ship.x, y), ship),
+                                                possible_coordinates))
+
+
                             c = 1
                             if not possible_coordinates:
                                 c = 0
