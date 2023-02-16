@@ -211,8 +211,8 @@ class GamePole:
     def put_missed_points(self):
         for i in range(self._size):
             for j in range(self._size):
-                if self.field[j][i] == 0 and (j, i) in self.missed_cells:
-                    self.field[j][i] = '.'
+                if self.field[i][j] == 0 and (j, i) in self.missed_cells:
+                    self.field[i][j] = '.'
 
     def move_ships(self):
         for ship in self._ships:
@@ -347,8 +347,8 @@ class SeaBattle:
                 ) and tmp_y != y and tmp_x != x:
                     field[tmp_y][tmp_x] = '.'
         if killed_flag:
-            xl = (x0 + length) if tp == 1 else x0 + 1
-            yl = (y0 + length) if tp == 2 else y0 + 1
+            xl = (x0 + length) if tp == 1 else (x0 + 1)
+            yl = (y0 + length) if tp == 2 else (y0 + 1)
             for i in range(y0 - 1, yl + 1):
                 for j in range(x0 - 1, xl + 1):
                     if all(
@@ -366,31 +366,30 @@ class SeaBattle:
                 return False
         return True
 
-    def find_point_near_the_ship(self, ship_coordinates: tuple, ship):
+    def find_point_near_the_ship(self, ship_coordinates: tuple):
         def inner_func(another_coordinates: tuple):
 
             ship_x, ship_y = ship_coordinates
             another_x, another_y = another_coordinates
-            if ship.tp == 1:
-                if another_x > ship_x:
-                    for x in range(ship_x + 1, another_x + 1):
-                        if self.human.field[ship_y][x] == '.':
-                            return False
-                else:
-                    for x in range(another_x, ship_x):
-                        if self.human.field[ship_y][x] == '.':
-                            return False
-                return True
+
+            if another_x > ship_x:
+                for x in range(ship_x + 1, another_x + 1):
+                    if self.human.field[ship_y][x] == '.':
+                        return False
             else:
-                if another_y > ship_y:
-                    for y in range(ship_y + 1, another_y + 1):
-                        if self.human.field[y][ship_x] == '.':
-                            return False
-                else:
-                    for y in range(another_y, ship_y):
-                        if self.human.field[y][ship_x] == '.':
-                            return False
-                return True
+                for x in range(another_x, ship_x):
+                    if self.human.field[ship_y][x] == '.':
+                        return False
+
+            if another_y > ship_y:
+                for y in range(ship_y + 1, another_y + 1):
+                    if self.human.field[y][ship_x] == '.':
+                        return False
+            else:
+                for y in range(another_y, ship_y):
+                    if self.human.field[y][ship_x] == '.':
+                        return False
+            return True
 
         return inner_func
 
@@ -403,6 +402,8 @@ class SeaBattle:
                 while self.human.ships_coordinates:
 
                     if self.human.damaged_ships_coordinates:  # if there are damaged ships
+                        outer_ship = outer_coordinates = None
+
                         for ship, coordinates in self.human.damaged_ships_coordinates.items():
                             max_possible_radius = max(self.human.ships_coordinates.keys(),
                                                       key=lambda x: x.length).length
@@ -422,14 +423,14 @@ class SeaBattle:
                                                             if x in range(self._size) and y in range(self._size) and
                                                             (x == point_x or y == point_y) and
                                                             self.human.field[y][x] not in ('.', 'X')]
+                                    c = 1
                                     if possible_radius > 1:
                                         possible_coordinates = list(
-                                            filter(self.find_point_near_the_ship((point_x, point_y), ship),
+                                            filter(self.find_point_near_the_ship((point_x, point_y)),
                                                    possible_coordinates))
-                                    if not possible_coordinates:
-                                        continue
-                                    else:
+                                    if possible_coordinates:
                                         break
+
                             elif len(coordinates) >= 2:
                                 if not self.coordinates_go_in_a_row(coordinates, ship.tp):
                                     possible_coordinates = self.human.ships_coordinates[ship].copy()
@@ -451,7 +452,7 @@ class SeaBattle:
 
                                         for x in (max_x, min_x):
                                             possible_coordinates = list(filter(
-                                                self.find_point_near_the_ship((x, ship.y), ship),
+                                                self.find_point_near_the_ship((x, ship.y)),
                                                 possible_coordinates))
 
                                     else:
@@ -471,18 +472,19 @@ class SeaBattle:
 
                                         for y in range(min_y, max_y):
                                             possible_coordinates = list(filter(
-                                                self.find_point_near_the_ship((ship.x, y), ship),
+                                                self.find_point_near_the_ship((ship.x, y)),
                                                 possible_coordinates))
+
                             print(possible_coordinates)
                             current_x, current_y = random.choice(possible_coordinates)
                             current_cell = self.human.field[current_y][current_x]
                             if current_cell == 0:
                                 self.human.field[current_y][current_x] = '.'
                                 self.human.missed_cells += (current_x, current_y),
-                                count += 1
-                                self.human.move_ships()
-                                self.show_two_fields()
+                                # self.human.move_ships()
+                                # self.show_two_fields()
                                 print()
+                                count += 1
                                 break
                             elif current_cell == 1:
                                 self.human.field[current_y][current_x] = 'X'
@@ -501,22 +503,28 @@ class SeaBattle:
 
                                             # put points around killed ship
                                             self.put_points(self.human.field, self._size, current_x, current_y,
-                                                            killed_flag=True, length=ship.length,
+                                                            killed_flag=True, length=tmp_ship.length,
                                                             tp=tmp_ship.tp, x0=tmp_ship.x, y0=tmp_ship.y)
 
                                             if tmp_ship in self.human.damaged_ships_coordinates:
                                                 self.human.damaged_ships_coordinates[tmp_ship].clear()
 
                                         else:
-                                            self.human.damaged_ships_coordinates.setdefault(ship, []).append(
-                                                (current_x, current_y)
-                                            )
-                                        print('point 1')
+                                            outer_ship = tmp_ship
+                                            outer_coordinates = (current_x, current_y)
+
                                         break
                                     else:
                                         continue
 
-
+                        if outer_ship is not None and outer_coordinates is not None:
+                            self.human.damaged_ships_coordinates.setdefault(outer_ship, []).append(
+                                outer_coordinates
+                            )
+                            outer_ship = outer_coordinates = None
+                        self.human.damaged_ships_coordinates = {item[0]: item[1]
+                                                                for item in self.human.damaged_ships_coordinates.items()
+                                                                if item[1]}
                         self.human.move_ships()
                         self.show_two_fields()
                         print()
@@ -554,7 +562,7 @@ class SeaBattle:
                                                         tp=ship.tp, x0=ship.x, y0=ship.y)
 
                                         if ship in self.human.damaged_ships_coordinates:
-                                            self.human.damaged_ships_coordinates[ship].clear()
+                                            self.human.damaged_ships_coordinates.pop(ship, None)
 
                                     else:
                                         self.human.damaged_ships_coordinates.setdefault(ship, []).append(
@@ -565,16 +573,15 @@ class SeaBattle:
                             self.human.move_ships()
                             self.show_two_fields()
                             print()
-                            print('in middle')
+
                     self.human.ships_coordinates = {item[0]: item[1]
                                                     for item in self.human.ships_coordinates.items()
                                                     if item[1]}
 
-                print("in inner")
-                count += 1
+                    print(self.human.ships_coordinates)
+                    print(self.human.damaged_ships_coordinates)
             else:  # human`s step
                 count += 1
-            print('in outher')
             if any(
                     map(lambda x: not x, (self.human.ships_coordinates, self.computer.ships_coordinates))
             ):
@@ -582,6 +589,7 @@ class SeaBattle:
         print()
 
 
-for _ in range(100):
+for i in range(100):
     sb = SeaBattle(10)
     sb.the_game()
+    print(i)
