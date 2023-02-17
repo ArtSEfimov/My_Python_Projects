@@ -1,5 +1,6 @@
 import random
 import secrets
+import time
 
 
 class Ship:
@@ -398,7 +399,7 @@ class SeaBattle:
         self.show_two_fields()
         print()
         while True:
-            if count % 2 or not count % 2:  # computer`s step
+            if count % 2:  # computer`s step
                 while self.human.ships_coordinates:
 
                     if self.human.damaged_ships_coordinates:  # if there are damaged ships
@@ -475,16 +476,11 @@ class SeaBattle:
                                                 self.find_point_near_the_ship((ship.x, y)),
                                                 possible_coordinates))
 
-                            print(possible_coordinates)
                             current_x, current_y = random.choice(possible_coordinates)
                             current_cell = self.human.field[current_y][current_x]
                             if current_cell == 0:
                                 self.human.field[current_y][current_x] = '.'
                                 self.human.missed_cells += (current_x, current_y),
-                                # self.human.move_ships()
-                                # self.show_two_fields()
-                                print()
-                                count += 1
                                 break
                             elif current_cell == 1:
                                 self.human.field[current_y][current_x] = 'X'
@@ -514,8 +510,6 @@ class SeaBattle:
                                             outer_coordinates = (current_x, current_y)
 
                                         break
-                                    else:
-                                        continue
 
                         if outer_ship is not None and outer_coordinates is not None:
                             self.human.damaged_ships_coordinates.setdefault(outer_ship, []).append(
@@ -525,9 +519,6 @@ class SeaBattle:
                         self.human.damaged_ships_coordinates = {item[0]: item[1]
                                                                 for item in self.human.damaged_ships_coordinates.items()
                                                                 if item[1]}
-                        self.human.move_ships()
-                        self.show_two_fields()
-                        print()
 
                     else:  # if there are no damaged ships
 
@@ -539,10 +530,6 @@ class SeaBattle:
                         elif current_cell == 0:
                             self.human.field[current_y][current_x] = '.'
                             self.human.missed_cells += (current_x, current_y),
-                            self.human.move_ships()
-                            self.show_two_fields()
-                            print()
-                            count += 1
                             break
                         elif current_cell == 1:
                             self.human.field[current_y][current_x] = 'X'
@@ -568,28 +555,74 @@ class SeaBattle:
                                         self.human.damaged_ships_coordinates.setdefault(ship, []).append(
                                             (current_x, current_y)
                                         )
-                                    print(self.human.ships_coordinates)
                                     break  # breaking the 'for' cycle
-                            self.human.move_ships()
-                            self.show_two_fields()
-                            print()
 
                     self.human.ships_coordinates = {item[0]: item[1]
                                                     for item in self.human.ships_coordinates.items()
                                                     if item[1]}
 
-                    print(self.human.ships_coordinates)
-                    print(self.human.damaged_ships_coordinates)
             else:  # human`s step
-                count += 1
+                while self.computer.ships_coordinates:
+                    current_x, current_y = input('Введите координаты: ').split()
+                    current_x = int(self.alphabet.index(current_x.upper()))
+                    current_y = int(current_y) - 1
+                    current_cell = self.computer.field[current_y][current_x]
+                    if current_cell == 0:
+                        self.computer.field[current_y][current_x] = '.'
+                        self.computer.missed_cells += (current_x, current_y),
+                        break
+
+                    elif current_cell == 1:
+                        self.computer.field[current_y][current_x] = 'X'
+
+                        # This is requires for the cases if I hit to another ship
+                        for tmp_ship, tmp_coordinates in self.computer.ships_coordinates.items():
+                            if (current_x, current_y) in tmp_coordinates:
+
+                                # put points around human 'X' diagonally
+                                self.put_points(self.computer.field, self._size, current_x, current_y)
+
+                                tmp_ship.is_move = False
+                                tmp_ship[tmp_coordinates.index((current_x, current_y))] = 'X'
+                                tmp_coordinates.remove((current_x, current_y))
+                                if not tmp_coordinates:
+
+                                    # put points around killed ship
+                                    self.put_points(self.computer.field, self._size, current_x, current_y,
+                                                    killed_flag=True, length=tmp_ship.length,
+                                                    tp=tmp_ship.tp, x0=tmp_ship.x, y0=tmp_ship.y)
+
+                                    if tmp_ship in self.computer.damaged_ships_coordinates:
+                                        self.computer.damaged_ships_coordinates[tmp_ship].clear()
+
+
+                                else:
+                                    self.computer.damaged_ships_coordinates.setdefault(tmp_ship, []).append(
+                                        (current_x, current_y)
+                                    )
+
+                                break
+                        self.computer.ships_coordinates = {item[0]: item[1]
+                                                           for item in self.computer.ships_coordinates.items()
+                                                           if item[1]}
+                        self.show_two_fields()
+
             if any(
                     map(lambda x: not x, (self.human.ships_coordinates, self.computer.ships_coordinates))
             ):
                 break
+            else:
+                count += 1
+                self.show_two_fields()
+                print(self.alphabet[current_x], current_y + 1)
+                breakpoint = input('This is a breakpoint')
+                continue
         print()
 
 
-for i in range(100):
-    sb = SeaBattle(10)
-    sb.the_game()
-    print(i)
+# for i in range(2000):
+sb = SeaBattle(10)
+sb.the_game()
+#     print(i)
+#     # time.sleep(10)
+# print(5 * 'OK! ')
