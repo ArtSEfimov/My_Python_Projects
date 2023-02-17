@@ -424,7 +424,7 @@ class SeaBattle:
                                                             if x in range(self._size) and y in range(self._size) and
                                                             (x == point_x or y == point_y) and
                                                             self.human.field[y][x] not in ('.', 'X')]
-                                    c = 1
+
                                     if possible_radius > 1:
                                         possible_coordinates = list(
                                             filter(self.find_point_near_the_ship((point_x, point_y)),
@@ -508,7 +508,7 @@ class SeaBattle:
                                         else:
                                             outer_ship = tmp_ship
                                             outer_coordinates = (current_x, current_y)
-
+                                        count += 1
                                         break
 
                         if outer_ship is not None and outer_coordinates is not None:
@@ -520,6 +520,7 @@ class SeaBattle:
                                                                 for item in self.human.damaged_ships_coordinates.items()
                                                                 if item[1]}
 
+                        break
                     else:  # if there are no damaged ships
 
                         current_x = random.randint(0, self._size - 1)
@@ -556,17 +557,41 @@ class SeaBattle:
                                             (current_x, current_y)
                                         )
                                     break  # breaking the 'for' cycle
-
+                            count += 1
                     self.human.ships_coordinates = {item[0]: item[1]
                                                     for item in self.human.ships_coordinates.items()
                                                     if item[1]}
-
+                    break
             else:  # human`s step
                 while self.computer.ships_coordinates:
-                    current_x, current_y = input('Введите координаты: ').split()
-                    current_x = int(self.alphabet.index(current_x.upper()))
-                    current_y = int(current_y) - 1
-                    current_cell = self.computer.field[current_y][current_x]
+                    while True:
+                        input_data = input('Введите координаты: ').split()
+                        if len(input_data) == 2:
+                            current_x, current_y = input_data
+                        elif len(input_data) == 1:
+                            unpack_data = input_data[0]
+                            if len(unpack_data) == 2:
+                                current_x, current_y = unpack_data[0], unpack_data[1]
+                            elif len(unpack_data) == 3:
+                                current_x, current_y = unpack_data[0], unpack_data[1:]
+                            else:
+                                print('Введены некорректные значения, повторите ввод')
+                                continue
+                        else:
+                            print('Введены некорректные значения, повторите ввод')
+                            continue
+                        try:
+                            current_x = int(self.alphabet.index(current_x.upper()))
+                            current_y = int(current_y) - 1
+                            current_cell = self.computer.field[current_y][current_x]
+                        except (ValueError, IndexError):
+                            print('Введены некорректные значения, повторите ввод')
+                            continue
+                        if current_x < 0 or current_y < 0:
+                            print('Введены некорректные значения, повторите ввод')
+                            continue
+                        break
+
                     if current_cell == 0:
                         self.computer.field[current_y][current_x] = '.'
                         self.computer.missed_cells += (current_x, current_y),
@@ -600,12 +625,12 @@ class SeaBattle:
                                     self.computer.damaged_ships_coordinates.setdefault(tmp_ship, []).append(
                                         (current_x, current_y)
                                     )
-
                                 break
                         self.computer.ships_coordinates = {item[0]: item[1]
                                                            for item in self.computer.ships_coordinates.items()
                                                            if item[1]}
-                        self.show_two_fields()
+                        count += 1
+                        break
 
             if any(
                     map(lambda x: not x, (self.human.ships_coordinates, self.computer.ships_coordinates))
@@ -614,10 +639,10 @@ class SeaBattle:
             else:
                 count += 1
                 self.show_two_fields()
+                print()
                 print(self.alphabet[current_x], current_y + 1)
                 breakpoint = input('This is a breakpoint')
                 continue
-        print()
 
 
 # for i in range(2000):
