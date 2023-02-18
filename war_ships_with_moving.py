@@ -316,6 +316,8 @@ class SeaBattle:
         self.computer.init()
         self.human.init()
 
+        self.print_marker = None
+
     def show_two_fields(self):
         for i in range(self._size + 1):
             if i == 0:
@@ -395,6 +397,7 @@ class SeaBattle:
         return inner_func
 
     def the_game(self):
+
         count = 0
         self.show_two_fields()
         print()
@@ -481,6 +484,7 @@ class SeaBattle:
                             if current_cell == 0:
                                 self.human.field[current_y][current_x] = '.'
                                 self.human.missed_cells += (current_x, current_y),
+                                self.print_marker = 2
                                 break
                             elif current_cell == 1:
                                 self.human.field[current_y][current_x] = 'X'
@@ -510,7 +514,7 @@ class SeaBattle:
                                             outer_coordinates = (current_x, current_y)
                                         count += 1
                                         break
-
+                                self.print_marker = 4
                         if outer_ship is not None and outer_coordinates is not None:
                             self.human.damaged_ships_coordinates.setdefault(outer_ship, []).append(
                                 outer_coordinates
@@ -531,6 +535,7 @@ class SeaBattle:
                         elif current_cell == 0:
                             self.human.field[current_y][current_x] = '.'
                             self.human.missed_cells += (current_x, current_y),
+                            self.print_marker = 2
                             break
                         elif current_cell == 1:
                             self.human.field[current_y][current_x] = 'X'
@@ -557,11 +562,15 @@ class SeaBattle:
                                             (current_x, current_y)
                                         )
                                     break  # breaking the 'for' cycle
+                            self.print_marker = 4
                             count += 1
                     self.human.ships_coordinates = {item[0]: item[1]
                                                     for item in self.human.ships_coordinates.items()
                                                     if item[1]}
+
                     break
+                print('Ход соперника:', end=' ')
+                print(self.alphabet[current_x], current_y + 1)
             else:  # human`s step
                 while self.computer.ships_coordinates:
                     while True:
@@ -595,6 +604,7 @@ class SeaBattle:
                     if current_cell == 0:
                         self.computer.field[current_y][current_x] = '.'
                         self.computer.missed_cells += (current_x, current_y),
+                        self.print_marker = 2
                         break
 
                     elif current_cell == 1:
@@ -620,7 +630,6 @@ class SeaBattle:
                                     if tmp_ship in self.computer.damaged_ships_coordinates:
                                         self.computer.damaged_ships_coordinates[tmp_ship].clear()
 
-
                                 else:
                                     self.computer.damaged_ships_coordinates.setdefault(tmp_ship, []).append(
                                         (current_x, current_y)
@@ -631,17 +640,21 @@ class SeaBattle:
                                                            if item[1]}
                         count += 1
                         break
+                    self.print_marker = 4
+                print('Ваш ход:', end=' ')
+                print(self.alphabet[current_x], current_y + 1)
 
             if any(
                     map(lambda x: not x, (self.human.ships_coordinates, self.computer.ships_coordinates))
             ):
                 break
             else:
-                count += 1
+                print()
                 self.show_two_fields()
                 print()
-                print(self.alphabet[current_x], current_y + 1)
-                breakpoint = input('This is a breakpoint')
+                time.sleep(self.print_marker)
+                count += 1
+                self.print_marker = 0
                 continue
 
 
