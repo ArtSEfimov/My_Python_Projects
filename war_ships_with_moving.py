@@ -602,6 +602,9 @@ class SeaBattle:
                         if current_x < 0 or current_y < 0:
                             print('Введены некорректные значения, повторите ввод')
                             continue
+                        if current_cell in ('.', 'X'):
+                            print('Вы сюда уже ходили, повторите ввод\n')
+                            continue
                         break
 
                     if current_cell == 0:
@@ -639,7 +642,7 @@ class SeaBattle:
                                     )
 
                                 break
-                        self.print_marker = 4
+                        self.print_marker = 2
 
                         self.computer.ships_coordinates = {item[0]: item[1]
                                                            for item in self.computer.ships_coordinates.items()
