@@ -255,7 +255,6 @@ class GamePole:
                             for i in range(self._size)
                         ]
 
-
                     elif ship.tp == 2:  # vertical orientation
 
                         self.ships_coordinates[ship] = [(ship.x, y) for y in range(ship.y, ship.y + ship.length)]
@@ -340,7 +339,31 @@ class SeaBattle:
                     else:
                         print((self.computer.field[i - 1][j - 2]
                                if self.computer.field[i - 1][j - 2] in ('.', 'X')
-                               else '0'), end=' ' if j != self._size + 1 else 3 * '\t')
+                               else ('.' if (j - 2, i - 1) in self.computer.missed_cells
+                                     else '0')), end=' ' if j != self._size + 1 else 3 * '\t')
+                print()
+
+    def if_win_show_two_fields(self):
+        for i in range(self._size + 1):
+            if i == 0:
+                print('\t', ' '.join([self.alphabet_for_field[i] for i in range(self._size)]), 4 * '\t',
+                      ' '.join([self.alphabet_for_field[i] for i in range(self._size)]), sep='')
+            else:
+                for j in range(self._size + 2):
+                    if j == 0:
+                        print(i, end='')
+                    elif j == 1:
+                        print(end='\t')
+                    else:
+                        print(self.human.field[i - 1][j - 2], end=' ' if j != self._size + 1 else 3 * '\t')
+
+                for j in range(self._size + 2):
+                    if j == 0:
+                        print(i, end='')
+                    elif j == 1:
+                        print(end='\t')
+                    else:
+                        print(self.computer.field[i - 1][j - 2], end=' ' if j != self._size + 1 else 3 * '\t')
                 print()
 
     @staticmethod
@@ -397,6 +420,15 @@ class SeaBattle:
             return True
 
         return inner_func
+
+    @staticmethod
+    def is_x_near_the_point(field, size, x, y):
+        for i in range(y - 1, y + 2):
+            for j in range(x - 1, x + 2):
+                if i in range(size) and j in range(size):
+                    if field[i][j] == 'X':
+                        return True
+        return False
 
     def the_game(self):
 
@@ -532,7 +564,13 @@ class SeaBattle:
                         current_x = random.randint(0, self._size - 1)
                         current_y = random.randint(0, self._size - 1)
                         current_cell = self.human.field[current_y][current_x]
-                        if current_cell in ('X', '.'):
+                        if current_cell in ('X', '.'):  # here you can adapt difficulty
+                            if current_cell == '.':
+                                if self.is_x_near_the_point(self.human.field, self._size, current_x, current_y):
+                                    continue
+                                else:
+                                    self.print_marker = 2
+                                    break
                             continue
                         elif current_cell == 0:
                             self.human.field[current_y][current_x] = '.'
@@ -602,14 +640,15 @@ class SeaBattle:
                         if current_x < 0 or current_y < 0:
                             print('Введены некорректные значения, повторите ввод')
                             continue
-                        if current_cell in ('.', 'X'):
+                        if current_cell == 'X':
                             print('Вы сюда уже ходили, повторите ввод\n')
                             continue
                         break
 
-                    if current_cell == 0:
+                    if current_cell in ('.', 0):
                         self.computer.field[current_y][current_x] = '.'
-                        self.computer.missed_cells += (current_x, current_y),
+                        if (current_x, current_y) not in self.computer.missed_cells:
+                            self.computer.missed_cells += (current_x, current_y),
                         self.print_marker = 2
                         break
 
@@ -653,26 +692,26 @@ class SeaBattle:
                 print(self.alphabet[current_x], current_y + 1)
 
             if not self.human.ships_coordinates:
-                self.show_two_fields()
+                print()
+                self.if_win_show_two_fields()
                 print('\nТы проиграл, кожаный!')
                 break
             elif not self.computer.ships_coordinates:
-                self.show_two_fields()
+                print()
+                self.if_win_show_two_fields()
                 print('\nТебе повезло, кожаный!')
                 break
             else:
                 print()
                 self.show_two_fields()
                 print()
+                self.human.move_ships()
+                self.computer.move_ships()
                 time.sleep(self.print_marker)
                 count += 1
                 self.print_marker = 0
                 continue
 
 
-# for i in range(2000):
 sb = SeaBattle(10)
 sb.the_game()
-#     print(i)
-#     # time.sleep(10)
-# print(5 * 'OK! ')
