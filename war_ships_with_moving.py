@@ -338,7 +338,9 @@ class SeaBattle:
                     elif j == 1:
                         print(end='\t')
                     else:
-                        print(self.computer.field[i - 1][j - 2], end=' ' if j != self._size + 1 else 3 * '\t')
+                        print((self.computer.field[i - 1][j - 2]
+                               if self.computer.field[i - 1][j - 2] in ('.', 'X')
+                               else '0'), end=' ' if j != self._size + 1 else 3 * '\t')
                 print()
 
     @staticmethod
@@ -530,7 +532,7 @@ class SeaBattle:
                         current_x = random.randint(0, self._size - 1)
                         current_y = random.randint(0, self._size - 1)
                         current_cell = self.human.field[current_y][current_x]
-                        if current_cell == '.':
+                        if current_cell in ('X', '.'):
                             continue
                         elif current_cell == 0:
                             self.human.field[current_y][current_x] = '.'
@@ -571,6 +573,7 @@ class SeaBattle:
                     break
                 print('Ход соперника:', end=' ')
                 print(self.alphabet[current_x], current_y + 1)
+
             else:  # human`s step
                 while self.computer.ships_coordinates:
                     while True:
@@ -634,19 +637,25 @@ class SeaBattle:
                                     self.computer.damaged_ships_coordinates.setdefault(tmp_ship, []).append(
                                         (current_x, current_y)
                                     )
+
                                 break
+                        self.print_marker = 4
+
                         self.computer.ships_coordinates = {item[0]: item[1]
                                                            for item in self.computer.ships_coordinates.items()
                                                            if item[1]}
                         count += 1
                         break
-                    self.print_marker = 4
                 print('Ваш ход:', end=' ')
                 print(self.alphabet[current_x], current_y + 1)
 
-            if any(
-                    map(lambda x: not x, (self.human.ships_coordinates, self.computer.ships_coordinates))
-            ):
+            if not self.human.ships_coordinates:
+                self.show_two_fields()
+                print('\nТы проиграл, кожаный!')
+                break
+            elif not self.computer.ships_coordinates:
+                self.show_two_fields()
+                print('\nТебе повезло, кожаный!')
                 break
             else:
                 print()
