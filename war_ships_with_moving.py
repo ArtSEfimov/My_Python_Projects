@@ -59,7 +59,30 @@ class Ship:
         current_y = self._y if self.tp == 1 else (self._y + go)
         self.set_start_coords(current_x, current_y)
 
+    @staticmethod
+    def ship_placement(ship_object, field, x, y, size_x, size_y):
+        if ship_object.tp == 1:  # horizontal orientation
+            field = [
+                [
+                    ship_object.length if j in range(ship_object.x, x) and ship_object.y == i
+                    else field[i][j]
+                    for j in range(size_x)
+                ]
+                for i in range(size_y)
+            ]
+        elif ship_object.tp == 2:  # vertical orientation
+            field = [
+                [
+                    ship_object.length if i in range(ship_object.y, y) and ship_object.x == j else
+                    field[i][j]
+                    for j in range(size_x)
+                ]
+                for i in range(size_y)
+            ]
+        return field
+
     def is_collide(self, ship):
+
         if self is ship:
             return False
         if any(
@@ -84,28 +107,10 @@ class Ship:
                  for _ in range(size_y)]
 
         # self
-        if self.tp == 1:  # horizontal orientation
-            field = [
-                [self.length if j in range(self.x, xl_1) and self.y == i else field[i][j] for j in range(size_x)]
-                for i in range(size_y)
-            ]
-        elif self.tp == 2:  # vertical orientation
-            field = [
-                [self.length if i in range(self.y, yl_1) and self.x == j else field[i][j] for j in range(size_x)]
-                for i in range(size_y)
-            ]
+        field = self.ship_placement(self, field, xl_1, yl_1, size_x, size_y)
 
-        # ship
-        if ship.tp == 1:  # horizontal orientation
-            field = [
-                [ship.length if j in range(ship.x, xl_2) and ship.y == i else field[i][j] for j in range(size_x)]
-                for i in range(size_y)
-            ]
-        elif ship.tp == 2:  # vertical orientation
-            field = [
-                [ship.length if i in range(ship.y, yl_2) and ship.x == j else field[i][j] for j in range(size_x)]
-                for i in range(size_y)
-            ]
+        # another ship
+        field = self.ship_placement(ship, field, xl_2, yl_2, size_x, size_y)
 
         def is_cross():
             ship_sum = 0
@@ -134,12 +139,6 @@ class Ship:
             )
         )
 
-    def __repr__(self):
-        return f'{self._length}'
-
-    def __str__(self):
-        return f'{self._length}'
-
 
 class GamePole:
     def __init__(self, size):
@@ -147,9 +146,12 @@ class GamePole:
         self._ships = list()
         self.ships_coordinates = {}
         self.damaged_ships_coordinates = {}
+
         self.__field = [
-            [0 for _ in range(self._size)] for _ in range(self._size)
+            [0 for _ in range(self._size)]
+            for _ in range(self._size)
         ]
+
         self.missed_cells = tuple()
 
     @property
@@ -182,6 +184,7 @@ class GamePole:
                                 lambda x: ship.is_collide(x), self._ships
                             )
                     ) and not ship.is_out_pole(self._size):
+
                         if ship.tp == 1:  # horizontal orientation
 
                             self.field = [
@@ -219,7 +222,7 @@ class GamePole:
         for ship in self._ships:
             if not ship.is_move:
                 continue
-            reserve_coords = ship.get_start_coords()
+            reserve_coordinates = ship.get_start_coords()
             if ship.tp == 1:  # horizontal orientation
                 self.field = [
                     [0 if j in range(ship.x, ship.x + ship.length) and ship.y == i
@@ -236,7 +239,7 @@ class GamePole:
                 ]
 
             for attract in range(2):
-                ship.set_start_coords(*reserve_coords)
+                ship.set_start_coords(*reserve_coordinates)
                 ship.move((-1 if attract else 1))
 
                 if not any(
@@ -273,7 +276,7 @@ class GamePole:
 
             # unsuccessful
             else:
-                ship.set_start_coords(*reserve_coords)
+                ship.set_start_coords(*reserve_coordinates)
                 if ship.tp == 1:  # horizontal orientation
                     self.field = [
                         [1 if j in range(ship.x, ship.x + ship.length) and ship.y == i
@@ -449,7 +452,7 @@ class SeaBattle:
                             if len(coordinates) == 1:
                                 point_x, point_y = coordinates[0]
                                 while True:
-                                    possible_radius = 1 if secrets.randbelow(100) > 20 \
+                                    possible_radius = 1 if secrets.randbelow(100) > 10 \
                                         else random.randint(1, max_possible_radius - 1)
 
                                     possible_coordinates = [(x, y)
@@ -655,11 +658,15 @@ class SeaBattle:
                             if self.is_x_near_the_point(self.computer.field, self._size, current_x, current_y):
                                 print('Вы сюда уже ходили, повторите ввод\n')
                                 continue
+                            else:
+                                self.timer_marker = 1
+                                self.message_marker = 'СНОВА МИМО!'
+                                break
                         self.computer.field[current_y][current_x] = '.'
                         if (current_x, current_y) not in self.computer.missed_cells:
                             self.computer.missed_cells += (current_x, current_y),
-                        self.timer_marker = 2
-                        self.message_marker = 'СНОВА МИМО!'
+                        self.timer_marker = 1
+                        self.message_marker = 'МИМО!'
                         break
 
                     elif current_cell == 1:
