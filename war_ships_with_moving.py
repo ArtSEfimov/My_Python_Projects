@@ -659,7 +659,7 @@ class SeaBattle:
                         if (current_x, current_y) not in self.computer.missed_cells:
                             self.computer.missed_cells += (current_x, current_y),
                         self.timer_marker = 2
-                        self.message_marker = 'МИМО!'
+                        self.message_marker = 'СНОВА МИМО!'
                         break
 
                     elif current_cell == 1:
