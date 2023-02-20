@@ -431,13 +431,18 @@ class SeaBattle:
             for j in range(x - 1, x + 2):
                 if i in range(size) and j in range(size):
                     if field[i][j] == 'X':
-                        return True
-        return False
+                        return j, i
+        return None
 
     def is_it_a_damaged_ship(self, x, y):
-        for coordinates in self.computer.damaged_ships_coordinates.values():
+        .XX.      X
+         ..       ..
+        for ship, coordinates in self.computer.damaged_ships_coordinates.items():
             if (x, y) in coordinates:
-                return True
+                tmp_x, tmp_y = coordinates[coordinates.index((x, y))]
+                if tmp_x == ship.x or tmp_y == ship.y:
+                    print(tmp_x, tmp_y)
+                    return True
         return False
 
     def the_game(self):
@@ -661,8 +666,10 @@ class SeaBattle:
 
                     if current_cell in ('.', 0):
                         if current_cell == '.':
-                            if self.is_x_near_the_point(self.computer.field, self._size, current_x, current_y) \
-                                    and not self.is_it_a_damaged_ship(current_x, current_y):
+                            function_return = self.is_x_near_the_point(
+                                self.computer.field, self._size, current_x, current_y
+                            )
+                            if function_return is not None and self.is_it_a_damaged_ship(function_return):
                                 print('Вы сюда уже ходили, повторите ввод\n')
                                 continue
                             else:
