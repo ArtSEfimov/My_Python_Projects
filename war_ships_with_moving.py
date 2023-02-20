@@ -434,6 +434,12 @@ class SeaBattle:
                         return True
         return False
 
+    def is_it_a_damaged_ship(self, x, y):
+        for coordinates in self.computer.damaged_ships_coordinates.values():
+            if (x, y) in coordinates:
+                return True
+        return False
+
     def the_game(self):
 
         count = 0
@@ -655,7 +661,8 @@ class SeaBattle:
 
                     if current_cell in ('.', 0):
                         if current_cell == '.':
-                            if self.is_x_near_the_point(self.computer.field, self._size, current_x, current_y):
+                            if self.is_x_near_the_point(self.computer.field, self._size, current_x, current_y) \
+                                    and not self.is_it_a_damaged_ship(current_x, current_y):
                                 print('Вы сюда уже ходили, повторите ввод\n')
                                 continue
                             else:
