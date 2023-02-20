@@ -462,7 +462,7 @@ class SeaBattle:
                             if len(coordinates) == 1:
                                 point_x, point_y = coordinates[0]
                                 while True:
-                                    possible_radius = 1 if secrets.randbelow(100) > 10 \
+                                    possible_radius = 1 if secrets.randbelow(100) > 25 \
                                         else random.randint(1, max_possible_radius - 1)
 
                                     possible_coordinates = [(x, y)
@@ -527,6 +527,7 @@ class SeaBattle:
                                                 self.find_point_near_the_ship((ship.x, y)),
                                                 possible_coordinates))
 
+                            random.shuffle(possible_coordinates)
                             current_x, current_y = random.choice(possible_coordinates)
                             current_cell = self.human.field[current_y][current_x]
                             if current_cell == 0:
