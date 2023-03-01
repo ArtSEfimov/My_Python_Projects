@@ -53,7 +53,9 @@ class Checker:
         self.color = color.lower()
         self.on_the_head = True
         self.position = 1
+
         self.is_up = False
+        self.is_single = False
 
     def __repr__(self):
         return self.color
@@ -101,10 +103,13 @@ class Game:
         self.white_checkers = [Checker('white') for _ in range(15)]
         self.black_checkers = [Checker('black') for _ in range(15)]
 
-        self.field.white_home.data[1] = MyList(checker for checker in self.white_checkers)
-        self.field.white_home.data[1][-1].is_up = True
-        self.field.black_home.data[1] = MyList(checker for checker in self.black_checkers)
-        self.field.black_home.data[1][-1].is_up = True
+        self.first_step_flag = True
+
+        self.white_head = self.field.white_home.data[1] = MyList(checker for checker in self.white_checkers)
+        self.white_head[-1].is_up = True
+        self.black_head = self.field.black_home.data[1] = MyList(checker for checker in self.black_checkers)
+        self.black_head[-1].is_up = True
+        self.black_head[-2].is_up = True
 
     @staticmethod
     def throw_dices():
@@ -113,10 +118,73 @@ class Game:
         return first_dice, second_dice
 
     def computer_step(self):  # black checkers
-        first_dice, second_dice = self.throw_dices()
-        # for checker in self.black_checkers:
+        self.first_dice, self.second_dice = self.throw_dices()
+        if self.first_step_flag:
+            self.first_step_flag = False
+        if self.black_head:
+            self.black_head[-1].is_up = True
+
+    def first_priority(self, color):
+        priority_checker_list = [checker
+                                 for checker in (self.white_checkers if color == 'white' else self.black_checkers)
+                                 if checker.is_up]
+
+        not_singles_checkers = list(
+            filter(
+                lambda c: not c.is_single, priority_checker_list
+            )
+        )
+
+        tmp_map_part_1 = {i: (self.field.white_home.data[i]
+                              if color == 'white'
+                              else self.field.black_home.data[i])
+                          for i in range(1, 7)}
+
+        start_for_next_part = max(tmp_map_part_1.keys())
+
+        tmp_map_part_2 = {i + start_for_next_part: (self.field.white_yard.data[i]
+                                                    if color == 'white'
+                                                    else self.field.black_yard.data[i])
+                          for i in range(1, 7)}
+
+        start_for_next_part = max(tmp_map_part_2.keys())
+
+        tmp_map_part_3 = {i + start_for_next_part: (self.field.black_home.data[i]
+                                                    if color == 'white'
+                                                    else self.field.white_home.data[i])
+                          for i in range(1, 7)}
+
+        start_for_next_part = max(tmp_map_part_3.keys())
+
+        tmp_map_part_4 = {i + start_for_next_part: (self.field.black_yard.data[i]
+                                                    if color == 'white'
+                                                    else self.field.white_yard.data[i])
+                          for i in range(1, 7)}
+
+        tmp_map = {}
+        tmp_map.update(tmp_map_part_1)
+        tmp_map.update(tmp_map_part_2)
+        tmp_map.update(tmp_map_part_3)
+        tmp_map.update(tmp_map_part_4)
+
+        if color == 'white':
+            if self.white_head:
+                priority_cells_numbers = [k
+                                          for k in range(2, 19)
+                                          if tmp_map[k] == 0]
+            else:
+                priority_cells_numbers = [k
+                                          for k in range(13, 25)
+                                          if tmp_map[k] == 0]
+
+
+
+        # if not_singles_checkers:
+        #     for checker in not_singles_checkers:
+        #         if checker.position + self.first_dice
 
 
 g = Game()
+g.first_priority('white')
 
 g.field.show_field()
