@@ -49,13 +49,31 @@ class FieldStructure:
 
 
 class Checker:
+    __COUNTER = 0
+
     def __init__(self, color):
         self.color = color.lower()
         self.on_the_head = True
-        self.position = 1
+        self.__position = 1
 
         self.is_up = False
         self.is_single = False
+
+    def get_position(self):
+        return self.__position
+
+    def set_position(self, value):
+        self.change_counter_value()
+        self.__position = value
+
+    @classmethod
+    def change_counter_value(cls, reset_flag=False):
+        if reset_flag:
+            cls.__COUNTER = 0
+        else:
+            cls.__COUNTER += 1
+
+    position = property(get_position, set_position)
 
     def __repr__(self):
         return self.color
@@ -100,6 +118,8 @@ class Game:
         self.field = Field()
         self.field.init_field_and_create_field_structure()
 
+        self.checker_class = Checker
+
         self.white_checkers = [Checker('white') for _ in range(15)]
         self.black_checkers = [Checker('black') for _ in range(15)]
 
@@ -109,7 +129,6 @@ class Game:
         self.white_head[-1].is_up = True
         self.black_head = self.field.black_home.data[1] = MyList(checker for checker in self.black_checkers)
         self.black_head[-1].is_up = True
-        self.black_head[-2].is_up = True
 
     @staticmethod
     def throw_dices():
@@ -134,57 +153,49 @@ class Game:
                 lambda c: not c.is_single, priority_checker_list
             )
         )
+        field_map = dict()
+        current_field_element = self.field.white_home if color == 'white' else self.field.black_home
+        start_for_next_part = 0
+        for _ in range(4):
+            field_map.update({i + start_for_next_part: current_field_element.data[i] for i in range(1, 7)})
+            current_field_element = current_field_element.next_element
+            start_for_next_part = max(field_map.keys())
 
-        tmp_map_part_1 = {i: (self.field.white_home.data[i]
-                              if color == 'white'
-                              else self.field.black_home.data[i])
-                          for i in range(1, 7)}
-
-        start_for_next_part = max(tmp_map_part_1.keys())
-
-        tmp_map_part_2 = {i + start_for_next_part: (self.field.white_yard.data[i]
-                                                    if color == 'white'
-                                                    else self.field.black_yard.data[i])
-                          for i in range(1, 7)}
-
-        start_for_next_part = max(tmp_map_part_2.keys())
-
-        tmp_map_part_3 = {i + start_for_next_part: (self.field.black_home.data[i]
-                                                    if color == 'white'
-                                                    else self.field.white_home.data[i])
-                          for i in range(1, 7)}
-
-        start_for_next_part = max(tmp_map_part_3.keys())
-
-        tmp_map_part_4 = {i + start_for_next_part: (self.field.black_yard.data[i]
-                                                    if color == 'white'
-                                                    else self.field.white_yard.data[i])
-                          for i in range(1, 7)}
-
-        tmp_map = {}
-        tmp_map.update(tmp_map_part_1)
-        tmp_map.update(tmp_map_part_2)
-        tmp_map.update(tmp_map_part_3)
-        tmp_map.update(tmp_map_part_4)
+        priority_cells_numbers = list()
 
         if color == 'white':
             if self.white_head:
                 priority_cells_numbers = [k
                                           for k in range(2, 19)
-                                          if tmp_map[k] == 0]
+                                          if field_map[k] == 0]
             else:
                 priority_cells_numbers = [k
                                           for k in range(13, 25)
-                                          if tmp_map[k] == 0]
+                                          if field_map[k] == 0]
+        if color == 'black':
+            if self.black_head:
+                priority_cells_numbers = [k
+                                          for k in range(2, 19)
+                                          if field_map[k] == 0]
+            else:
+                priority_cells_numbers = [k
+                                          for k in range(13, 25)
+                                          if field_map[k] == 0]
+        if priority_cells_numbers:
+            if not_singles_checkers:
+                for checker in not_singles_checkers:
+                    for arg in range(self.first_dice, self.second_dice, self.first_dice + self.second_dice):
+                        if checker.position + arg in priority_cells_numbers:
+                            checker.position += arg
+                            break
 
-
-
-        # if not_singles_checkers:
-        #     for checker in not_singles_checkers:
-        #         if checker.position + self.first_dice
+            else:  # checker.__COUNT  (0, 2,) reset__COUNT
+                pass
+        else:
+            pass
 
 
 g = Game()
 g.first_priority('white')
-
+print(g)
 g.field.show_field()
