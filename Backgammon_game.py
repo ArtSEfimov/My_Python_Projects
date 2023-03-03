@@ -73,6 +73,10 @@ class Checker:
         else:
             cls.__COUNTER += 1
 
+    @classmethod
+    def get_counter(cls):
+        return cls.__COUNTER
+
     position = property(get_position, set_position)
 
     def __repr__(self):
@@ -161,38 +165,40 @@ class Game:
             current_field_element = current_field_element.next_element
             start_for_next_part = max(field_map.keys())
 
-        priority_cells_numbers = list()
+        def make_priority_cells_list(head=None):
+            if head:
+                return [k for k in range(2, 19) if field_map[k] == 0]
+            return [k for k in range(13, 25) if field_map[k] == 0]
 
-        if color == 'white':
-            if self.white_head:
-                priority_cells_numbers = [k
-                                          for k in range(2, 19)
-                                          if field_map[k] == 0]
-            else:
-                priority_cells_numbers = [k
-                                          for k in range(13, 25)
-                                          if field_map[k] == 0]
-        if color == 'black':
-            if self.black_head:
-                priority_cells_numbers = [k
-                                          for k in range(2, 19)
-                                          if field_map[k] == 0]
-            else:
-                priority_cells_numbers = [k
-                                          for k in range(13, 25)
-                                          if field_map[k] == 0]
+        priority_cells_numbers = make_priority_cells_list(
+            head=(self.white_head if color == 'white' else self.black_head)
+        )
+
         if priority_cells_numbers:
             if not_singles_checkers:
-                for checker in not_singles_checkers:
-                    for arg in range(self.first_dice, self.second_dice, self.first_dice + self.second_dice):
-                        if checker.position + arg in priority_cells_numbers:
-                            checker.position += arg
-                            break
+                for dice in range(self.first_dice, self.second_dice):
+                    for checker in not_singles_checkers:
+                        if checker.position + dice in priority_cells_numbers:
+                            checker.position += dice
+                            if checker.get_counter() == 2:
+                                break  # breaking the cycle with checkers
+                    if self.checker_class.get_counter() == 2:
+                        self.checker_class.change_counter_value(reset_flag=True)
+                        return  # breaking the cycle with dices
 
-            else:  # checker.__COUNT  (0, 2,) reset__COUNT
-                pass
+            if priority_checker_list:  # this means, that __COUNTER != 2, the step is not finished
+                for dice in range(self.first_dice, self.second_dice):
+                    for checker in priority_checker_list:
+                        if checker.position + dice in priority_cells_numbers:
+                            checker.position += dice
+                            if checker.get_counter() == 2:
+                                break  # breaking the cycle with checkers
+                    if self.checker_class.get_counter() == 2:
+                        self.checker_class.change_counter_value(reset_flag=True)
+                        return  # breaking the cycle with dices
+
         else:
-            pass
+            pass  # we need others cells (maybe without '0')
 
 
 g = Game()
