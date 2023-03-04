@@ -3,7 +3,11 @@ import random
 
 class MyList(list):
     def __new__(cls, *args, **kwargs):
-        return super().__new__(cls, *args, **kwargs)
+        return super().__new__(cls)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.content_color = None
 
     def __getitem__(self, item):
         if isinstance(item, slice):
@@ -20,6 +24,9 @@ class MyList(list):
                 return super().__getitem__(item)
 
     def __setitem__(self, key, value):
+        if isinstance(value, MyList):
+            if value:
+                value.content_color = value[1].color
         if isinstance(key, slice):
             start, stop, step = key.indices(len(self))
             modify_slice = slice((start - 1 if start not in (len(self) - 1, 0) else None),
@@ -29,10 +36,10 @@ class MyList(list):
         else:
             if key > 0:
                 if key - 1 in range(len(self)):
-                    return super().__setitem__(key - 1, value)
+                    super().__setitem__(key - 1, value)
             else:
                 if abs(key) in range(1, len(self) + 1):
-                    return super().__setitem__(key, value)
+                    super().__setitem__(key, value)
 
 
 class FieldStructure:
@@ -80,11 +87,11 @@ class Checker:
     position = property(get_position, set_position)
 
     def __repr__(self):
-        return self.color
+        return self.position
 
     def __str__(self):
         # return 'b' if self.color == 'black' else 'w'
-        return str(self.is_up)
+        return f'{self.color}-{self.position}-{self.is_up}'
 
 
 class Field:
@@ -129,9 +136,9 @@ class Game:
 
         self.first_step_flag = True
 
-        self.white_head = self.field.white_home.data[1] = MyList(checker for checker in self.white_checkers)
+        self.white_head = self.field.white_home.data[1] = MyList([checker for checker in self.white_checkers])
         self.white_head[-1].is_up = True
-        self.black_head = self.field.black_home.data[1] = MyList(checker for checker in self.black_checkers)
+        self.black_head = self.field.black_home.data[1] = MyList([checker for checker in self.black_checkers])
         self.black_head[-1].is_up = True
 
     @staticmethod
@@ -144,8 +151,8 @@ class Game:
         self.first_dice, self.second_dice = self.throw_dices()
         if self.first_step_flag:
             self.first_step_flag = False
-        if self.black_head:
-            self.black_head[-1].is_up = True
+        print(self.first_priority('black'))
+        self.field.show_field()
 
     def first_priority(self, color):
         priority_checker_list = [checker
@@ -170,6 +177,17 @@ class Game:
                 return [k for k in range(2, 19) if field_map[k] == 0]
             return [k for k in range(13, 25) if field_map[k] == 0]
 
+        def make_another_cells_list(current_color, head=None, tower_length=1):
+            if head:
+                return [k
+                        for k in range(2, 19)
+                        if len(field_map[k]) <= tower_length and field_map[k].color == current_color]
+            return [k
+                    for k in range(13, 25)
+                    if len(field_map[k]) <= tower_length and field_map[k].color == current_color]
+
+        another_cells_numbers = list()
+
         priority_cells_numbers = make_priority_cells_list(
             head=(self.white_head if color == 'white' else self.black_head)
         )
@@ -184,7 +202,7 @@ class Game:
                                 break  # breaking the cycle with checkers
                     if self.checker_class.get_counter() == 2:
                         self.checker_class.change_counter_value(reset_flag=True)
-                        return  # breaking the cycle with dices
+                        return True  # breaking the cycle with dices
 
             if priority_checker_list:  # this means, that __COUNTER != 2, the step is not finished
                 for dice in range(self.first_dice, self.second_dice):
@@ -195,13 +213,33 @@ class Game:
                                 break  # breaking the cycle with checkers
                     if self.checker_class.get_counter() == 2:
                         self.checker_class.change_counter_value(reset_flag=True)
-                        return  # breaking the cycle with dices
+                        return True  # breaking the cycle with dices
 
-        else:
-            pass  # we need others cells (maybe without '0')
+        else:  # we need others cells (maybe without '0')
+            while self.checker_class.get_counter() != 2:
+                tower = 1
+                another_cells_numbers = make_another_cells_list(
+                    color,
+                    head=(self.white_head if color == 'white' else self.black_head),
+                    tower_length=tower
+                )
+                if another_cells_numbers:
+                    if priority_checker_list:
+                        for dice in range(self.first_dice, self.second_dice):
+                            for checker in priority_checker_list:
+                                if checker.position + dice in another_cells_numbers:
+                                    checker.position += dice
+                                    if checker.get_counter() == 2:
+                                        break  # breaking the cycle with checkers
+                            if self.checker_class.get_counter() == 2:
+                                self.checker_class.change_counter_value(reset_flag=True)
+                                return True  # breaking the cycle with dices
+                else:
+                    tower += 1
+                    if tower > 15:
+                        return False
+                    continue
 
 
 g = Game()
-g.first_priority('white')
-print(g)
-g.field.show_field()
+g.computer_step()
