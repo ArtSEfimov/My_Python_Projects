@@ -154,16 +154,27 @@ class Game:
         print(self.first_priority('black'))
         self.field.show_field()
 
-    def first_priority(self, color):
-        priority_checker_list = [checker
+    def first_priority(self, color, dice, counter_value=1):
+        # формируем список шашек, которые находятся наверху и могут "ходить"
+        possible_checker_list = [checker
                                  for checker in (self.white_checkers if color == 'white' else self.black_checkers)
                                  if checker.is_up]
 
+        # формируем список НЕОДИНОКИХ шашек (походить ими - в приоритете)
         not_singles_checkers = list(
             filter(
-                lambda c: not c.is_single, priority_checker_list
+                lambda c: not c.is_single, possible_checker_list
             )
         )
+        # список ОСТАЛЬНЫХ шашек (которые не одиночные, но всё ещё наверху и могут "ходить")
+        others_checkers = list(
+            filter(
+                lambda c: c.is_single, possible_checker_list
+            )
+        )
+
+        # вспомогательный словарь (для каждого игрока будет свой, но формируется на основании общего поля)
+        # -------------------------------------------------------------------------------------------------
         field_map = dict()
         current_field_element = self.field.white_home if color == 'white' else self.field.black_home
         start_for_next_part = 0
@@ -172,73 +183,35 @@ class Game:
             current_field_element = current_field_element.next_element
             start_for_next_part = max(field_map.keys())
 
+        # -------------------------------------------------------------------------------------------------
+
+        # функции для создания приоритетного списка полей, куда можно походить в первую очередь
+        # здесь делаем поля, которые не заняты (значения равны 0, а не списку с шашками)
         def make_priority_cells_list(head=None):
             if head:
                 return [k for k in range(2, 19) if field_map[k] == 0]
             return [k for k in range(13, 25) if field_map[k] == 0]
 
-        def make_another_cells_list(current_color, head=None, tower_length=1):
-            if head:
-                return [k
-                        for k in range(2, 19)
-                        if len(field_map[k]) <= tower_length and field_map[k].color == current_color]
-            return [k
-                    for k in range(13, 25)
-                    if len(field_map[k]) <= tower_length and field_map[k].color == current_color]
-
-        another_cells_numbers = list()
-
         priority_cells_numbers = make_priority_cells_list(
             head=(self.white_head if color == 'white' else self.black_head)
         )
 
-        if priority_cells_numbers:
-            if not_singles_checkers:
-                for dice in range(self.first_dice, self.second_dice):
-                    for checker in not_singles_checkers:
-                        if checker.position + dice in priority_cells_numbers:
-                            checker.position += dice
-                            if checker.get_counter() == 2:
-                                break  # breaking the cycle with checkers
-                    if self.checker_class.get_counter() == 2:
-                        self.checker_class.change_counter_value(reset_flag=True)
-                        return True  # breaking the cycle with dices
+        if priority_cells_numbers:  # если есть поля с нулевыми значениями
+            if not_singles_checkers:  # если есть неодиночные шашки (убираем "верхние этажи")
+                for checker in not_singles_checkers:
+                    if checker.position + dice in priority_cells_numbers:
+                        checker.position += dice
+                        # здесь нужно физически перенести шашку на новое место
+                        return True
 
-            if priority_checker_list:  # this means, that __COUNTER != 2, the step is not finished
-                for dice in range(self.first_dice, self.second_dice):
-                    for checker in priority_checker_list:
-                        if checker.position + dice in priority_cells_numbers:
-                            checker.position += dice
-                            if checker.get_counter() == 2:
-                                break  # breaking the cycle with checkers
-                    if self.checker_class.get_counter() == 2:
-                        self.checker_class.change_counter_value(reset_flag=True)
-                        return True  # breaking the cycle with dices
+            if others_checkers:
+                for checker in others_checkers:
+                    if checker.position + dice in priority_cells_numbers:
+                        checker.position += dice
+                        # здесь нужно физически перенести шашку на новое место
+                        return True
 
-        else:  # we need others cells (maybe without '0')
-            while self.checker_class.get_counter() != 2:
-                tower = 1
-                another_cells_numbers = make_another_cells_list(
-                    color,
-                    head=(self.white_head if color == 'white' else self.black_head),
-                    tower_length=tower
-                )
-                if another_cells_numbers:
-                    if priority_checker_list:
-                        for dice in range(self.first_dice, self.second_dice):
-                            for checker in priority_checker_list:
-                                if checker.position + dice in another_cells_numbers:
-                                    checker.position += dice
-                                    if checker.get_counter() == 2:
-                                        break  # breaking the cycle with checkers
-                            if self.checker_class.get_counter() == 2:
-                                self.checker_class.change_counter_value(reset_flag=True)
-                                return True  # breaking the cycle with dices
-                else:
-                    tower += 1
-                    if tower > 15:
-                        return False
-                    continue
+        return False  # ход не удался
 
 
 g = Game()
