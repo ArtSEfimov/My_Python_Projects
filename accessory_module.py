@@ -1,4 +1,4 @@
-def second_priority(self, color, dice, counter_value=1):
+def second_priority(self, color, dice):
     # формируем список шашек, которые находятся наверху и могут "ходить"
     possible_checker_list = [checker
                              for checker in (self.white_checkers if color == 'white' else self.black_checkers)
