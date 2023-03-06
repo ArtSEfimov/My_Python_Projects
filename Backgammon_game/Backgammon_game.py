@@ -1,80 +1,5 @@
 import random
-
-
-class MyStack:
-    def __init__(self):
-        self.top = None
-        self.color = None
-
-        # attributes for elements:
-        # prev_element
-        # next_element
-
-    def is_empty(self):
-        return self.top is None
-
-    def add_element(self, element):
-        if self.is_empty():
-            self.top = element
-        else:
-            self.top.next_element = element
-            element.prev_element = self.top
-            self.top = element
-
-    def pop_element(self):
-        if not self.is_empty():
-            if self.top.prev_element is not None:
-                self.top = self.top.prev_element
-                self.top.next_element = None
-            else:
-                self.top = None
-
-
-class MyList(list):
-    def __new__(cls, *args, **kwargs):
-        return super().__new__(cls)
-
-    def __getitem__(self, item):
-        if isinstance(item, slice):
-            start, stop, step = item.indices(len(self))
-            modify_slice = slice((start - 1 if start not in (len(self) - 1, 0) else None),
-                                 (stop - 1 if stop not in (len(self), -1) else None),
-                                 step)
-            return super().__getitem__(modify_slice)
-        if item > 0:
-            if item - 1 in range(len(self)):
-                return super().__getitem__(item - 1)
-        else:
-            if abs(item) in range(1, len(self) + 1):
-                return super().__getitem__(item)
-
-    def __setitem__(self, key, value):
-        if isinstance(key, slice):
-            start, stop, step = key.indices(len(self))
-            modify_slice = slice((start - 1 if start not in (len(self) - 1, 0) else None),
-                                 (stop - 1 if stop not in (len(self), -1) else None),
-                                 step)
-            super().__setitem__(modify_slice, value)
-        else:
-            if key > 0:
-                if key - 1 in range(len(self)):
-                    super().__setitem__(key - 1, value)
-            else:
-                if abs(key) in range(1, len(self) + 1):
-                    super().__setitem__(key, value)
-
-
-class FieldStructure:
-    def __init__(self, data):
-        self.data = data
-        self.next_element = None
-        self.previous_element = None
-
-    def connect_elements(self, next_element=None, previous_element=None):
-        if next_element:
-            self.next_element = next_element
-        if previous_element:
-            self.previous_element = previous_element
+from Accessory_module import MyList, MyStack, FieldStructure
 
 
 class Checker:
@@ -140,8 +65,6 @@ class Game:
         self.field = Field()
         self.field.init_field_and_create_field_structure()
 
-        self.checker_class = Checker
-
         self.white_checkers = [Checker('white') for _ in range(15)]
         self.black_checkers = [Checker('black') for _ in range(15)]
 
@@ -180,6 +103,26 @@ class Game:
                     print('Пропуск хода')
 
         self.field.show_field()
+
+    def new_place_for_checker(self, checker: Checker):
+        position = checker.position
+        color = checker.color
+
+        # определим, в какой части поля находится клетка, которая уже записана в свойство шашки
+        quarters = {
+            (1 if color == 'white' else 3): self.field.white_home,
+            (2 if color == 'white' else 4): self.field.white_yard,
+            (3 if color == 'white' else 1): self.field.black_home,
+            (4 if color == 'white' else 2): self.field.black_yard
+        }
+        position_in_mylist = position % 6
+        position_in_mylist = position_in_mylist if position_in_mylist else 6
+        new_home = quarters[((position - 1) // 6) + 1].data[position_in_mylist]
+
+        if new_home == 0:  # это значит,что там ноль, а не стэк, значит стэк нужно создавать заново
+            new_home = MyStack()
+        # это значит что там уже стэк
+        new_home.add_element(checker)
 
     def first_priority(self, color, dice):
         # формируем список шашек, которые находятся наверху и могут "ходить"
@@ -228,14 +171,20 @@ class Game:
                 for checker in not_singles_checkers:
                     if checker.position + dice in priority_cells_numbers:
                         checker.position += dice
-                        # здесь нужно физически перенести шашку на новое место
+                        # НУЖНО УБРАТЬ ШАШКУ СО СТАРОЙ ПОЗИЦИИ
+                        self.new_place_for_checker(checker)
+                        # здесь нужно убрать пустые стеки (превратить в нули)
+                        # и изменить свойства верзним шашкам (top стеков)
                         return True
 
             if others_checkers:
                 for checker in others_checkers:
                     if checker.position + dice in priority_cells_numbers:
                         checker.position += dice
-                        # здесь нужно физически перенести шашку на новое место
+                        # НУЖНО УБРАТЬ ШАШКУ СО СТАРОЙ ПОЗИЦИИ
+                        self.new_place_for_checker(checker)
+                        # здесь нужно убрать пустые стеки (превратить в нули)
+                        # и изменить свойства верзним шашкам (top стеков)
                         return True
 
         return False  # ход не удался
@@ -296,13 +245,19 @@ class Game:
                     for checker in not_singles_checkers:
                         if checker.position + dice in another_cells_numbers:
                             checker.position += dice
-                            # здесь нужно физически перенести шашку на новое место
+                            # НУЖНО УБРАТЬ ШАШКУ СО СТАРОЙ ПОЗИЦИИ
+                            self.new_place_for_checker(checker)
+                            # здесь нужно убрать пустые стеки (превратить в нули)
+                            # и изменить свойства верзним шашкам (top стеков)
                             return True
                 if others_checkers:
                     for checker in others_checkers:
                         if checker.position + dice in another_cells_numbers:
                             checker.position += dice
-                            # здесь нужно физически перенести шашку на новое место
+                            # НУЖНО УБРАТЬ ШАШКУ СО СТАРОЙ ПОЗИЦИИ
+                            self.new_place_for_checker(checker)
+                            # здесь нужно убрать пустые стеки (превратить в нули)
+                            # и изменить свойства верзним шашкам (top стеков)
                             return True
 
             else:
