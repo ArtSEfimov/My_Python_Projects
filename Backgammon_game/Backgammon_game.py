@@ -101,28 +101,47 @@ class Game:
             if not self.first_priority('black', dice):  # если приоритетная попытка хода не удалась
                 if not self.second_priority('black', dice):  # если и вторая попытка хода не удалась
                     print('Пропуск хода')
-
+        print(self.first_dice, self.second_dice)
         self.field.show_field()
 
-    def new_place_for_checker(self, checker: Checker):
-        position = checker.position
-        color = checker.color
-
-        # определим, в какой части поля находится клетка, которая уже записана в свойство шашки
+    # функция для описания четвертей поля в зависимиости от цвета шашки
+    def get_quarters(self, color):
         quarters = {
             (1 if color == 'white' else 3): self.field.white_home,
             (2 if color == 'white' else 4): self.field.white_yard,
             (3 if color == 'white' else 1): self.field.black_home,
             (4 if color == 'white' else 2): self.field.black_yard
         }
+        return quarters
+
+    # определим, в какой части поля находится клетка, которая уже записана в свойство шашки
+    def get_position(self, color, position):
+        quarters = self.get_quarters(color)
+
         position_in_mylist = position % 6
         position_in_mylist = position_in_mylist if position_in_mylist else 6
-        new_home = quarters[((position - 1) // 6) + 1].data[position_in_mylist]
+        home = quarters[((position - 1) // 6) + 1]
+        return home, position_in_mylist  # часть поля
 
-        if new_home == 0:  # это значит,что там ноль, а не стэк, значит стэк нужно создавать заново
-            new_home = MyStack()
+    def remove_checker_from_old_position(self, checker: Checker):
+        old_position = checker.position
+        color = checker.color
+        old_home, position_in_mylist = self.get_position(color, old_position)
+        old_home = old_home.data
+        old_home[position_in_mylist].pop_element
+        if old_home[position_in_mylist].is_empty:
+            old_home[position_in_mylist] = 0
+
+    def new_place_for_checker(self, checker: Checker):
+        position = checker.position
+        color = checker.color
+        new_home, position_in_mylist = self.get_position(color, position)
+        new_home = new_home.data
+
+        if new_home[position_in_mylist] == 0:  # это значит,что там ноль, а не стэк, значит стэк нужно создавать заново
+            new_home[position_in_mylist] = MyStack()
         # это значит что там уже стэк
-        new_home.add_element(checker)
+        new_home[position_in_mylist].add_element(checker)
 
     def first_priority(self, color, dice):
         # формируем список шашек, которые находятся наверху и могут "ходить"
@@ -170,8 +189,14 @@ class Game:
             if not_singles_checkers:  # если есть неодиночные шашки (убираем "верхние этажи")
                 for checker in not_singles_checkers:
                     if checker.position + dice in priority_cells_numbers:
-                        checker.position += dice
+
                         # НУЖНО УБРАТЬ ШАШКУ СО СТАРОЙ ПОЗИЦИИ
+                        self.remove_checker_from_old_position(checker)
+                        # НУЖНО РАЗОБРАТЬСЯ ПОЧЕМУ ИСЧЕЗАЕТ НЕПУСТОЙ СТЭК
+
+
+
+                        checker.position += dice
                         self.new_place_for_checker(checker)
                         # здесь нужно убрать пустые стеки (превратить в нули)
                         # и изменить свойства верзним шашкам (top стеков)
@@ -181,7 +206,10 @@ class Game:
                 for checker in others_checkers:
                     if checker.position + dice in priority_cells_numbers:
                         checker.position += dice
+
                         # НУЖНО УБРАТЬ ШАШКУ СО СТАРОЙ ПОЗИЦИИ
+                        self.remove_checker_from_old_position(checker)
+
                         self.new_place_for_checker(checker)
                         # здесь нужно убрать пустые стеки (превратить в нули)
                         # и изменить свойства верзним шашкам (top стеков)

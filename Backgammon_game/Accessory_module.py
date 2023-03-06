@@ -13,6 +13,7 @@ class MyStack:
     def add_element(self, element):
         if self.is_empty():
             self.top = element
+            self.color = element.color
         else:
             self.top.next_element = element
             self.top = element
@@ -24,6 +25,7 @@ class MyStack:
                 self.top.next_element = None
             else:
                 self.top = None
+                self.color = None
 
 
 class MyList(list):
