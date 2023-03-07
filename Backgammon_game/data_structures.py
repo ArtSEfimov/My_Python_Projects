@@ -7,25 +7,35 @@ class MyStack:
         # attributes for elements:
         # prev_element
         # next_element
+        # is_up
+        # is_single
 
     def is_empty(self):
         return self.top is None
 
-    # ошибка в привязывании предыдущего элемента (!!!)
     def add_element(self, element):
         if self.is_empty():
             self.top = element
             self.color = element.color
+            element.is_single = True
         else:
             self.top.next_element = element
+            element.prev_element = self.top
             self.top = element
+            element.is_single = False
+        element.is_up = True
         self.count += 1
 
     def pop_element(self):
         if not self.is_empty():
             if self.top.prev_element is not None:
+                tmp_link = self.top
                 self.top = self.top.prev_element
                 self.top.next_element = None
+                tmp_link.prev_element = None
+                self.top.is_up = True
+                # проверим, остался ли один элемент
+                self.top.is_single = (True if self.top.prev_element is None else False)
             else:
                 self.top = None
                 self.color = None
