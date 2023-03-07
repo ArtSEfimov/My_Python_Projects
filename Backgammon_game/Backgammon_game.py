@@ -128,8 +128,8 @@ class Game:
         color = checker.color
         old_home, position_in_mylist = self.get_position(color, old_position)
         old_home = old_home.data
-        old_home[position_in_mylist].pop_element
-        if old_home[position_in_mylist].is_empty:
+        old_home[position_in_mylist].pop_element()
+        if old_home[position_in_mylist].is_empty():
             old_home[position_in_mylist] = 0
 
     def new_place_for_checker(self, checker: Checker):

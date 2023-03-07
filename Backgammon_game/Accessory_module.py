@@ -2,6 +2,7 @@ class MyStack:
     def __init__(self):
         self.top = None
         self.color = None
+        self.count = 0  # так мы будем отображать стэк: количество лементов * цвет элементов
 
         # attributes for elements:
         # prev_element
@@ -10,6 +11,7 @@ class MyStack:
     def is_empty(self):
         return self.top is None
 
+    # ошибка в привязывании предыдущего элемента (!!!)
     def add_element(self, element):
         if self.is_empty():
             self.top = element
@@ -17,6 +19,7 @@ class MyStack:
         else:
             self.top.next_element = element
             self.top = element
+        self.count += 1
 
     def pop_element(self):
         if not self.is_empty():
@@ -26,6 +29,10 @@ class MyStack:
             else:
                 self.top = None
                 self.color = None
+            self.count -= 1
+
+    def __repr__(self):
+        return f'{self.count} - {self.color}'
 
 
 class MyList(list):
