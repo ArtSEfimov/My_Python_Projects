@@ -1,5 +1,5 @@
 import random
-from data_structures import MyList, MyStack, FieldStructure
+from data_structures import MyStack
 from field_and_checker import Checker, Field
 
 
@@ -33,6 +33,22 @@ class Game:
         second_dice = random.randint(1, 6)
         return first_dice, second_dice
 
+    # def try_to_step(self, first_dice, second_dice):
+    #     result_list = list()
+    #
+    #     for dice in (first_dice, second_dice):
+    #         result = self.first_priority('black', dice)
+    #         result_list.append((dice, result))
+    #
+    #     return not all(
+    #         map(
+    #             lambda e: e[1], result_list
+    #         )
+    #     )
+
+    # НУЖНО НАУЧИТЬСЯ ВОЗВРАЩАТЬ ШАШКУ НА МЕСТО, ЧТОБЫ ПРОБОВАТЬ РАЗНЫЕ КОМБИНАЦИИ ХОДОВ
+    # В ПРИОРИТЕТЕ ПРИОРИТЕТНЫЙ ШАГ, ДАЖЕ ЕСЛИ ПРИДЕТСЯ РАЗМЕНИВАТЬ МЕСТАМИ КУБИКИ
+
     def computer_step(self):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
 
@@ -40,10 +56,15 @@ class Game:
         if self.first_step_flag:
             self.first_step_flag = False
 
-        for dice in (self.first_dice, self.second_dice):
-            if not self.first_priority('black', dice):  # если приоритетная попытка хода не удалась
-                if not self.second_priority('black', dice):  # если и вторая попытка хода не удалась
-                    print('Пропуск хода')
+        # first, second = self.first_dice, self.second_dice
+        # for _ in range(2):
+        #     if self.try_to_step(first, second):
+        #         break
+        #     first, second = second, first
+        #
+        #
+        # if not self.second_priority('black', dice):  # если и вторая попытка хода не удалась
+        #     print('Пропуск хода')
 
         # надо подумать, если не получилось походить в этом порядке очков кубиков, может получится в обратном порядке
         # еще надо подумать над снятием шашки с "головы" (чтобы делать это один раз за ход)

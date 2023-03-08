@@ -1,3 +1,6 @@
+from data_structures import FieldStructure, MyList
+
+
 class Checker:
 
     def __init__(self, color):
