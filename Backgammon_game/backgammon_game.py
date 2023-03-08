@@ -44,6 +44,10 @@ class Game:
             if not self.first_priority('black', dice):  # если приоритетная попытка хода не удалась
                 if not self.second_priority('black', dice):  # если и вторая попытка хода не удалась
                     print('Пропуск хода')
+
+        # надо подумать, если не получилось походить в этом порядке очков кубиков, может получится в обратном порядке
+        # еще надо подумать над снятием шашки с "головы" (чтобы делать это один раз за ход)
+
         print(self.first_dice, self.second_dice)
         self.field.show_field()
 
@@ -132,26 +136,25 @@ class Game:
             if not_singles_checkers:  # если есть неодиночные шашки (убираем "верхние этажи")
                 for checker in not_singles_checkers:
                     if checker.position + dice in priority_cells_numbers:
-                        # НУЖНО УБРАТЬ ШАШКУ СО СТАРОЙ ПОЗИЦИИ
+                        # убираем шашку со старой позиции
                         self.remove_checker_from_old_position(checker)
-
+                        # присваеваем ей ноувю позицию
                         checker.position += dice
+                        # размещаем ее на новой позиции
                         self.new_place_for_checker(checker)
-                        # здесь нужно убрать пустые стеки (превратить в нули)
-                        # и изменить свойства верзним шашкам (top стеков)
+
                         return True
 
             if others_checkers:
                 for checker in others_checkers:
                     if checker.position + dice in priority_cells_numbers:
-                        checker.position += dice
-
-                        # НУЖНО УБРАТЬ ШАШКУ СО СТАРОЙ ПОЗИЦИИ
+                        # убираем шашку со старой позиции
                         self.remove_checker_from_old_position(checker)
-
+                        # присваеваем ей ноувю позицию
+                        checker.position += dice
+                        # размещаем ее на новой позиции
                         self.new_place_for_checker(checker)
-                        # здесь нужно убрать пустые стеки (превратить в нули)
-                        # и изменить свойства верзним шашкам (top стеков)
+
                         return True
 
         return False  # ход не удался
@@ -211,20 +214,24 @@ class Game:
                 if not_singles_checkers:
                     for checker in not_singles_checkers:
                         if checker.position + dice in another_cells_numbers:
+                            # убираем шашку со старой позиции
+                            self.remove_checker_from_old_position(checker)
+                            # присваеваем ей ноувю позицию
                             checker.position += dice
-                            # НУЖНО УБРАТЬ ШАШКУ СО СТАРОЙ ПОЗИЦИИ
+                            # размещаем ее на новой позиции
                             self.new_place_for_checker(checker)
-                            # здесь нужно убрать пустые стеки (превратить в нули)
-                            # и изменить свойства верзним шашкам (top стеков)
+
                             return True
                 if others_checkers:
                     for checker in others_checkers:
                         if checker.position + dice in another_cells_numbers:
+                            # убираем шашку со старой позиции
+                            self.remove_checker_from_old_position(checker)
+                            # присваеваем ей ноувю позицию
                             checker.position += dice
-                            # НУЖНО УБРАТЬ ШАШКУ СО СТАРОЙ ПОЗИЦИИ
+                            # размещаем ее на новой позиции
                             self.new_place_for_checker(checker)
-                            # здесь нужно убрать пустые стеки (превратить в нули)
-                            # и изменить свойства верзним шашкам (top стеков)
+
                             return True
 
             else:
