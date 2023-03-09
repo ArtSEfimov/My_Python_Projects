@@ -33,21 +33,47 @@ class Game:
         second_dice = random.randint(1, 6)
         return first_dice, second_dice
 
-    def try_to_step(self, first_dice, second_dice):
-        result_list = list()
+    # НАДО СДЕЛАТЬ ЭТУ ФУНКЦИЮ УНИВЕРСАЛЬНОЙ (ПЕРЕДАДИМ В КАЧЕСТВЕ АРГУМЕНТА ФУНКЦИЮ {first_Priority, second_priority})
+    # НАДО ЕЩЕ РАЗ ПРОБЕЖАТЬ ЭТОТ АЛГОРИТМ
+    def try_to_step_in_first_priority(self, first_dice, second_dice):
+        result, checker = self.first_priority('black', first_dice)
+        if result:  # ЕСТЬ успех с ПЕРВЫМ КУБИКОМ
+            result, checker = self.first_priority('black', second_dice)
+            if result:  # ЕСТЬ успех со ВТОРЫМ КУБИКОМ
+                return True  # ход удался
 
-        for dice in (first_dice, second_dice):
-            result = self.first_priority('black', dice)
-            result_list.append((dice, result))
+            # НЕТ успеха со ВТОРЫМ КУБИКОМ
+            # сначала возвращаем на старое место шашку первого хода
+            self.move_checker_to_new_position(checker, reverse_flag=True)
+            self.remove_checker_from_old_position(checker, reverse_flag=True)
 
-        return not all(
-            map(
-                lambda e: e[1], result_list
-            )
-        )
+            # затем меняем местами порядок хода
+            result, checker = self.first_priority('black', second_dice)
+            if result:  # ЕСТЬ успех со ВТОРЫМ (первым) кубиком
+                result, checker = self.first_priority('black', first_dice)
+                if result:  # ЕСТЬ успех с ПЕРВЫМ (вторым) кубиком
+                    return True  # ход удался
 
-    # НУЖНО НАУЧИТЬСЯ ВОЗВРАЩАТЬ ШАШКУ НА МЕСТО, ЧТОБЫ ПРОБОВАТЬ РАЗНЫЕ КОМБИНАЦИИ ХОДОВ
-    # В ПРИОРИТЕТЕ ПРИОРИТЕТНЫЙ ШАГ, ДАЖЕ ЕСЛИ ПРИДЕТСЯ РАЗМЕНИВАТЬ МЕСТАМИ КУБИКИ
+                self.move_checker_to_new_position(checker, reverse_flag=True)
+                self.remove_checker_from_old_position(checker, reverse_flag=True)
+
+                dices = [first_dice, second_dice]
+                argument_value = random.choice(dices)
+                dices.remove(argument_value)
+                return_value, = dices
+
+                self.first_priority('black', argument_value)
+                return return_value  # 50/50
+
+            return second_dice
+        result, checker = self.first_priority('black', second_dice)
+        if result:
+            result, checker = self.first_priority('black', first_dice)
+            if result:
+                return True
+            return first_dice
+
+        return False
 
     def computer_step(self):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
@@ -55,16 +81,6 @@ class Game:
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
             self.first_step_flag = False
-
-        result, checker = self.first_priority('black', self.first_dice)
-        if not result:
-            result, checker = self.first_priority('black', self.second_dice)
-            if not result:
-                pass
-            else:
-                
-        else:
-            result, checker = self.first_priority('black', self.second_dice)
 
         if not self.second_priority('black', dice):  # если и вторая попытка хода не удалась
             print('Пропуск хода')
