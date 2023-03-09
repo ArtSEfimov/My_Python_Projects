@@ -6,6 +6,7 @@ class Checker:
     def __init__(self, color):
         self.color = color.lower()
         self.__position = 1
+        self.__backup_position = 1
 
         self.prev_element = None
         self.next_element = None
@@ -17,8 +18,16 @@ class Checker:
         return self.__position
 
     def set_position(self, value):
+        self.__backup_position = self.__position
         self.__position = value
 
+    def get_backup_position(self):
+        return self.__backup_position
+
+    def set_backup_position(self, value):
+        self.__backup_position = value
+
+    backup_position = property(get_backup_position, set_backup_position)
     position = property(get_position, set_position)
 
     def __repr__(self):

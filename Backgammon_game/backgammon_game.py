@@ -33,18 +33,18 @@ class Game:
         second_dice = random.randint(1, 6)
         return first_dice, second_dice
 
-    # def try_to_step(self, first_dice, second_dice):
-    #     result_list = list()
-    #
-    #     for dice in (first_dice, second_dice):
-    #         result = self.first_priority('black', dice)
-    #         result_list.append((dice, result))
-    #
-    #     return not all(
-    #         map(
-    #             lambda e: e[1], result_list
-    #         )
-    #     )
+    def try_to_step(self, first_dice, second_dice):
+        result_list = list()
+
+        for dice in (first_dice, second_dice):
+            result = self.first_priority('black', dice)
+            result_list.append((dice, result))
+
+        return not all(
+            map(
+                lambda e: e[1], result_list
+            )
+        )
 
     # НУЖНО НАУЧИТЬСЯ ВОЗВРАЩАТЬ ШАШКУ НА МЕСТО, ЧТОБЫ ПРОБОВАТЬ РАЗНЫЕ КОМБИНАЦИИ ХОДОВ
     # В ПРИОРИТЕТЕ ПРИОРИТЕТНЫЙ ШАГ, ДАЖЕ ЕСЛИ ПРИДЕТСЯ РАЗМЕНИВАТЬ МЕСТАМИ КУБИКИ
@@ -56,15 +56,18 @@ class Game:
         if self.first_step_flag:
             self.first_step_flag = False
 
-        # first, second = self.first_dice, self.second_dice
-        # for _ in range(2):
-        #     if self.try_to_step(first, second):
-        #         break
-        #     first, second = second, first
-        #
-        #
-        # if not self.second_priority('black', dice):  # если и вторая попытка хода не удалась
-        #     print('Пропуск хода')
+        result, checker = self.first_priority('black', self.first_dice)
+        if not result:
+            result, checker = self.first_priority('black', self.second_dice)
+            if not result:
+                pass
+            else:
+                
+        else:
+            result, checker = self.first_priority('black', self.second_dice)
+
+        if not self.second_priority('black', dice):  # если и вторая попытка хода не удалась
+            print('Пропуск хода')
 
         # надо подумать, если не получилось походить в этом порядке очков кубиков, может получится в обратном порядке
         # еще надо подумать над снятием шашки с "головы" (чтобы делать это один раз за ход)
@@ -91,8 +94,8 @@ class Game:
         home = quarters[((position - 1) // 6) + 1]
         return home, position_in_mylist  # часть поля
 
-    def remove_checker_from_old_position(self, checker: Checker):
-        old_position = checker.position
+    def remove_checker_from_old_position(self, checker: Checker, reverse_flag=False):
+        old_position = checker.position if not reverse_flag else checker.backup_position
         color = checker.color
         old_home, position_in_mylist = self.get_position(color, old_position)
         old_home = old_home.data
@@ -100,8 +103,8 @@ class Game:
         if old_home[position_in_mylist].is_empty():
             old_home[position_in_mylist] = 0
 
-    def new_place_for_checker(self, checker: Checker):
-        position = checker.position
+    def move_checker_to_new_position(self, checker: Checker, reverse_flag=False):
+        position = checker.position if not reverse_flag else checker.backup_position
         color = checker.color
         new_home, position_in_mylist = self.get_position(color, position)
         new_home = new_home.data
@@ -162,9 +165,9 @@ class Game:
                         # присваеваем ей ноувю позицию
                         checker.position += dice
                         # размещаем ее на новой позиции
-                        self.new_place_for_checker(checker)
+                        self.move_checker_to_new_position(checker)
 
-                        return True
+                        return True, checker
 
             if others_checkers:
                 for checker in others_checkers:
@@ -174,11 +177,11 @@ class Game:
                         # присваеваем ей ноувю позицию
                         checker.position += dice
                         # размещаем ее на новой позиции
-                        self.new_place_for_checker(checker)
+                        self.move_checker_to_new_position(checker)
 
-                        return True
+                        return True, checker
 
-        return False  # ход не удался
+        return False,  # ход не удался
 
     def second_priority(self, color, dice):
         # формируем список шашек, которые находятся наверху и могут "ходить"
@@ -240,9 +243,10 @@ class Game:
                             # присваеваем ей ноувю позицию
                             checker.position += dice
                             # размещаем ее на новой позиции
-                            self.new_place_for_checker(checker)
+                            self.move_checker_to_new_position(checker)
 
-                            return True
+                            return True, checker
+
                 if others_checkers:
                     for checker in others_checkers:
                         if checker.position + dice in another_cells_numbers:
@@ -251,14 +255,14 @@ class Game:
                             # присваеваем ей ноувю позицию
                             checker.position += dice
                             # размещаем ее на новой позиции
-                            self.new_place_for_checker(checker)
+                            self.move_checker_to_new_position(checker)
 
-                            return True
+                            return True, checker
 
             else:
                 tower += 1
                 if tower > 15:
-                    return False
+                    return False,
                 continue
 
 
