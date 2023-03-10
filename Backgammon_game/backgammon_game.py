@@ -35,43 +35,47 @@ class Game:
 
     # НАДО СДЕЛАТЬ ЭТУ ФУНКЦИЮ УНИВЕРСАЛЬНОЙ (ПЕРЕДАДИМ В КАЧЕСТВЕ АРГУМЕНТА ФУНКЦИЮ {first_Priority, second_priority})
     # НАДО ЕЩЕ РАЗ ПРОБЕЖАТЬ ЭТОТ АЛГОРИТМ
-    def try_to_step_in_first_priority(self, first_dice, second_dice):
-        result, checker = self.first_priority('black', first_dice)
+    def try_to_step(self, function, first_dice=0, second_dice=0):
+        result, checker_1 = function('black', first_dice)
         if result:  # ЕСТЬ успех с ПЕРВЫМ КУБИКОМ
-            result, checker = self.first_priority('black', second_dice)
-            if result:  # ЕСТЬ успех со ВТОРЫМ КУБИКОМ
+            result, checker_2 = function('black', second_dice)
+            if result:  # ЕСТЬ успех с ПЕРВЫМ КУБИКОМ и со ВТОРЫМ КУБИКОМ
                 return True  # ход удался
 
-            # НЕТ успеха со ВТОРЫМ КУБИКОМ
+            # ЕСТЬ успех с ПЕРВЫМ КУБИКОМ, но НЕТ успеха со ВТОРЫМ КУБИКОМ
+            # значит нужно попробовать походить наоборот
             # сначала возвращаем на старое место шашку первого хода
-            self.move_checker_to_new_position(checker, reverse_flag=True)
-            self.remove_checker_from_old_position(checker, reverse_flag=True)
+
+            self.remove_checker_from_old_position(checker_1, reverse_flag=True)
+            self.move_checker_to_new_position(checker_1, reverse_flag=True)
 
             # затем меняем местами порядок хода
-            result, checker = self.first_priority('black', second_dice)
-            if result:  # ЕСТЬ успех со ВТОРЫМ (первым) кубиком
-                result, checker = self.first_priority('black', first_dice)
-                if result:  # ЕСТЬ успех с ПЕРВЫМ (вторым) кубиком
+            result, checker_2 = function('black', second_dice)
+            if result:  # ЕСТЬ успех со ВТОРЫМ кубиком
+                result, checker_1 = function('black', first_dice)
+                if result:  # ЕСТЬ успех со ВТОРЫМ кубиком и с ПЕРВЫМ кубиком
                     return True  # ход удался
 
-                self.move_checker_to_new_position(checker, reverse_flag=True)
-                self.remove_checker_from_old_position(checker, reverse_flag=True)
+                self.remove_checker_from_old_position(checker_2, reverse_flag=True)
+                self.move_checker_to_new_position(checker_2, reverse_flag=True)
 
                 dices = [first_dice, second_dice]
                 argument_value = random.choice(dices)
                 dices.remove(argument_value)
                 return_value, = dices
 
-                self.first_priority('black', argument_value)
-                return return_value  # 50/50
+                function('black', argument_value)
+                return return_value  # 50/50 здесь надо сделать второй по приоритетности ход с возвращенным значением
 
-            return second_dice
-        result, checker = self.first_priority('black', second_dice)
+            function('black', first_dice)
+            return second_dice  # 50/50 здесь надо сделать второй по приоритетности ход с возвращенным значением
+
+        result, checker = function('black', second_dice)
         if result:
-            result, checker = self.first_priority('black', first_dice)
+            result, checker = function('black', first_dice)
             if result:
                 return True
-            return first_dice
+            return first_dice  # 50/50 здесь надо сделать второй по приоритетности ход с возвращенным значением
 
         return False
 
@@ -81,9 +85,14 @@ class Game:
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
             self.first_step_flag = False
-
-        if not self.second_priority('black', dice):  # если и вторая попытка хода не удалась
-            print('Пропуск хода')
+        step_result = self.try_to_step(self.first_priority, first_dice=self.first_dice, second_dice=self.second_dice)
+        if isinstance(step_result, bool):
+            if step_result:
+                pass  # ход удался, ходит следующий игрок
+            else:
+                pass  # надо запустить функцию низшего приоритета с обоими значениями кубиков
+        else:
+            pass  # функция вернет значение кубика, с которым надо запустить функцию низшего приоритета
 
         # надо подумать, если не получилось походить в этом порядке очков кубиков, может получится в обратном порядке
         # еще надо подумать над снятием шашки с "головы" (чтобы делать это один раз за ход)
