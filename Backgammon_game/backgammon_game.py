@@ -1,4 +1,6 @@
 import random
+import time
+
 from data_structures import MyStack
 from field_and_checker import Checker, Field
 
@@ -11,7 +13,10 @@ class Game:
         self.white_checkers = [Checker('white') for _ in range(15)]
         self.black_checkers = [Checker('black') for _ in range(15)]
 
+        self.who_steps = 'computer'
+
         self.first_step_flag = True
+        self.head_reset = True
 
         self.first_dice = self.second_dice = None
 
@@ -33,8 +38,6 @@ class Game:
         second_dice = random.randint(1, 6)
         return first_dice, second_dice
 
-    # НАДО СДЕЛАТЬ ЭТУ ФУНКЦИЮ УНИВЕРСАЛЬНОЙ (ПЕРЕДАДИМ В КАЧЕСТВЕ АРГУМЕНТА ФУНКЦИЮ {first_Priority, second_priority})
-    # НАДО ЕЩЕ РАЗ ПРОБЕЖАТЬ ЭТОТ АЛГОРИТМ
     def try_to_step(self, function, first_dice=0, second_dice=0):
         result, checker_1 = function('black', first_dice)
         if result:  # ЕСТЬ успех с ПЕРВЫМ КУБИКОМ
@@ -46,7 +49,7 @@ class Game:
             # значит нужно попробовать походить наоборот
             # сначала возвращаем на старое место шашку первого хода
 
-            self.remove_checker_from_old_position(checker_1, reverse_flag=True)
+            self.remove_checker_from_old_position(checker_1)
             self.move_checker_to_new_position(checker_1, reverse_flag=True)
 
             # затем меняем местами порядок хода
@@ -56,7 +59,7 @@ class Game:
                 if result:  # ЕСТЬ успех со ВТОРЫМ кубиком и с ПЕРВЫМ кубиком
                     return True  # ход удался
 
-                self.remove_checker_from_old_position(checker_2, reverse_flag=True)
+                self.remove_checker_from_old_position(checker_2)
                 self.move_checker_to_new_position(checker_2, reverse_flag=True)
 
                 dices = [first_dice, second_dice]
@@ -79,6 +82,18 @@ class Game:
 
         return False
 
+    def finished(self, color):
+        if color == 'black':
+            return self.field.get_sum_of_structure(self.field.white_yard, color) == 15
+        return self.field.get_sum_of_structure(self.field.black_yard, color) == 15
+
+    def play_the_game(self):
+        color = 'black' if self.who_steps == 'computer' else 'white'
+        while not self.finished(color):
+            self.head_reset = True
+            self.computer_step()
+            time.sleep(0)
+
     def computer_step(self):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
 
@@ -88,14 +103,19 @@ class Game:
         step_result = self.try_to_step(self.first_priority, first_dice=self.first_dice, second_dice=self.second_dice)
         if isinstance(step_result, bool):
             if step_result:
-                pass  # ход удался, ходит следующий игрок
+                self.who_steps = 'human'  # ход удался, ходит следующий игрок
             else:
-                pass  # надо запустить функцию низшего приоритета с обоими значениями кубиков
+                step_result = self.try_to_step(self.second_priority,
+                                               first_dice=self.first_dice,
+                                               second_dice=self.second_dice)  # надо запустить функцию низшего приоритета с обоими значениями кубиков
+                if isinstance(step_result, bool):
+                    self.who_steps = 'human'  # ход удался (или нет), ходит следующий игрок
+                else:
+                    self.second_priority('black', step_result)
+        # step_result = значению кубика, с которым надо запустить функцию низшего приоритета
         else:
-            pass  # функция вернет значение кубика, с которым надо запустить функцию низшего приоритета
-
-        # надо подумать, если не получилось походить в этом порядке очков кубиков, может получится в обратном порядке
-        # еще надо подумать над снятием шашки с "головы" (чтобы делать это один раз за ход)
+            self.second_priority('black', step_result)
+        self.who_steps = 'human'
 
         print(self.first_dice, self.second_dice)
         self.field.show_field()
@@ -119,8 +139,8 @@ class Game:
         home = quarters[((position - 1) // 6) + 1]
         return home, position_in_mylist  # часть поля
 
-    def remove_checker_from_old_position(self, checker: Checker, reverse_flag=False):
-        old_position = checker.position if not reverse_flag else checker.backup_position
+    def remove_checker_from_old_position(self, checker: Checker):
+        old_position = checker.position
         color = checker.color
         old_home, position_in_mylist = self.get_position(color, old_position)
         old_home = old_home.data
@@ -129,7 +149,9 @@ class Game:
             old_home[position_in_mylist] = 0
 
     def move_checker_to_new_position(self, checker: Checker, reverse_flag=False):
-        position = checker.position if not reverse_flag else checker.backup_position
+        if reverse_flag:
+            checker.position = checker.backup_position
+        position = checker.position
         color = checker.color
         new_home, position_in_mylist = self.get_position(color, position)
         new_home = new_home.data
@@ -139,11 +161,41 @@ class Game:
         # это значит что там уже стэк
         new_home[position_in_mylist].add_element(checker)
 
-    def first_priority(self, color, dice):
-        # формируем список шашек, которые находятся наверху и могут "ходить"
-        possible_checker_list = [checker
-                                 for checker in (self.white_checkers if color == 'white' else self.black_checkers)
-                                 if checker.is_up]
+    def is_not_head_checker(self, checker):
+        if checker is self.black_head.top or checker is self.white_head.top:
+            if self.head_reset:
+                self.head_reset = False
+                return True
+            return False
+        return True
+
+    def get_possible_checker_list(self, color):
+        return [checker
+                for checker in (self.white_checkers if color == 'white' else self.black_checkers)
+                if checker.is_up and self.is_not_head_checker(checker)]
+
+    def get_phase_of_game(self):
+        if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 12:
+            return 1
+        if self.field.black_home.data.count(0) < 3:
+            return 2
+        if self.field.get_sum_of_structure(self.field.black_home, 'black') <= 3:
+            return 3
+        return 4
+
+    def get_field_map(self, color):
+        field_map = dict()
+        current_field_element = self.field.white_home if color == 'white' else self.field.black_home
+        start_for_next_part = 0
+        for _ in range(4):
+            field_map.update({i + start_for_next_part: current_field_element.data[i] for i in range(1, 7)})
+            current_field_element = current_field_element.next_element
+            start_for_next_part = max(field_map.keys())
+        return field_map
+
+    def get_from(self, color):
+        current_phase = self.get_phase_of_game()
+        possible_checker_list = self.get_possible_checker_list(color)
 
         # формируем список НЕОДИНОКИХ шашек (походить ими - в приоритете)
         not_singles_checkers = list(
@@ -157,16 +209,44 @@ class Game:
                 lambda c: c.is_single, possible_checker_list
             )
         )
+        checker_list = list()
+        checker_list.extend(not_singles_checkers)
+        checker_list.extend(others_checkers)
+        if current_phase == 1:
+            return checker_list
+
+    def get_to(self, color):
+
+        def generate_list(left_border, right_border, empty_flag=True):
+            if empty_flag:
+                return [k
+                        for k in range(left_border, right_border)
+                        if field_map[k] == 0
+                        ]
+            return [k for k in range(left_border, right_border)]
+
+        current_phase = self.get_phase_of_game()
+        field_map = self.get_field_map(color)
+        cells_list = list()
+        if current_phase == 1:
+            borders = (
+                (2, 7), (13, 19), (2, 13), (2, 19), (2, 25)
+            )
+            for left, right in borders:
+                cells_list.extend(generate_list(left, right))
+            for left, right in borders:
+                cells_list.extend(generate_list(left, right, empty_flag=False))
+            return cells_list
+
+    def ranking_by_priority(self, color, dice):
+
+        # формируем список шашек, которые находятся наверху и могут "ходить"
+        checker_list = self.get_from(color)
+        if not checker_list:
+            return False, None
 
         # вспомогательный словарь (для каждого игрока будет свой, но формируется на основании общего поля)
         # -------------------------------------------------------------------------------------------------
-        field_map = dict()
-        current_field_element = self.field.white_home if color == 'white' else self.field.black_home
-        start_for_next_part = 0
-        for _ in range(4):
-            field_map.update({i + start_for_next_part: current_field_element.data[i] for i in range(1, 7)})
-            current_field_element = current_field_element.next_element
-            start_for_next_part = max(field_map.keys())
 
         # -------------------------------------------------------------------------------------------------
 
@@ -174,8 +254,6 @@ class Game:
         # здесь делаем поля, которые не заняты (значения равны 0, а не списку с шашками)
         def make_priority_cells_list(head=None):
             if head:
-                return [k for k in range(2, 19) if field_map[k] == 0]
-            return [k for k in range(13, 25) if field_map[k] == 0]
 
         priority_cells_numbers = make_priority_cells_list(
             head=(self.white_head if color == 'white' else self.black_head)
@@ -185,7 +263,7 @@ class Game:
             if not_singles_checkers:  # если есть неодиночные шашки (убираем "верхние этажи")
                 for checker in not_singles_checkers:
                     if checker.position + dice in priority_cells_numbers:
-                        # убираем шашку со старой позиции
+                        # убираем шашку со старой позиции)
                         self.remove_checker_from_old_position(checker)
                         # присваеваем ей ноувю позицию
                         checker.position += dice
@@ -206,7 +284,7 @@ class Game:
 
                         return True, checker
 
-        return False,  # ход не удался
+        return False, None  # ход не удался
 
     def second_priority(self, color, dice):
         # формируем список шашек, которые находятся наверху и могут "ходить"
@@ -245,11 +323,17 @@ class Game:
         def make_another_cells_list(current_color, head=None, tower_length=1):
             if head:
                 return [k
-                        for k in range(2, 19)
-                        if len(field_map[k]) <= tower_length and field_map[k].color == current_color]
+                        for k in range(2, 25)
+                        if isinstance(field_map[k], MyStack)
+                        and field_map[k].color == current_color
+                        and len(field_map[k]) <= tower_length
+                        ]
             return [k
-                    for k in range(13, 25)
-                    if len(field_map[k]) <= tower_length and field_map[k].color == current_color]
+                    for k in range(2, 25)
+                    if isinstance(field_map[k], MyStack)
+                    and field_map[k].color == current_color
+                    and len(field_map[k]) <= tower_length
+                    ]
 
         # остальные поля (без нулей)
         while True:
@@ -287,9 +371,9 @@ class Game:
             else:
                 tower += 1
                 if tower > 15:
-                    return False,
+                    return False, None
                 continue
 
 
 g = Game()
-g.computer_step()
+g.play_the_game()

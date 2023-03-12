@@ -14,13 +14,20 @@ class MyStack:
         return self.top is None
 
     def add_element(self, element):
+        element.prev_element = None
+        element.next_element = None
+
         if self.is_empty():
             self.top = element
             self.color = element.color
             element.is_single = True
+            element.is_up = True
+
         else:
             self.top.next_element = element
             element.prev_element = self.top
+            self.top.is_up = False
+            self.top.is_single = False
             self.top = element
             element.is_single = False
         element.is_up = True
@@ -29,10 +36,8 @@ class MyStack:
     def pop_element(self):
         if not self.is_empty():
             if self.top.prev_element is not None:
-                tmp_link = self.top
                 self.top = self.top.prev_element
                 self.top.next_element = None
-                tmp_link.prev_element = None
                 self.top.is_up = True
                 # проверим, остался ли один элемент
                 self.top.is_single = (True if self.top.prev_element is None else False)
@@ -43,6 +48,12 @@ class MyStack:
 
     def __repr__(self):
         return f'{self.count} - {self.color}'
+
+    def __bool__(self):
+        return not self.is_empty()
+
+    def __len__(self):
+        return self.count
 
 
 class MyList(list):
@@ -77,6 +88,9 @@ class MyList(list):
             else:
                 if abs(key) in range(1, len(self) + 1):
                     super().__setitem__(key, value)
+
+    def __repr__(self):
+        return super().__repr__()
 
 
 class FieldStructure:

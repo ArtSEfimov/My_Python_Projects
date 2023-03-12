@@ -1,4 +1,4 @@
-from data_structures import FieldStructure, MyList
+from data_structures import FieldStructure, MyList, MyStack
 
 
 class Checker:
@@ -35,7 +35,7 @@ class Checker:
 
     def __str__(self):
         # return 'b' if self.color == 'black' else 'w'
-        return f'{self.color}-{self.position}-{self.is_up}'
+        return f'position={self.position} backup_position={self.__backup_position} is_up={self.is_up} is_single={self.is_single}'
 
 
 class Field:
@@ -45,8 +45,15 @@ class Field:
         self.white_yard = FieldStructure(MyList([0] * 6))
         self.black_yard = FieldStructure(MyList([0] * 6))
 
-        self.white_start = self.white_home
-        self.black_start = self.black_home
+    @staticmethod
+    def get_sum_of_structure(structure, color):
+        return sum(
+            (element.count
+             for element in structure.data
+             if isinstance(element, MyStack)
+             and element.color == color
+             )
+        )
 
     def init_field_and_create_field_structure(self):
         self.white_home.connect_elements(next_element=self.white_yard)
@@ -55,7 +62,7 @@ class Field:
         self.black_yard.connect_elements(previous_element=self.black_home, next_element=self.white_home)
 
     def show_field(self):
-        start = self.white_start
+        start = self.white_home
         for _ in range(4):
             tmp_data = start.data
             for element in tmp_data:
