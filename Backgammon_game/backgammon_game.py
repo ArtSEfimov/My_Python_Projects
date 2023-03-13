@@ -38,10 +38,10 @@ class Game:
         second_dice = random.randint(1, 6)
         return first_dice, second_dice
 
-    def try_to_step(self, first_dice, second_dice):
-        result, checker_1, count_1 = self.ranking_by_priority('black', first_dice)
+    def try_to_step(self):
+        result, checker_1, count_1 = self.ranking_by_priority('black', self.first_dice)
         if result:  # ЕСТЬ успех с ПЕРВЫМ КУБИКОМ
-            result, checker_2, _ = self.ranking_by_priority('black', second_dice)
+            result, checker_2, _ = self.ranking_by_priority('black', self.second_dice)
             if result:  # ЕСТЬ успех с ПЕРВЫМ КУБИКОМ и со ВТОРЫМ КУБИКОМ
                 return True  # ход удался
 
@@ -53,9 +53,9 @@ class Game:
             self.move_checker_to_new_position(checker_1, reverse_flag=True)
 
             # затем меняем местами порядок хода
-        result, checker_2, count_2 = self.ranking_by_priority('black', second_dice)
+        result, checker_2, count_2 = self.ranking_by_priority('black', self.second_dice)
         if result:  # ЕСТЬ успех со ВТОРЫМ кубиком
-            result, checker_1, _ = self.ranking_by_priority('black', first_dice)
+            result, checker_1, _ = self.ranking_by_priority('black', self.first_dice)
             if result:  # ЕСТЬ успех со ВТОРЫМ кубиком и с ПЕРВЫМ кубиком
                 return True  # ход удался
 
@@ -63,12 +63,12 @@ class Game:
             self.move_checker_to_new_position(checker_2, reverse_flag=True)
 
             if count_2 > count_1:
-                self.ranking_by_priority('black', first_dice)
-                return first_dice
+                self.ranking_by_priority('black', self.first_dice)
+                return self.first_dice
             else:
-                self.ranking_by_priority('black', second_dice)
-                return second_dice
-        
+                self.ranking_by_priority('black', self.second_dice)
+                return self.second_dice
+
         return False
 
     def finished(self, color):
@@ -81,7 +81,7 @@ class Game:
         while not self.finished(color):
             self.head_reset = True
             self.computer_step()
-            time.sleep(0)
+            time.sleep(10)
 
     def computer_step(self):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
@@ -89,21 +89,15 @@ class Game:
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
             self.first_step_flag = False
-        step_result = self.try_to_step(self.first_priority, first_dice=self.first_dice, second_dice=self.second_dice)
+        step_result = self.try_to_step()
         if isinstance(step_result, bool):
             if step_result:
-                self.who_steps = 'human'  # ход удался, ходит следующий игрок
+                print('success')  # ход удался, ходит следующий игрок
             else:
-                step_result = self.try_to_step(self.second_priority,
-                                               first_dice=self.first_dice,
-                                               second_dice=self.second_dice)  # надо запустить функцию низшего приоритета с обоими значениями кубиков
-                if isinstance(step_result, bool):
-                    self.who_steps = 'human'  # ход удался (или нет), ходит следующий игрок
-                else:
-                    self.second_priority('black', step_result)
-        # step_result = значению кубика, с которым надо запустить функцию низшего приоритета
+                print('no success')
         else:
-            self.second_priority('black', step_result)
+            print('50/50 success')
+
         self.who_steps = 'human'
 
         print(self.first_dice, self.second_dice)
@@ -247,7 +241,7 @@ class Game:
         count = 0
         checker_list = self.get_from(color)
         if not checker_list:
-            return False, None
+            return False, None, None
         cells_list = self.get_to(color)
 
         for cell in cells_list:
@@ -270,3 +264,4 @@ g = Game()
 print(g.get_field_map('black'))
 print(g.get_to('black')
       )
+g.play_the_game()
