@@ -55,6 +55,15 @@ class Field:
              )
         )
 
+    @staticmethod
+    def get_occupied_of_structure(structure, color):
+        summa = 0
+        for element in structure.data:
+            if isinstance(element, MyStack):
+                if element.color == color:
+                    summa += 1
+        return summa
+
     def init_field_and_create_field_structure(self):
         self.white_home.connect_elements(next_element=self.white_yard)
         self.white_yard.connect_elements(previous_element=self.white_home, next_element=self.black_home)

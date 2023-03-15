@@ -84,7 +84,7 @@ class Game:
             time.sleep(10)
 
     def computer_step(self):  # black checkers
-        self.first_dice, self.second_dice = self.throw_dices()
+        self.first_dice=self.second_dice = 6 # self.throw_dices()
 
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
@@ -158,7 +158,7 @@ class Game:
                 if checker.is_up and self.is_not_head_checker(checker)]
 
     def get_phase_of_game(self):
-        if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 12:
+        if self.field.get_occupied_of_structure(self.field.black_home, 'black') <= 3:
             return 1
         if self.field.black_home.data.count(0) < 3:
             return 2
@@ -192,11 +192,9 @@ class Game:
                 lambda c: c.is_single, possible_checker_list
             )
         )
-        checker_list = list()
-        checker_list.extend(not_singles_checkers)
-        checker_list.extend(others_checkers)
+
         if current_phase == 1:
-            return checker_list
+            return not_singles_checkers, others_checkers
 
     def get_to(self, color):
 
@@ -204,8 +202,7 @@ class Game:
             if empty_flag:
                 return [k
                         for k in range(left_border, right_border)
-                        if field_map[k] == 0
-                        ]
+                        if field_map[k] == 0]
 
             def generate_another_list():
                 tower = 1
@@ -228,34 +225,51 @@ class Game:
         field_map = self.get_field_map(color)
         cells_list = list()
         if current_phase == 1:
+
             borders = (
-                (2, 7), (13, 19), (2, 13), (2, 19), (2, 25)
+                (2, 7), (13, 19), (7, 13), (2, 25)
             )
+
             for left, right in borders:
                 cells_list.extend(generate_list(left, right))
             for left, right in borders:
                 cells_list.extend(generate_list(left, right, empty_flag=False))
+
             return cells_list
 
     def ranking_by_priority(self, color, dice):
-        count = 0
-        checker_list = self.get_from(color)
-        if not checker_list:
-            return False, None, None
+
+        not_singles_checkers, others_checkers = self.get_from(color)
         cells_list = self.get_to(color)
 
-        for cell in cells_list:
-            for checker in checker_list:
-                count += 1
-                if checker.position + dice == cell:
-                    # убираем шашку со старой позиции)
-                    self.remove_checker_from_old_position(checker)
-                    # присваеваем ей ноувю позицию
-                    checker.position += dice
-                    # размещаем ее на новой позиции
-                    self.move_checker_to_new_position(checker)
+        count = 0
+        if not_singles_checkers:
+            for cell in cells_list:
+                for checker in not_singles_checkers:
+                    count += 1
+                    if checker.position + dice == cell:
+                        # убираем шашку со старой позиции)
+                        self.remove_checker_from_old_position(checker)
+                        # присваеваем ей ноувю позицию
+                        checker.position += dice
+                        # размещаем ее на новой позиции
+                        self.move_checker_to_new_position(checker)
+                        return True, checker, count
 
-                    return True, checker, count
+        count = 0
+        if others_checkers:
+            for checker in others_checkers:
+                for cell in cells_list:
+                    count += 1
+                    if checker.position + dice == cell:
+                        # убираем шашку со старой позиции)
+                        self.remove_checker_from_old_position(checker)
+                        # присваеваем ей ноувю позицию
+                        checker.position += dice
+                        # размещаем ее на новой позиции
+                        self.move_checker_to_new_position(checker)
+
+                        return True, checker, count
 
         return False, None, None  # ход не удался
 
