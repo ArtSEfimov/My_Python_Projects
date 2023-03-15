@@ -53,11 +53,10 @@ class Game:
     def computer_step(self):  # black checkers
         # self.first_dice, self.second_dice = self.throw_dices()
         self.dices = [int(i) for i in input().split()]
-
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
             self.first_step_flag = False
-        step_result = self.try_to_step()
+        step_result = self.checking_move()
         if isinstance(step_result, bool):
             if step_result:
                 print('success')  # ход удался, ходит следующий игрок
@@ -163,8 +162,8 @@ class Game:
             )
         )
 
-        if current_phase == 1:
-            return not_singles_checkers, others_checkers
+        # if current_phase == 1:
+        return not_singles_checkers, others_checkers
 
     def get_to(self, color):
 
@@ -205,24 +204,47 @@ class Game:
 
             return cells_list
 
-    def try_to_step(self):
-        result, checker_1, count_1, rest_dice = self.ranking_by_priority('black', self.dices)
-        if result:  # ЕСТЬ успех с ПЕРВЫМ КУБИКОМ
-            result, checker_2, _, _ = self.ranking_by_priority('black', rest_dice)
-            if result:  # ЕСТЬ успех с ПЕРВЫМ КУБИКОМ и со ВТОРЫМ КУБИКОМ
-                return True  # ход удался
+    def is_success_move(self, checker, dice, cell):
+        if checker.position + dice == cell:
+            # убираем шашку со старой позиции)
+            self.remove_checker_from_old_position(checker)
+            # присваеваем ей ноувю позицию
+            checker.position += dice
+            # размещаем ее на новой позиции
+            self.move_checker_to_new_position(checker)
+            return True
 
-            # ЕСТЬ успех с ПЕРВЫМ КУБИКОМ, но НЕТ успеха со ВТОРЫМ КУБИКОМ
-            # значит нужно попробовать походить наоборот
-            # сначала возвращаем на старое место шашку первого хода
+        return False
 
+
+
+    def checking_move(self):
+
+        result_1, checker_1, count_1 = self.move('black', self.first_dice)
+        result_2, checker_2, count_2 = self.move('black', self.second_dice)
+        if result_1 and result_2:
+            count_12 = count_1 + count_2
             self.remove_checker_from_old_position(checker_1)
             self.move_checker_to_new_position(checker_1, reverse_flag=True)
+            self.remove_checker_from_old_position(checker_2)
+            self.move_checker_to_new_position(checker_2, reverse_flag=True)
+
+        result_2, checker_2, count_2 = self.move('black', self.second_dice)
+        result_1, checker_1, count_1 = self.move('black', self.first_dice)
+        if result_2 and result_1:
+            count_21 = count_1 + count_2
+            self.remove_checker_from_old_position(checker_1)
+            self.move_checker_to_new_position(checker_1, reverse_flag=True)
+            self.remove_checker_from_old_position(checker_2)
+            self.move_checker_to_new_position(checker_2, reverse_flag=True)
+
+        if count_21 > count_12:
+
 
             # затем меняем местами порядок хода
-        result, checker_2, count_2 = self.ranking_by_priority('black', self.second_dice)
+        result, checker_2, count_2, rest_dice_2 = self.move('black', dice)
         if result:  # ЕСТЬ успех со ВТОРЫМ кубиком
-            result, checker_1, _ = self.ranking_by_priority('black', self.first_dice)
+            result, checker_1, _ = self.move('black', )
             if result:  # ЕСТЬ успех со ВТОРЫМ кубиком и с ПЕРВЫМ кубиком
                 return True  # ход удался
 
@@ -230,53 +252,38 @@ class Game:
             self.move_checker_to_new_position(checker_2, reverse_flag=True)
 
             if count_2 > count_1:
-                self.ranking_by_priority('black', self.first_dice)
+                self.move('black', )
                 return self.first_dice
             else:
-                self.ranking_by_priority('black', self.second_dice)
+                self.move('black', )
                 return self.second_dice
 
         return False
 
-    def ranking_by_priority(self, color, dice):
+    def move(self, color, dice):
 
-        def is_success_move(current_checker, dice_value, cell_value):
-            if current_checker.position + dice_value == cell_value:
-                # убираем шашку со старой позиции)
-                self.remove_checker_from_old_position(checker)
-                # присваеваем ей ноувю позицию
-                checker.position += first_dice
-                # размещаем ее на новой позиции
-                self.move_checker_to_new_position(checker)
-                return True
-
-            return False
-
-        first_dice, second_dice = dice
-
-        not_singles_checkers, others_checkers = self.get_from(color)
+        not_singles_checkers, singles_checkers = self.get_from(color)
         cells_list = self.get_to(color)
 
-        count = 0
+        count = None
+
         if not_singles_checkers:
+            count = 0
             for cell in cells_list:
                 for checker in not_singles_checkers:
                     count += 1
-                    if is_success_move(checker, first_dice, cell):
-                        return True, checker, count, first_dice
-                    if is_success_move(checker, second_dice, cell):
-                        return True, checker, count, second_dice
+                    if self.is_success_move(checker, dice, cell):
+                        return True, checker, count
 
-        count = 0
-        if others_checkers:
-            for checker in others_checkers:
+        if singles_checkers:
+            count = 0
+            for checker in singles_checkers:
                 for cell in cells_list:
                     count += 1
-                    if is_success_move(checker, first_dice, cell):
-                        return True, checker, count, first_dice
-                    if is_success_move(checker, second_dice, cell):
-                        return True, checker, count, second_dice
-        return False, None, None, None  # ход не удался
+                    if self.is_success_move(checker, dice, cell):
+                        return True, checker, count
+
+        return False, None, None  # ход не удался
 
 
 g = Game()
