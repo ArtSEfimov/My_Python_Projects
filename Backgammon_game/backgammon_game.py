@@ -52,7 +52,7 @@ class Game:
 
     def computer_step(self):  # black checkers
         # self.first_dice, self.second_dice = self.throw_dices()
-        self.dices = [int(i) for i in input().split()]
+        self.first_dice, self.second_dice = [int(i) for i in input().split()]
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
             self.first_step_flag = False
@@ -218,7 +218,29 @@ class Game:
 
         return False
 
+    def compare_counts(self, tuple_12, tuple_21):
+        if all(map(lambda x: x is not None, tuple_12)) and all(map(lambda x: x is not None, tuple_21)):
+            tuple_12 = sum(tuple_12)
+            tuple_21 = sum(tuple_21)
+            if tuple_21 >= tuple_12:  # если True, то прямой порядок хода (первый, второй)
+                return self.first_dice, self.second_dice
+            return self.second_dice, self.first_dice
 
+        if all(map(lambda x: x is not None, tuple_12)):
+            return self.first_dice, self.second_dice
+        if all(map(lambda x: x is not None, tuple_21)):
+            return self.second_dice, self.first_dice
+
+        if any(map(lambda x: x is not None, tuple_12)) and any(map(lambda x: x is not None, tuple_21)):
+            tuple_12, _ = tuple_12
+            tuple_21, _ = tuple_21
+            if tuple_21 >= tuple_12:  # если True, то прямой порядок хода (первый, второй)
+                return self.first_dice
+            return self.second_dice
+
+        if any(map(lambda x: x is not None, tuple_12)):
+            return self.first_dice
+        return self.second_dice
 
     def checking_move(self):
 
@@ -248,7 +270,11 @@ class Game:
             self.remove_checker_from_old_position(checker_1)
             self.move_checker_to_new_position(checker_1, reverse_flag=True)
 
-
+        value_1, value_2 = self.compare_counts(count_12, count_21)
+        if value_1 is not None:
+            self.move('black', value_1)
+        if value_2 is not None:
+            self.move('black', value_2)
 
     def move(self, color, dice):
 
