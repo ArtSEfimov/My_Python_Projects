@@ -161,9 +161,11 @@ class Game:
                 lambda c: c.is_single, possible_checker_list
             )
         )
-
+        checkers = list()
+        checkers.extend(not_singles_checkers)
+        checkers.extend(others_checkers)
         # if current_phase == 1:
-        return not_singles_checkers, others_checkers
+        return checkers
 
     def get_to(self, color):
 
@@ -222,63 +224,42 @@ class Game:
 
         result_1, checker_1, count_1 = self.move('black', self.first_dice)
         result_2, checker_2, count_2 = self.move('black', self.second_dice)
-        if result_1 and result_2:
-            count_12 = count_1 + count_2
+
+        count_12 = (count_1, count_2)
+
+        if result_1:
             self.remove_checker_from_old_position(checker_1)
             self.move_checker_to_new_position(checker_1, reverse_flag=True)
+
+        if result_2:
             self.remove_checker_from_old_position(checker_2)
             self.move_checker_to_new_position(checker_2, reverse_flag=True)
 
         result_2, checker_2, count_2 = self.move('black', self.second_dice)
         result_1, checker_1, count_1 = self.move('black', self.first_dice)
-        if result_2 and result_1:
-            count_21 = count_1 + count_2
+
+        count_21 = (count_2, count_1)
+
+        if result_2:
+            self.remove_checker_from_old_position(checker_2)
+            self.move_checker_to_new_position(checker_2, reverse_flag=True)
+
+        if result_1:
             self.remove_checker_from_old_position(checker_1)
             self.move_checker_to_new_position(checker_1, reverse_flag=True)
-            self.remove_checker_from_old_position(checker_2)
-            self.move_checker_to_new_position(checker_2, reverse_flag=True)
-
-        if count_21 > count_12:
 
 
-            # затем меняем местами порядок хода
-        result, checker_2, count_2, rest_dice_2 = self.move('black', dice)
-        if result:  # ЕСТЬ успех со ВТОРЫМ кубиком
-            result, checker_1, _ = self.move('black', )
-            if result:  # ЕСТЬ успех со ВТОРЫМ кубиком и с ПЕРВЫМ кубиком
-                return True  # ход удался
-
-            self.remove_checker_from_old_position(checker_2)
-            self.move_checker_to_new_position(checker_2, reverse_flag=True)
-
-            if count_2 > count_1:
-                self.move('black', )
-                return self.first_dice
-            else:
-                self.move('black', )
-                return self.second_dice
-
-        return False
 
     def move(self, color, dice):
 
-        not_singles_checkers, singles_checkers = self.get_from(color)
+        checkers_list = self.get_from(color)
         cells_list = self.get_to(color)
 
-        count = None
+        count = 0
 
-        if not_singles_checkers:
-            count = 0
+        if checkers_list:
             for cell in cells_list:
-                for checker in not_singles_checkers:
-                    count += 1
-                    if self.is_success_move(checker, dice, cell):
-                        return True, checker, count
-
-        if singles_checkers:
-            count = 0
-            for checker in singles_checkers:
-                for cell in cells_list:
+                for checker in checkers_list:
                     count += 1
                     if self.is_success_move(checker, dice, cell):
                         return True, checker, count
