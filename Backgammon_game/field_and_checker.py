@@ -1,4 +1,5 @@
 from data_structures import FieldStructure, MyList, MyStack
+from collections import deque
 
 
 class Checker:
@@ -6,7 +7,7 @@ class Checker:
     def __init__(self, color):
         self.color = color.lower()
         self.__position = 1
-        self.__backup_position = 1
+        self.__backup_position = deque([1])
 
         self.prev_element = None
         self.next_element = None
@@ -18,14 +19,16 @@ class Checker:
         return self.__position
 
     def set_position(self, value):
-        self.__backup_position = self.__position
+        self.backup_position = self.__position
         self.__position = value
 
     def get_backup_position(self):
-        return self.__backup_position
+        if len(self.__backup_position) == 1:
+            return 1
+        return self.__backup_position.pop()
 
     def set_backup_position(self, value):
-        self.__backup_position = value
+        self.__backup_position.append(value)
 
     backup_position = property(get_backup_position, set_backup_position)
     position = property(get_position, set_position)
