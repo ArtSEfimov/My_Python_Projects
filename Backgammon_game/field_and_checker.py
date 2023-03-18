@@ -7,7 +7,7 @@ class Checker:
     def __init__(self, color):
         self.color = color.lower()
         self.__position = 1
-        self.__backup_position = deque([1])
+        self.__backup_position = deque()
 
         self.prev_element = None
         self.next_element = None
@@ -23,8 +23,6 @@ class Checker:
         self.__position = value
 
     def get_backup_position(self):
-        if len(self.__backup_position) == 1:
-            return 1
         return self.__backup_position.pop()
 
     def set_backup_position(self, value):

@@ -101,6 +101,7 @@ class Game:
     def move_checker_to_new_position(self, checker: Checker, reverse_flag=False):
         if reverse_flag:
             checker.position = checker.backup_position
+            _ = checker.backup_position
         position = checker.position
         color = checker.color
         new_home, position_in_mylist = self.get_position(color, position)
@@ -113,18 +114,13 @@ class Game:
         if new_home[position_in_mylist] is self.black_head or new_home[position_in_mylist] is self.white_head:
             self.head_reset = True
 
-    def is_not_head_checker(self, checker):
-        if checker is self.black_head.top or checker is self.white_head.top:
-            if self.head_reset:
-                self.head_reset = False
-                return True
-            return False
-        return True
+    def is_checker_from_head(self, checker):
+        return checker is self.black_head.top or checker is self.white_head.top
 
     def get_possible_checker_list(self, color):
         return [checker
                 for checker in (self.white_checkers if color == 'white' else self.black_checkers)
-                if checker.is_up and self.is_not_head_checker(checker)]
+                if checker.is_up]
 
     def get_phase_of_game(self):
         if self.field.get_occupied_of_structure(self.field.black_home, 'black') <= 3:
@@ -150,36 +146,60 @@ class Game:
         possible_checker_list = self.get_possible_checker_list(color)
 
         # формируем список НЕОДИНОКИХ шашек (походить ими - в приоритете)
-        not_singles_checkers = list(
-            filter(
-                lambda c: not c.is_single, possible_checker_list
-            )
-        )
+        def get_not_singles_checkers(borders_tuple=None):
+            if borders_tuple:
+                left_border, right_border = borders_tuple
+                return [
+                    checker for checker in possible_checker_list
+                    if not checker.is_single and checker.position in range(left_border, right_border + 1)
+                ]
+            return [
+                checker for checker in possible_checker_list
+                if not checker.is_single
+            ]
+
         # список ОСТАЛЬНЫХ шашек (которые не одиночные, но всё ещё наверху и могут "ходить")
-        others_checkers = list(
-            filter(
-                lambda c: c.is_single, possible_checker_list
-            )
-        )
+        def get_singles_checkers(borders_tuple=None):
+            if borders_tuple:
+                left_border, right_border = borders_tuple
+                return [
+                    checker for checker in possible_checker_list
+                    if checker.is_single and checker.position in range(left_border, right_border + 1)
+                ]
+            return [
+                checker for checker in possible_checker_list
+                if checker.is_single
+            ]
+
         checkers = list()
-        checkers.extend(not_singles_checkers)
-        checkers.extend(others_checkers)
-        # if current_phase == 1:
-        return checkers
+
+        if current_phase == 1:
+            borders = (
+                (1, 1), (7, 12), (13, 24), (2, 6)
+            )
+            for border in borders:
+                checkers.extend(get_not_singles_checkers(border))
+            checkers.extend(get_not_singles_checkers())
+
+            for border in borders:
+                checkers.extend(get_singles_checkers(border))
+            checkers.extend(get_singles_checkers())
+
+            return checkers
 
     def get_to(self, color):
 
         def generate_list(left_border, right_border, empty_flag=True):
             if empty_flag:
                 return [k
-                        for k in range(left_border, right_border)
+                        for k in range(left_border, right_border + 1)
                         if field_map[k] == 0]
 
             def generate_another_list():
                 tower = 1
                 another_list = list()
                 while tower < 16:
-                    tmp_list = [k for k in range(left_border, right_border)
+                    tmp_list = [k for k in range(left_border, right_border + 1)
                                 if isinstance(field_map[k], MyStack)
                                 and field_map[k].color == color
                                 and len(field_map[k]) == tower]
@@ -196,7 +216,7 @@ class Game:
         if current_phase == 1:
 
             borders = (
-                (2, 7), (13, 19), (7, 13), (2, 25)
+                (2, 6), (13, 18), (7, 12), (19, 24)
             )
 
             for left, right in borders:
@@ -209,13 +229,18 @@ class Game:
     def is_success_move(self, checker, dice, cell):
         if checker.position + dice == cell:
             # убираем шашку со старой позиции)
+
+            if self.is_checker_from_head(checker):
+                if self.head_reset:
+                    self.head_reset = False
+                else:
+                    return False
             self.remove_checker_from_old_position(checker)
             # присваеваем ей ноувю позицию
             checker.position += dice
             # размещаем ее на новой позиции
             self.move_checker_to_new_position(checker)
             return True
-
         return False
 
     def compare_counts(self, tuple_12, tuple_21):
@@ -235,12 +260,12 @@ class Game:
             tuple_12, _ = tuple_12
             tuple_21, _ = tuple_21
             if tuple_21 >= tuple_12:  # если True, то прямой порядок хода (первый, второй)
-                return self.first_dice
-            return self.second_dice
+                return self.first_dice, None
+            return self.second_dice, None
 
         if any(map(lambda x: x is not None, tuple_12)):
-            return self.first_dice
-        return self.second_dice
+            return self.first_dice, None
+        return self.second_dice, None
 
     def checking_move(self):
 
@@ -285,8 +310,8 @@ class Game:
 
         if checkers_list:
             for cell in cells_list:
+                count += 1
                 for checker in checkers_list:
-                    count += 1
                     if self.is_success_move(checker, dice, cell):
                         return True, checker, count
 
