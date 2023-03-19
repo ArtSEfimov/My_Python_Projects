@@ -179,11 +179,11 @@ class Game:
             )
             for border in borders:
                 checkers.extend(get_not_singles_checkers(border))
-            checkers.extend(get_not_singles_checkers())
+            # checkers.extend(get_not_singles_checkers())
 
             for border in borders:
                 checkers.extend(get_singles_checkers(border))
-            checkers.extend(get_singles_checkers())
+            # checkers.extend(get_singles_checkers())
 
             return checkers
 
@@ -226,30 +226,20 @@ class Game:
 
             return cells_list
 
-    def is_success_move(self, checker, dice, cell):
-        if checker.position + dice == cell:
-            # убираем шашку со старой позиции)
-
-            if self.is_checker_from_head(checker):
-                if self.head_reset:
-                    self.head_reset = False
-                else:
-                    return False
-            self.remove_checker_from_old_position(checker)
-            # присваеваем ей ноувю позицию
-            checker.position += dice
-            # размещаем ее на новой позиции
-            self.move_checker_to_new_position(checker)
-            return True
-        return False
-
     def compare_counts(self, tuple_12, tuple_21):
         if all(map(lambda x: x is not None, tuple_12)) and all(map(lambda x: x is not None, tuple_21)):
             tuple_12 = sum(tuple_12)
             tuple_21 = sum(tuple_21)
-            if tuple_21 >= tuple_12:  # если True, то прямой порядок хода (первый, второй)
+            if tuple_21 > tuple_12:  # если True, то прямой порядок хода (первый, второй)
                 return self.first_dice, self.second_dice
-            return self.second_dice, self.first_dice
+            if tuple_21 < tuple_12:
+                return self.second_dice, self.first_dice
+            return random.choice(
+                (
+                    (self.first_dice, self.second_dice),
+                    (self.second_dice, self.first_dice)
+                )
+            )
 
         if all(map(lambda x: x is not None, tuple_12)):
             return self.first_dice, self.second_dice
@@ -259,9 +249,11 @@ class Game:
         if any(map(lambda x: x is not None, tuple_12)) and any(map(lambda x: x is not None, tuple_21)):
             tuple_12, _ = tuple_12
             tuple_21, _ = tuple_21
-            if tuple_21 >= tuple_12:  # если True, то прямой порядок хода (первый, второй)
+            if tuple_21 > tuple_12:  # если True, то прямой порядок хода (первый, второй)
                 return self.first_dice, None
-            return self.second_dice, None
+            if tuple_21 < tuple_12:
+                return self.second_dice, None
+            return random.choice((self.first_dice, self.second_dice)), None
 
         if any(map(lambda x: x is not None, tuple_12)):
             return self.first_dice, None
@@ -271,8 +263,8 @@ class Game:
 
         result_1, checker_1, count_1 = self.move('black', self.first_dice)
         result_2, checker_2, count_2 = self.move('black', self.second_dice)
-
         count_12 = (count_1, count_2)
+        print(count_12)
 
         if result_1:
             self.remove_checker_from_old_position(checker_1)
@@ -286,6 +278,7 @@ class Game:
         result_1, checker_1, count_1 = self.move('black', self.first_dice)
 
         count_21 = (count_2, count_1)
+        print(count_21)
 
         if result_2:
             self.remove_checker_from_old_position(checker_2)
@@ -301,20 +294,43 @@ class Game:
         if value_2 is not None:
             self.move('black', value_2)
 
+    def is_success_move(self, checker, dice):
+        if self.is_checker_from_head(checker):
+            self.head_reset = False
+        # убираем шашку со старой позиции)
+
+        self.remove_checker_from_old_position(checker)
+        # присваеваем ей ноувю позицию
+        checker.position += dice
+        # размещаем ее на новой позиции
+        self.move_checker_to_new_position(checker)
+
     def move(self, color, dice):
 
         checkers_list = self.get_from(color)
         cells_list = self.get_to(color)
 
-        count = 0
+        checker_dict = dict()
+        checker_count = 0
 
         if checkers_list:
-            for cell in cells_list:
-                count += 1
-                for checker in checkers_list:
-                    if self.is_success_move(checker, dice, cell):
-                        return True, checker, count
+            for checker in checkers_list:
+                checker_count += 1
+                for cell_index, cell_value in enumerate(cells_list):
+                    if checker.position + dice == cell_value:
+                        if self.is_checker_from_head(checker):
+                            if not self.head_reset:
+                                break
 
+                        checker_dict[checker] = (checker_count, cell_index)
+
+            if checker_dict:
+                sorted_checkers_keys = sorted(checker_dict,
+                                              key=lambda k: (checker_dict[k][0], checker_dict[k][1]))
+                key = sorted_checkers_keys[0]
+                checker, count = key, checker_dict[key][0] + checker_dict[key][1]
+                self.is_success_move(checker, dice)
+                return True, checker, count
         return False, None, None  # ход не удался
 
 
