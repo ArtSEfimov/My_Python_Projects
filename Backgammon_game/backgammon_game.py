@@ -123,9 +123,10 @@ class Game:
                 if checker.is_up]
 
     def get_phase_of_game(self):
-        if self.field.get_occupied_of_structure(self.field.black_home, 'black') <= 3:
+        if self.field.get_occupied_of_structure(self.field.black_home, 'black') <= 4:
             return 1
-        if self.field.black_home.data.count(0) < 3:
+        if self.field.get_occupied_of_structure(self.field.black_yard, 'black') <= 3 \
+                or self.field.get_occupied_of_structure(self.field.white_home, 'black') < 3:
             return 2
         if self.field.get_sum_of_structure(self.field.black_home, 'black') <= 3:
             return 3
@@ -179,11 +180,21 @@ class Game:
             )
             for border in borders:
                 checkers.extend(get_not_singles_checkers(border))
-            # checkers.extend(get_not_singles_checkers())
 
             for border in borders:
                 checkers.extend(get_singles_checkers(border))
-            # checkers.extend(get_singles_checkers())
+
+            return checkers
+
+        if current_phase == 2:
+            borders = (
+                (1, 6), (7, 12), (13, 18), (19, 24)
+            )
+            for border in borders:
+                checkers.extend(get_not_singles_checkers(border))
+
+            for border in borders:
+                checkers.extend(get_singles_checkers(border))
 
             return checkers
 
@@ -217,6 +228,19 @@ class Game:
 
             borders = (
                 (2, 6), (13, 18), (7, 12), (19, 24)
+            )
+
+            for left, right in borders:
+                cells_list.extend(generate_list(left, right))
+            for left, right in borders:
+                cells_list.extend(generate_list(left, right, empty_flag=False))
+
+            return cells_list
+
+        if current_phase == 2:
+
+            borders = (
+                (7, 12), (13, 18), (1, 6), (19, 24)
             )
 
             for left, right in borders:
@@ -306,9 +330,17 @@ class Game:
         self.move_checker_to_new_position(checker)
 
     def move(self, color, dice):
-
+        # def check_func(x):
+        #     for element in checkers_list:
+        #         if element.position + dice == x:
+        #             return True
+        #     return False
         checkers_list = self.get_from(color)
         cells_list = self.get_to(color)
+
+        # cells_list = list(filter(
+        #     check_func, cells_list
+        # ))
 
         checker_dict = dict()
         checker_count = 0
@@ -326,7 +358,7 @@ class Game:
 
             if checker_dict:
                 sorted_checkers_keys = sorted(checker_dict,
-                                              key=lambda k: (checker_dict[k][0], checker_dict[k][1]))
+                                              key=lambda k: (checker_dict[k][1], checker_dict[k][0]))
                 key = sorted_checkers_keys[0]
                 checker, count = key, checker_dict[key][0] + checker_dict[key][1]
                 self.is_success_move(checker, dice)
