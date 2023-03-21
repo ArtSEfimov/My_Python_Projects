@@ -228,7 +228,7 @@ class Game:
         if current_phase == 1:
 
             borders = (
-                (2, 6), (7, 12), (13, 18), (19, 24)
+                (2, 4), (7, 8), (5, 6), (9, 12), (13, 18), (19, 24)
             )
 
             for left, right in borders:
@@ -352,10 +352,13 @@ class Game:
             if checker_dict:
                 sorted_checkers_keys = sorted(checker_dict,
                                               key=lambda k: (checker_dict[k][1] + checker_dict[k][0]))
+                print(checker_dict)
                 key = sorted_checkers_keys[0]
                 checker, count = key, checker_dict[key][0] + checker_dict[key][1]
                 self.is_success_move(checker, dice)
+
                 return True, checker, count
+
         return False, None, None  # ход не удался
 
 

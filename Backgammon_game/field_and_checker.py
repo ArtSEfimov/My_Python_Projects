@@ -32,7 +32,7 @@ class Checker:
     position = property(get_position, set_position)
 
     def __repr__(self):
-        return self.position
+        return f'{self.position}'
 
     def __str__(self):
         # return 'b' if self.color == 'black' else 'w'
