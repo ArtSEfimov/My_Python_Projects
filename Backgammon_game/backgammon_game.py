@@ -173,31 +173,30 @@ class Game:
                 if checker.is_single
             ]
 
-        checkers = list()
+        singles_checkers = list()
+        not_singles_checkers = list()
 
         if current_phase == 1:
             borders = (
                 (1, 1), (10, 12), (7, 9), (13, 24), (5, 6), (2, 4)
             )
             for border in borders:
-                checkers.extend(get_not_singles_checkers(border))
+                not_singles_checkers.extend(get_not_singles_checkers(border))
 
             for border in borders:
-                checkers.extend(get_singles_checkers(border))
-
-            return checkers
+                singles_checkers.extend(get_singles_checkers(border))
 
         if current_phase == 2:
             borders = (
                 (1, 6), (7, 12), (13, 18), (19, 24)
             )
             for border in borders:
-                checkers.extend(get_not_singles_checkers(border))
+                not_singles_checkers.extend(get_not_singles_checkers(border))
 
             for border in borders:
-                checkers.extend(get_singles_checkers(border))
+                singles_checkers.extend(get_singles_checkers(border))
 
-            return checkers
+        return not_singles_checkers, singles_checkers
 
     def get_to(self, color):
 
@@ -332,14 +331,36 @@ class Game:
 
     def move(self, color, dice):
 
-        checkers_list = self.get_from(color)
+        not_singles_checkers_list, singles_checkers_list = self.get_from(color)
         cells_list = self.get_to(color)
 
         checker_dict = dict()
 
-        if checkers_list:
-            for checker_index, checker_value in enumerate(checkers_list):
+        if not_singles_checkers_list:
+            for checker_index, checker_value in enumerate(not_singles_checkers_list):
+                for cell_index, cell_value in enumerate(cells_list):
+                    if checker_value.position + dice == cell_value:
+                        if self.is_checker_from_head(checker_value):
+                            if not self.head_reset:
+                                break
 
+                        checker_dict[checker_value] = (checker_index, cell_index)
+                        break
+
+            if checker_dict:
+                sorted_checkers_keys = sorted(checker_dict,
+                                              key=lambda k: (checker_dict[k][1] + checker_dict[k][0]))
+                print(checker_dict)
+                key = sorted_checkers_keys[0]
+                checker, count = key, checker_dict[key][0] + checker_dict[key][1]
+                self.is_success_move(checker, dice)
+
+                return True, checker, count
+
+        checker_dict = dict()
+
+        if singles_checkers_list:
+            for checker_index, checker_value in enumerate(singles_checkers_list):
                 for cell_index, cell_value in enumerate(cells_list):
                     if checker_value.position + dice == cell_value:
                         if self.is_checker_from_head(checker_value):
