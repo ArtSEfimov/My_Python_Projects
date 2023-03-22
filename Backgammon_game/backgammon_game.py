@@ -329,57 +329,80 @@ class Game:
         # размещаем ее на новой позиции
         self.move_checker_to_new_position(checker)
 
+    def get_checker_count(self, checker_list, cells_list, dice):
+        checker = None
+        count = None
+
+        if checker_list:
+            for checker_index, checker_value in enumerate(checker_list):
+                for cell_index, cell_value in enumerate(cells_list):
+                    if checker_value.position + dice == cell_value:
+                        if self.is_checker_from_head(checker_value):
+                            if not self.head_reset:
+                                break
+
+                        new_count_value = checker_index + cell_index
+                        if count is None:
+                            count = new_count_value
+                            checker = checker_value
+                        else:
+                            if count > new_count_value:
+                                count = new_count_value
+                                checker = checker_value
+                            elif count == new_count_value:
+                                checker = random.choice((checker, checker_value))
+                        break
+
+        return checker, count
+
     def move(self, color, dice):
 
         not_singles_checkers_list, singles_checkers_list = self.get_from(color)
         cells_list = self.get_to(color)
 
-        checker_dict = dict()
+        not_single_checker, not_single_count = self.get_checker_count(not_singles_checkers_list, cells_list, dice)
 
-        if not_singles_checkers_list:
-            for checker_index, checker_value in enumerate(not_singles_checkers_list):
-                for cell_index, cell_value in enumerate(cells_list):
-                    if checker_value.position + dice == cell_value:
-                        if self.is_checker_from_head(checker_value):
-                            if not self.head_reset:
-                                break
+        single_checker, single_count = self.get_checker_count(singles_checkers_list, cells_list, dice)
 
-                        checker_dict[checker_value] = (checker_index, cell_index)
-                        break
+        if all(
+                map(
+                    lambda x: x is not None, (not_single_checker, not_single_count)
+                )
+        ) and all(
+            map(
+                lambda x: x is not None, (single_checker, single_count)
+            )
+        ):
+            if single_count > not_single_count:
+                checker = not_single_checker
+                count = not_single_count
+            elif single_count == not_single_count:
+                checker = random.choice((single_checker, not_single_checker))
+                count = single_count
+            else:
+                count = single_count
+                checker = single_checker
+            self.is_success_move(checker, dice)
+            return True, checker, count
 
-            if checker_dict:
-                sorted_checkers_keys = sorted(checker_dict,
-                                              key=lambda k: (checker_dict[k][1] + checker_dict[k][0]))
-                print(checker_dict)
-                key = sorted_checkers_keys[0]
-                checker, count = key, checker_dict[key][0] + checker_dict[key][1]
-                self.is_success_move(checker, dice)
-
-                return True, checker, count
-
-        checker_dict = dict()
-
-        if singles_checkers_list:
-            for checker_index, checker_value in enumerate(singles_checkers_list):
-                for cell_index, cell_value in enumerate(cells_list):
-                    if checker_value.position + dice == cell_value:
-                        if self.is_checker_from_head(checker_value):
-                            if not self.head_reset:
-                                break
-
-                        checker_dict[checker_value] = (checker_index, cell_index)
-                        break
-
-            if checker_dict:
-                sorted_checkers_keys = sorted(checker_dict,
-                                              key=lambda k: (checker_dict[k][1] + checker_dict[k][0]))
-                print(checker_dict)
-                key = sorted_checkers_keys[0]
-                checker, count = key, checker_dict[key][0] + checker_dict[key][1]
-                self.is_success_move(checker, dice)
-
-                return True, checker, count
-
+        if all(
+                map(
+                    lambda x: x is not None, (not_single_checker, not_single_count)
+                )
+        ):
+            checker = not_single_checker
+            count = not_single_count
+            self.is_success_move(checker, dice)
+            return True, checker, count
+        if all(
+                map(
+                    lambda x: x is not None, (single_checker, single_count)
+                )
+        ):
+            checker = single_checker
+            count = single_count
+            self.is_success_move(checker, dice)
+            return True, checker, count
         return False, None, None  # ход не удался
 
 
