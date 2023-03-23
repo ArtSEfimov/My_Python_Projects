@@ -173,30 +173,27 @@ class Game:
                 if checker.is_single
             ]
 
-        singles_checkers = list()
-        not_singles_checkers = list()
+        # singles_checkers = list()
+        # not_singles_checkers = list()
+        checker_list = list()
 
         if current_phase == 1:
             borders = (
                 (1, 1), (10, 12), (7, 9), (13, 24), (5, 6), (2, 4)
             )
             for border in borders:
-                not_singles_checkers.extend(get_not_singles_checkers(border))
-
-            for border in borders:
-                singles_checkers.extend(get_singles_checkers(border))
+                checker_list.extend(get_not_singles_checkers(border))
+                checker_list.extend(get_singles_checkers(border))
 
         if current_phase == 2:
             borders = (
                 (1, 6), (7, 12), (13, 18), (19, 24)
             )
             for border in borders:
-                not_singles_checkers.extend(get_not_singles_checkers(border))
+                checker_list.extend(get_not_singles_checkers(border))
+                checker_list.extend(get_singles_checkers(border))
 
-            for border in borders:
-                singles_checkers.extend(get_singles_checkers(border))
-
-        return not_singles_checkers, singles_checkers
+        return checker_list
 
     def get_to(self, color):
 
@@ -329,13 +326,19 @@ class Game:
         # размещаем ее на новой позиции
         self.move_checker_to_new_position(checker)
 
-    def get_checker_count(self, checker_list, cells_list, dice):
+
+    def move(self, color, dice):
+
+        checker_list = self.get_from(color)
+        cells_list = self.get_to(color)
+
         checker = None
         count = None
 
         if checker_list:
-            for checker_index, checker_value in enumerate(checker_list):
-                for cell_index, cell_value in enumerate(cells_list):
+            for cell_index, cell_value in enumerate(cells_list):
+                for checker_index, checker_value in enumerate(checker_list):
+
                     if checker_value.position + dice == cell_value:
                         if self.is_checker_from_head(checker_value):
                             if not self.head_reset:
@@ -353,54 +356,6 @@ class Game:
                                 checker = random.choice((checker, checker_value))
                         break
 
-        return checker, count
-
-    def move(self, color, dice):
-
-        not_singles_checkers_list, singles_checkers_list = self.get_from(color)
-        cells_list = self.get_to(color)
-
-        not_single_checker, not_single_count = self.get_checker_count(not_singles_checkers_list, cells_list, dice)
-
-        single_checker, single_count = self.get_checker_count(singles_checkers_list, cells_list, dice)
-
-        if all(
-                map(
-                    lambda x: x is not None, (not_single_checker, not_single_count)
-                )
-        ) and all(
-            map(
-                lambda x: x is not None, (single_checker, single_count)
-            )
-        ):
-            if single_count > not_single_count:
-                checker = not_single_checker
-                count = not_single_count
-            elif single_count == not_single_count:
-                checker = random.choice((single_checker, not_single_checker))
-                count = single_count
-            else:
-                count = single_count
-                checker = single_checker
-            self.is_success_move(checker, dice)
-            return True, checker, count
-
-        if all(
-                map(
-                    lambda x: x is not None, (not_single_checker, not_single_count)
-                )
-        ):
-            checker = not_single_checker
-            count = not_single_count
-            self.is_success_move(checker, dice)
-            return True, checker, count
-        if all(
-                map(
-                    lambda x: x is not None, (single_checker, single_count)
-                )
-        ):
-            checker = single_checker
-            count = single_count
             self.is_success_move(checker, dice)
             return True, checker, count
         return False, None, None  # ход не удался
