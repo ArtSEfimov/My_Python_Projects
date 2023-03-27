@@ -145,115 +145,106 @@ class Game:
     def get_from(self, color):
         current_phase = self.get_phase_of_game()
         possible_checker_list = self.get_possible_checker_list(color)
+        possible_checker_list.sort(key=lambda checker: checker.position)
 
         # формируем список НЕОДИНОКИХ шашек (походить ими - в приоритете)
-        def get_not_singles_checkers(borders_tuple=None):
-            if borders_tuple:
-                left_border, right_border = borders_tuple
-                return [
-                    checker for checker in possible_checker_list
-                    if not checker.is_single and checker.position in range(left_border, right_border + 1)
-                ]
-            return [
-                checker for checker in possible_checker_list
-                if not checker.is_single
-            ]
+        # def get_not_singles_checkers(borders_tuple=None):
+        #     if borders_tuple:
+        #         left_border, right_border = borders_tuple
+        #         return [
+        #             checker for checker in possible_checker_list
+        #             if not checker.is_single and checker.position in range(left_border, right_border + 1)
+        #         ]
+        #     return [
+        #         checker for checker in possible_checker_list
+        #         if not checker.is_single
+        #     ]
 
         # список ОСТАЛЬНЫХ шашек (которые не одиночные, но всё ещё наверху и могут "ходить")
-        def get_singles_checkers(borders_tuple=None):
-            if borders_tuple:
-                left_border, right_border = borders_tuple
+        # def get_checker_list(borders_tuple):
+        #     left_border, right_border = borders_tuple
+        #
+        #     return [
+        #         checker for checker in possible_checker_list
+        #         if checker.position in range(left_border, right_border + 1)
+        #     ]
 
-                return [
-                    checker for checker in possible_checker_list
-                    if checker.is_single and checker.position in range(left_border, right_border + 1)
-                ]
-            return [
-                checker for checker in possible_checker_list
-                if checker.is_single
-            ]
-
-        # singles_checkers = list()
-        # not_singles_checkers = list()
-        checker_list = list()
+        borders = tuple()
 
         if current_phase == 1:
             borders = (
-                (1, 1), (10, 12), (7, 9), (13, 24), (5, 6), (2, 4)
+                (1, 1), (2, 7), (7, 12), (13, 18), (19, 24)
             )
-            for border in borders:
-                checker_list.extend(get_not_singles_checkers(border))
-                checker_list.extend(get_singles_checkers(border))
 
         if current_phase == 2:
             borders = (
-                (1, 6), (7, 12), (13, 18), (19, 24)
+                (1, 1), (2, 6), (7, 12), (13, 18), (19, 24)
             )
-            for border in borders:
-                checker_list.extend(get_not_singles_checkers(border))
-                checker_list.extend(get_singles_checkers(border))
 
-        return checker_list
+        return possible_checker_list, self.get_borders_weight(borders)
+
+    @staticmethod
+    def get_borders_dict(weight, borders):
+        left, right = borders
+        return {value: weight for value in range(left, right + 1)}
+
+    def get_borders_weight(self, borders):
+        borders_weight = dict()
+        borders_length = len(borders)
+
+        for border_index, border in enumerate(borders):
+            borders_weight.update(self.get_borders_dict(borders_length - border_index, border))
+
+        return borders_weight
 
     def get_to(self, color):
 
-        def generate_list(left_border, right_border, empty_flag=True):
-            if empty_flag:
-                return [k
-                        for k in range(left_border, right_border + 1)
-                        if field_map[k] == 0]
-
-            def generate_another_list():
-                tower = 1
-                another_list = list()
-                while tower < 16:
-                    tmp_list = [k for k in range(left_border, right_border + 1)
-                                if isinstance(field_map[k], MyStack)
-                                and field_map[k].color == color
-                                and len(field_map[k]) == tower]
-                    if tmp_list:
-                        another_list.extend(tmp_list)
-                    tower += 1
-                return another_list
-
-            return generate_another_list()
+        # def generate_list(left_border, right_border, empty_flag=True):
+        #     # if empty_flag:
+        #     return [k
+        #             for k in range(left_border, right_border + 1)
+        #             if field_map[k] == 0]
+        #
+        #     # def generate_another_list():
+        #     #     tower = 1
+        #     #     another_list = list()
+        #     #     while tower < 16:
+        #     #         tmp_list = [k for k in range(left_border, right_border + 1)
+        #     #                     if isinstance(field_map[k], MyStack)
+        #     #                     and field_map[k].color == color
+        #     #                     and len(field_map[k]) == tower]
+        #     #         if tmp_list:
+        #     #             another_list.extend(tmp_list)
+        #     #         tower += 1
+        #     #     return another_list
+        #     #
+        #     # return generate_another_list()
 
         current_phase = self.get_phase_of_game()
-        field_map = self.get_field_map(color)
-        cells_list = list()
+        # field_map = self.get_field_map(color)
+
+        cells_list = [cell for cell in range(2, 25)]
+        borders = tuple()
+
         if current_phase == 1:
-
             borders = (
-                (2, 4), (7, 8), (5, 6), (9, 12), (13, 18), (19, 24)
+                (2, 7), (8, 12), (13, 18), (19, 24)
             )
-
-            for left, right in borders:
-                cells_list.extend(generate_list(left, right))
-            for left, right in borders:
-                cells_list.extend(generate_list(left, right, empty_flag=False))
-
-            return cells_list
 
         if current_phase == 2:
-
             borders = (
-                (4, 6), (2, 3), (13, 18), (10, 12), (7, 9), (19, 24)
+                (4, 6), (2, 3), (7, 9), (13, 18), (10, 12), (19, 24)
             )
 
-            for left, right in borders:
-                cells_list.extend(generate_list(left, right))
-            for left, right in borders:
-                cells_list.extend(generate_list(left, right, empty_flag=False))
-
-            return cells_list
+        return cells_list, self.get_borders_weight(borders)
 
     def compare_counts(self, tuple_12, tuple_21):
         if all(map(lambda x: x is not None, tuple_12)) and all(map(lambda x: x is not None, tuple_21)):
             tuple_12 = sum(tuple_12)
             tuple_21 = sum(tuple_21)
-            if tuple_21 > tuple_12:  # если True, то прямой порядок хода (первый, второй)
+            if tuple_21 < tuple_12:  # если True, то прямой порядок хода (первый, второй)
                 return self.first_dice, self.second_dice
-            if tuple_21 < tuple_12:
+            if tuple_21 > tuple_12:
                 return self.second_dice, self.first_dice
             return random.choice(
                 (
@@ -270,9 +261,9 @@ class Game:
         if any(map(lambda x: x is not None, tuple_12)) and any(map(lambda x: x is not None, tuple_21)):
             tuple_12, _ = tuple_12
             tuple_21, _ = tuple_21
-            if tuple_21 > tuple_12:  # если True, то прямой порядок хода (первый, второй)
+            if tuple_21 < tuple_12:  # если True, то прямой порядок хода (первый, второй)
                 return self.first_dice, None
-            if tuple_21 < tuple_12:
+            if tuple_21 > tuple_12:
                 return self.second_dice, None
             return random.choice((self.first_dice, self.second_dice)), None
 
@@ -286,7 +277,7 @@ class Game:
         result_2, checker_2, count_2 = self.move('black', self.second_dice)
         count_12 = (count_1, count_2)
         print(count_12)
-
+        self.field.show_field()
         if result_1:
             self.remove_checker_from_old_position(checker_1)
             self.move_checker_to_new_position(checker_1, reverse_flag=True)
@@ -300,7 +291,7 @@ class Game:
 
         count_21 = (count_2, count_1)
         print(count_21)
-
+        self.field.show_field()
         if result_2:
             self.remove_checker_from_old_position(checker_2)
             self.move_checker_to_new_position(checker_2, reverse_flag=True)
@@ -326,34 +317,54 @@ class Game:
         # размещаем ее на новой позиции
         self.move_checker_to_new_position(checker)
 
-
     def move(self, color, dice):
 
-        checker_list = self.get_from(color)
-        cells_list = self.get_to(color)
+        checkers_list, checker_weight = self.get_from(color)
+        cells_list, cell_weight = self.get_to(color)
+        cells_list = list(filter(lambda cell: cell <= checkers_list[-1].position + dice, cells_list))
 
         checker = None
         count = None
 
-        if checker_list:
-            for cell_index, cell_value in enumerate(cells_list):
-                for checker_index, checker_value in enumerate(checker_list):
+        if checkers_list:
+            for cell_value in cells_list:
+                for checker_value in checkers_list:
 
                     if checker_value.position + dice == cell_value:
                         if self.is_checker_from_head(checker_value):
                             if not self.head_reset:
                                 break
 
-                        new_count_value = checker_index + cell_index
+                        count_value = (cell_weight[cell_value]) #+ checker_weight[checker_value.position]
+
+                        old_position, position = self.get_position(color, checker_value.position)
+                        old_position = old_position.data[position]
+
+                        new_position, position = self.get_position(color, checker_value.position + dice)
+                        new_position = new_position.data[position]
+
+                        if isinstance(old_position, MyStack):
+                            value = old_position.count
+                            if old_position is self.black_head:
+                                value += 15
+                            count_value += value
+                        else:
+                            count_value -= 1
+
+                        if isinstance(new_position, MyStack):
+                            count_value -= new_position.count
+                        else:
+                            count_value += 1
+
                         if count is None:
-                            count = new_count_value
+                            count = count_value
                             checker = checker_value
                         else:
-                            if count > new_count_value:
-                                count = new_count_value
+                            if count_value > count:
+                                count = count_value
                                 checker = checker_value
-                            elif count == new_count_value:
-                                checker = random.choice((checker, checker_value))
+                            elif count == count_value:
+                                checker = random.choice((checker_value, checker))
                         break
 
             self.is_success_move(checker, dice)
@@ -363,6 +374,7 @@ class Game:
 
 g = Game()
 print(g.get_field_map('black'))
-print(g.get_to('black')
-      )
+a, b = g.get_to('black')
+print(a)
+print(b)
 g.play_the_game()
