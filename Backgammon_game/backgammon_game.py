@@ -172,16 +172,57 @@ class Game:
         borders = tuple()
 
         if current_phase == 1:
-            borders = (
-                (1, 1), (2, 7), (7, 12), (13, 18), (19, 24)
-            )
+            # borders = (
+            #     (1, 1), (2, 7), (7, 12), (13, 18), (19, 24)
+            # )
+
+            borders = {
+                1:10,
+                2: 1,
+                3: 2,
+                4: 2,
+                5: 5,
+                6: 7,
+                7: 8,
+                12: 8,
+                11: 8,
+                10: 8,
+                9: 8,
+                8: 8,
+                13: 3,
+                14: 3,
+                15: 3,
+                16: 3,
+                17: 3,
+                18: 3
+            }
 
         if current_phase == 2:
-            borders = (
-                (1, 1), (2, 6), (7, 12), (13, 18), (19, 24)
-            )
+            # borders = (
+            #     (1, 1), (2, 6), (7, 12), (13, 18), (19, 24)
+            # )
+            borders = {
+                1:10,
+                2: 1,
+                3: 2,
+                4: 2,
+                5: 5,
+                6: 7,
+                7: 8,
+                12: 8,
+                11: 8,
+                10: 8,
+                9: 8,
+                8: 8,
+                13: 3,
+                14: 3,
+                15: 3,
+                16: 3,
+                17: 3,
+                18: 3
+            }
 
-        return possible_checker_list, self.get_borders_weight(borders)
+        return possible_checker_list, borders
 
     @staticmethod
     def get_borders_dict(weight, borders):
@@ -227,16 +268,53 @@ class Game:
         borders = tuple()
 
         if current_phase == 1:
-            borders = (
-                (2, 7), (8, 12), (13, 18), (19, 24)
-            )
+            # borders = {
+            #     (2, 7), (8, 12), (13, 18), (19, 24)
+            # }
+            borders = {
+                2: 10,
+                3: 10,
+                4: 10,
+                5: 10,
+                6: 10,
+                7: 10,
+                12: 8,
+                11: 8,
+                10: 8,
+                9: 8,
+                8: 8,
+                13: 9,
+                14: 9,
+                15: 9,
+                16: 9,
+                17: 9,
+                18: 9
+            }
 
         if current_phase == 2:
-            borders = (
-                (4, 6), (2, 3), (7, 9), (13, 18), (10, 12), (19, 24)
-            )
-
-        return cells_list, self.get_borders_weight(borders)
+            # borders = (
+            #     (4, 6), (2, 3), (7, 9), (13, 18), (10, 12), (19, 24)
+            # )
+            borders = {
+                2: 10,
+                3: 10,
+                4: 10,
+                5: 10,
+                6: 10,
+                7: 10,
+                12: 8,
+                11: 8,
+                10: 8,
+                9: 8,
+                8: 8,
+                13: 9,
+                14: 9,
+                15: 9,
+                16: 9,
+                17: 9,
+                18: 9
+            }
+        return cells_list, borders
 
     def compare_counts(self, tuple_12, tuple_21):
         if all(map(lambda x: x is not None, tuple_12)) and all(map(lambda x: x is not None, tuple_21)):
@@ -274,6 +352,7 @@ class Game:
     def checking_move(self):
 
         result_1, checker_1, count_1 = self.move('black', self.first_dice)
+        self.field.show_field()
         result_2, checker_2, count_2 = self.move('black', self.second_dice)
         count_12 = (count_1, count_2)
         print(count_12)
@@ -287,6 +366,7 @@ class Game:
             self.move_checker_to_new_position(checker_2, reverse_flag=True)
 
         result_2, checker_2, count_2 = self.move('black', self.second_dice)
+        self.field.show_field()
         result_1, checker_1, count_1 = self.move('black', self.first_dice)
 
         count_21 = (count_2, count_1)
@@ -323,8 +403,8 @@ class Game:
         cells_list, cell_weight = self.get_to(color)
         cells_list = list(filter(lambda cell: cell <= checkers_list[-1].position + dice, cells_list))
 
+        counts = dict()
         checker = None
-        count = None
 
         if checkers_list:
             for cell_value in cells_list:
@@ -335,7 +415,8 @@ class Game:
                             if not self.head_reset:
                                 break
 
-                        count_value = (cell_weight[cell_value]) #+ checker_weight[checker_value.position]
+                        cell_count = cell_weight[cell_value]
+                        checker_count = checker_weight[checker_value.position]
 
                         old_position, position = self.get_position(color, checker_value.position)
                         old_position = old_position.data[position]
@@ -345,28 +426,24 @@ class Game:
 
                         if isinstance(old_position, MyStack):
                             value = old_position.count
-                            if old_position is self.black_head:
+                            if old_position is self.black_head or old_position is self.white_head:
                                 value += 15
-                            count_value += value
+                            cell_count += value
                         else:
-                            count_value -= 1
+                            cell_count -= 1
 
                         if isinstance(new_position, MyStack):
-                            count_value -= new_position.count
+                            cell_count -= new_position.count
                         else:
-                            count_value += 1
+                            cell_count += 1
 
-                        if count is None:
-                            count = count_value
-                            checker = checker_value
-                        else:
-                            if count_value > count:
-                                count = count_value
-                                checker = checker_value
-                            elif count == count_value:
-                                checker = random.choice((checker_value, checker))
+                        counts[checker_value] = (cell_count, checker_count)
                         break
 
+        sorted_counts = sorted(counts, key=lambda c: (counts[c][0], counts[c][1]), reverse=True)
+        checker = sorted_counts[0]
+        count = counts[checker][0] + counts[checker][1]
+        if checker is not None:
             self.is_success_move(checker, dice)
             return True, checker, count
         return False, None, None  # ход не удался
