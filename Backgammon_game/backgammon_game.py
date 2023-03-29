@@ -177,10 +177,10 @@ class Game:
             # )
 
             borders = {
-                1:10,
-                2: 1,
-                3: 2,
-                4: 2,
+                1: 10,
+                2: 3,
+                3: 3,
+                4: 3,
                 5: 5,
                 6: 7,
                 7: 8,
@@ -189,12 +189,12 @@ class Game:
                 10: 8,
                 9: 8,
                 8: 8,
-                13: 3,
-                14: 3,
-                15: 3,
-                16: 3,
-                17: 3,
-                18: 3
+                13: 2,
+                14: 2,
+                15: 2,
+                16: 2,
+                17: 2,
+                18: 2
             }
 
         if current_phase == 2:
@@ -202,7 +202,7 @@ class Game:
             #     (1, 1), (2, 6), (7, 12), (13, 18), (19, 24)
             # )
             borders = {
-                1:10,
+                1: 10,
                 2: 1,
                 3: 2,
                 4: 2,
@@ -214,12 +214,12 @@ class Game:
                 10: 8,
                 9: 8,
                 8: 8,
-                13: 3,
-                14: 3,
-                15: 3,
-                16: 3,
-                17: 3,
-                18: 3
+                13: 2,
+                14: 2,
+                15: 2,
+                16: 2,
+                17: 2,
+                18: 2
             }
 
         return possible_checker_list, borders
@@ -288,7 +288,13 @@ class Game:
                 15: 9,
                 16: 9,
                 17: 9,
-                18: 9
+                18: 9,
+                19: 0,
+                20: 0,
+                21: 0,
+                22: 0,
+                23: 0,
+                24: 0
             }
 
         if current_phase == 2:
@@ -296,12 +302,12 @@ class Game:
             #     (4, 6), (2, 3), (7, 9), (13, 18), (10, 12), (19, 24)
             # )
             borders = {
-                2: 10,
-                3: 10,
-                4: 10,
-                5: 10,
-                6: 10,
-                7: 10,
+                2: 9,
+                3: 9,
+                4: 9,
+                5: 9,
+                6: 9,
+                7: 9,
                 12: 8,
                 11: 8,
                 10: 8,
@@ -312,7 +318,13 @@ class Game:
                 15: 9,
                 16: 9,
                 17: 9,
-                18: 9
+                18: 9,
+                19: 0,
+                20: 0,
+                21: 0,
+                22: 0,
+                23: 0,
+                24: 0
             }
         return cells_list, borders
 
@@ -401,48 +413,45 @@ class Game:
 
         checkers_list, checker_weight = self.get_from(color)
         cells_list, cell_weight = self.get_to(color)
-        cells_list = list(filter(lambda cell: cell <= checkers_list[-1].position + dice, cells_list))
+        # cells_list = list(filter(lambda cell: cell <= checkers_list[-1].position + dice, cells_list))
 
         counts = dict()
-        checker = None
 
         if checkers_list:
-            for cell_value in cells_list:
-                for checker_value in checkers_list:
 
-                    if checker_value.position + dice == cell_value:
-                        if self.is_checker_from_head(checker_value):
-                            if not self.head_reset:
-                                break
+            for checker_value in checkers_list:
+                if self.is_checker_from_head(checker_value):
+                    if not self.head_reset:
+                        continue
 
-                        cell_count = cell_weight[cell_value]
-                        checker_count = checker_weight[checker_value.position]
+                cell_value = checker_value.position + dice
+                count = cell_weight[cell_value] + (checker_weight[checker_value.position])//2
 
-                        old_position, position = self.get_position(color, checker_value.position)
-                        old_position = old_position.data[position]
+                old_position, position = self.get_position(color, checker_value.position)
+                old_position = old_position.data[position]
 
-                        new_position, position = self.get_position(color, checker_value.position + dice)
-                        new_position = new_position.data[position]
+                new_position, position = self.get_position(color, checker_value.position + dice)
+                new_position = new_position.data[position]
 
-                        if isinstance(old_position, MyStack):
-                            value = old_position.count
-                            if old_position is self.black_head or old_position is self.white_head:
-                                value += 15
-                            cell_count += value
-                        else:
-                            cell_count -= 1
+                if isinstance(old_position, MyStack):
+                    value = old_position.count * 2
+                    if old_position is self.black_head or old_position is self.white_head:
+                        value += 15
+                    count += value
 
-                        if isinstance(new_position, MyStack):
-                            cell_count -= new_position.count
-                        else:
-                            cell_count += 1
+                else:
+                    count -= 1
 
-                        counts[checker_value] = (cell_count, checker_count)
-                        break
+                if isinstance(new_position, MyStack):
+                    count -= new_position.count
+                else:
+                    count += 2
 
-        sorted_counts = sorted(counts, key=lambda c: (counts[c][0], counts[c][1]), reverse=True)
+                counts[checker_value] = count
+
+        sorted_counts = sorted(counts, key=lambda c: counts[c], reverse=True)
         checker = sorted_counts[0]
-        count = counts[checker][0] + counts[checker][1]
+        count = counts[checker]
         if checker is not None:
             self.is_success_move(checker, dice)
             return True, checker, count
