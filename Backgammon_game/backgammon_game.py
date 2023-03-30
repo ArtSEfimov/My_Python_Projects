@@ -122,14 +122,23 @@ class Game:
                 for checker in (self.white_checkers if color == 'white' else self.black_checkers)
                 if checker.is_up]
 
+    def seventh_position(self, color='black'):
+        value = self.field.black_yard.data[1]
+        if isinstance(value, MyStack):
+            if value.color == 'black':
+                return 1
+
+        return 0
+
     def get_phase_of_game(self):
-        if self.field.get_occupied_of_structure(self.field.black_home, 'black') <= 4:
+        if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6\
+                and self.field.get_occupied_of_structure(self.field.black_home, 'black')\
+                + self.seventh_position('black') <= 4:
             return 1
-        if self.field.get_occupied_of_structure(self.field.black_yard, 'black') <= 3 \
-                or self.field.get_occupied_of_structure(self.field.white_home, 'black') < 3:
+        if self.field.get_occupied_of_structure(self.field.white_home, 'black') < 5:
             return 2
-        if self.field.get_sum_of_structure(self.field.black_home, 'black') <= 3:
-            return 3
+        # if self.field.get_sum_of_structure(self.field.black_home, 'black') <= 3:
+        #     return 3
         return 4
 
     def get_field_map(self, color):
@@ -203,23 +212,23 @@ class Game:
             # )
             borders = {
                 1: 10,
-                2: 1,
+                2: 2,
                 3: 2,
                 4: 2,
-                5: 5,
-                6: 7,
+                5: 2,
+                6: 2,
                 7: 8,
-                12: 8,
-                11: 8,
-                10: 8,
+                12: 6,
+                11: 6,
+                10: 6,
                 9: 8,
                 8: 8,
-                13: 2,
+                13: 4,
                 14: 2,
                 15: 2,
-                16: 2,
-                17: 2,
-                18: 2
+                16: 3,
+                17: 3,
+                18: 3
             }
 
         return possible_checker_list, borders
@@ -302,23 +311,23 @@ class Game:
             #     (4, 6), (2, 3), (7, 9), (13, 18), (10, 12), (19, 24)
             # )
             borders = {
-                2: 9,
-                3: 9,
-                4: 9,
-                5: 9,
-                6: 9,
-                7: 9,
-                12: 8,
-                11: 8,
+                2: 5,
+                3: 5,
+                4: 6,
+                5: 6,
+                6: 7,
+                7: 7,
+                12: 9,
+                11: 9,
                 10: 8,
                 9: 8,
-                8: 8,
-                13: 9,
-                14: 9,
-                15: 9,
-                16: 9,
-                17: 9,
-                18: 9,
+                8: 7,
+                13: 10,
+                14: 10,
+                15: 10,
+                16: 10,
+                17: 10,
+                18: 10,
                 19: 0,
                 20: 0,
                 21: 0,
@@ -425,13 +434,17 @@ class Game:
                         continue
 
                 cell_value = checker_value.position + dice
-                count = cell_weight[cell_value] + (checker_weight[checker_value.position])//2
 
                 old_position, position = self.get_position(color, checker_value.position)
                 old_position = old_position.data[position]
 
-                new_position, position = self.get_position(color, checker_value.position + dice)
+                new_position, position = self.get_position(color, cell_value)
                 new_position = new_position.data[position]
+
+                if isinstance(new_position, MyStack) and new_position.color != color:
+                    continue
+
+                count = cell_weight[cell_value] + (checker_weight[checker_value.position]) // 2
 
                 if isinstance(old_position, MyStack):
                     value = old_position.count * 2
@@ -440,7 +453,7 @@ class Game:
                     count += value
 
                 else:
-                    count -= 1
+                    count -= 2
 
                 if isinstance(new_position, MyStack):
                     count -= new_position.count
@@ -449,12 +462,14 @@ class Game:
 
                 counts[checker_value] = count
 
-        sorted_counts = sorted(counts, key=lambda c: counts[c], reverse=True)
-        checker = sorted_counts[0]
-        count = counts[checker]
-        if checker is not None:
+        if counts:
+            sorted_counts = sorted(counts, key=lambda c: counts[c], reverse=True)
+            checker = sorted_counts[0]
+            count = counts[checker]
+
             self.is_success_move(checker, dice)
             return True, checker, count
+
         return False, None, None  # ход не удался
 
 
