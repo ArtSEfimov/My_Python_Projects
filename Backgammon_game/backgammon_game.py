@@ -69,6 +69,7 @@ class Game:
 
         print(self.first_dice, self.second_dice)
         self.field.show_field()
+        print(self.get_phase_of_game())
 
     # функция для описания четвертей поля в зависимиости от цвета шашки
     def get_quarters(self, color):
@@ -135,10 +136,10 @@ class Game:
                 and self.field.get_occupied_of_structure(self.field.black_home, 'black') \
                 + self.seventh_position('black') <= 4:
             return 1
-        if self.field.get_occupied_of_structure(self.field.white_home, 'black') < 5:
+        if self.field.get_occupied_of_structure(self.field.white_home, 'black') < 3:
             return 2
-        # if self.field.get_sum_of_structure(self.field.black_home, 'black') <= 3:
-        #     return 3
+        if self.field.get_occupied_of_structure(self.field.black_yard, 'black') <= 4:
+            return 3
         return 4
 
     def get_field_map(self, color):
@@ -151,52 +152,39 @@ class Game:
             start_for_next_part = max(field_map.keys())
         return field_map
 
-    def get_from(self, color):
+    def get_from(self, color):  # может быть color понадобится для определения фазы игры в зависимости от цвета
         current_phase = self.get_phase_of_game()
-        possible_checker_list = self.get_possible_checker_list(color)
-        # possible_checker_list.sort(key=lambda checker: checker.position)
-
-        borders = tuple()
 
         if current_phase == 1:
-            borders = {
+            return {
                 1: 10, 2: 3, 3: 3, 4: 3, 5: 4, 6: 5,
                 7: 8, 8: 8, 9: 8, 10: 8, 11: 8, 12: 8,
-                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2
+                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+                19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1
             }
 
         if current_phase == 2:
-            borders = {
-                1: 10, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7,
-                7: 7, 8: 8, 9: 8, 10: 7, 11: 6, 12: 5,
-                13: 4, 14: 2, 15: 2, 16: 3, 17: 3, 18: 3
+            return {
+                1: 10, 2: 8, 3: 8, 4: 8, 5: 8, 6: 8,
+                7: 10, 8: 10, 9: 10, 10: 9, 11: 9, 12: 9,
+                13: 4, 14: 2, 15: 2, 16: 3, 17: 3, 18: 3,
+                19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1
             }
 
-        return possible_checker_list, borders
-
-    @staticmethod
-    def get_borders_dict(weight, borders):
-        left, right = borders
-        return {value: weight for value in range(left, right + 1)}
-
-    def get_borders_weight(self, borders):
-        borders_weight = dict()
-        borders_length = len(borders)
-
-        for border_index, border in enumerate(borders):
-            borders_weight.update(self.get_borders_dict(borders_length - border_index, border))
-
-        return borders_weight
+        if current_phase == 3:
+            return {
+                1: 10, 2: 9, 3: 9, 4: 8, 5: 8, 6: 7,
+                7: 6, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1,
+                13: 4, 14: 2, 15: 2, 16: 3, 17: 3, 18: 3,
+                19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1
+            }
 
     def get_to(self, color):
 
         current_phase = self.get_phase_of_game()
 
-        cells_list = [cell for cell in range(2, 25)]
-        borders = tuple()
-
         if current_phase == 1:
-            borders = {
+            return {
                 2: 10, 3: 10, 4: 10, 5: 10, 6: 10, 7: 7,
                 8: 7, 9: 7, 10: 8, 11: 8, 12: 8,
                 13: 9, 14: 9, 15: 8, 16: 8, 17: 7, 18: 7,
@@ -204,14 +192,20 @@ class Game:
             }
 
         if current_phase == 2:
-            borders = {
+            return {
                 2: 5, 3: 5, 4: 5, 5: 5, 6: 6, 7: 6,
                 8: 7, 9: 7, 10: 8, 11: 8, 12: 8,
                 13: 10, 14: 10, 15: 10, 16: 10, 17: 10, 18: 10,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                19: 1, 20: 1, 21: 2, 22: 2, 23: 3, 24: 3
             }
 
-        return cells_list, borders
+        if current_phase == 2:
+            return {
+                2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
+                8: 8, 9: 9, 10: 10, 11: 10, 12: 10,
+                13: 5, 14: 5, 15: 5, 16: 5, 17: 5, 18: 5,
+                19: 1, 20: 1, 21: 2, 22: 2, 23: 3, 24: 3
+            }
 
     def compare_counts(self, tuple_12, tuple_21):
         if all(map(lambda x: x is not None, tuple_12)) and all(map(lambda x: x is not None, tuple_21)):
@@ -296,9 +290,9 @@ class Game:
         self.move_checker_to_new_position(checker)
 
     def move(self, color, dice):
-
-        checkers_list, checker_weight = self.get_from(color)
-        cells_list, cell_weight = self.get_to(color)
+        checkers_list = self.get_possible_checker_list(color)
+        checker_weight = self.get_from(color)
+        cell_weight = self.get_to(color)
 
         counts = dict()
 
@@ -350,8 +344,5 @@ class Game:
 
 
 g = Game()
-print(g.get_field_map('black'))
-a, b = g.get_to('black')
-print(a)
-print(b)
+
 g.play_the_game()
