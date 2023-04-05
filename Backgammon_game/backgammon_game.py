@@ -157,8 +157,8 @@ class Game:
 
         if current_phase == 1:
             return {
-                1: 10, 2: 3, 3: 3, 4: 3, 5: 4, 6: 5,
-                7: 8, 8: 8, 9: 8, 10: 8, 11: 8, 12: 8,
+                1: 10, 2: 4, 3: 4, 4: 4, 5: 5, 6: 6,
+                7: 7, 8: 8, 9: 8, 10: 8, 11: 8, 12: 8,
                 13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
                 19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1
             }
@@ -167,7 +167,7 @@ class Game:
             return {
                 1: 10, 2: 8, 3: 8, 4: 8, 5: 8, 6: 8,
                 7: 10, 8: 10, 9: 10, 10: 9, 11: 9, 12: 9,
-                13: 4, 14: 2, 15: 2, 16: 3, 17: 3, 18: 3,
+                13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3,
                 19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1
             }
 
@@ -194,8 +194,8 @@ class Game:
         if current_phase == 2:
             return {
                 2: 5, 3: 5, 4: 5, 5: 5, 6: 6, 7: 6,
-                8: 7, 9: 7, 10: 8, 11: 8, 12: 8,
-                13: 10, 14: 10, 15: 10, 16: 10, 17: 10, 18: 10,
+                8: 6, 9: 6, 10: 7, 11: 7, 12: 7,
+                13: 10, 14: 10, 15: 9, 16: 9, 17: 8, 18: 8,
                 19: 1, 20: 1, 21: 2, 22: 2, 23: 3, 24: 3
             }
 
@@ -317,7 +317,15 @@ class Game:
                 count = cell_weight[cell_value] + (checker_weight[checker_value.position]) // 2
 
                 if isinstance(old_position, MyStack):
-                    value = old_position.count * 3
+
+                    if old_position.count < 6:
+                        k = 3
+                    elif old_position.count < 11:
+                        k = 2
+                    else:
+                        k = 1
+
+                    value = old_position.count * k
                     if old_position is self.black_head or old_position is self.white_head:
                         value += 15
                     count += value
@@ -326,9 +334,17 @@ class Game:
                     count -= 1
 
                 if isinstance(new_position, MyStack):
-                    count -= new_position.count
+
+                    if old_position.count < 6:
+                        k = 1
+                    elif old_position.count < 11:
+                        k = 2
+                    else:
+                        k = 3
+
+                    count -= new_position.count * k
                 else:
-                    count += 3
+                    count += 1
 
                 counts[checker_value] = count
 
