@@ -344,7 +344,7 @@ class Game:
 
                     count -= new_position.count * k
                 else:
-                    count += 1
+                    count += 3
 
                 counts[checker_value] = count
 
