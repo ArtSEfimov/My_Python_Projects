@@ -185,8 +185,8 @@ class Game:
 
         if current_phase == 1:
             return {
-                2: 10, 3: 10, 4: 10, 5: 10, 6: 10, 7: 7,
-                8: 7, 9: 7, 10: 8, 11: 8, 12: 8,
+                2: 10, 3: 10, 4: 10, 5: 10, 6: 10, 7: 10,
+                8: 10, 9: 10, 10: 10, 11: 10, 12: 10,
                 13: 9, 14: 9, 15: 8, 16: 8, 17: 7, 18: 7,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -289,6 +289,14 @@ class Game:
         # размещаем ее на новой позиции
         self.move_checker_to_new_position(checker)
 
+    @staticmethod
+    def get_ratio(count):
+        if count < 6:
+            return 4
+        if count < 11:
+            return 3
+        return 2
+
     def move(self, color, dice):
         checkers_list = self.get_possible_checker_list(color)
         checker_weight = self.get_from(color)
@@ -318,33 +326,24 @@ class Game:
 
                 if isinstance(old_position, MyStack):
 
-                    if old_position.count < 6:
-                        k = 3
-                    elif old_position.count < 11:
-                        k = 2
-                    else:
-                        k = 1
+                    value = old_position.count * self.get_ratio(old_position.count)
 
-                    value = old_position.count * k
                     if old_position is self.black_head or old_position is self.white_head:
                         value += 15
+
                     count += value
+
+                    if old_position.count == 1:
+                        count -= 1
 
                 else:
                     count -= 1
 
                 if isinstance(new_position, MyStack):
+                    count -= new_position.count // self.get_ratio(new_position.count)
 
-                    if old_position.count < 6:
-                        k = 1
-                    elif old_position.count < 11:
-                        k = 2
-                    else:
-                        k = 3
-
-                    count -= new_position.count * k
                 else:
-                    count += 3
+                    count += 2
 
                 counts[checker_value] = count
 
