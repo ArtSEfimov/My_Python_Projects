@@ -157,7 +157,7 @@ class Game:
 
         if current_phase == 1:
             return {
-                1: 10, 2: 4, 3: 4, 4: 4, 5: 5, 6: 6,
+                1: 10, 2: 5, 3: 5, 4: 5, 5: 6, 6: 6,
                 7: 7, 8: 8, 9: 8, 10: 8, 11: 8, 12: 8,
                 13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
                 19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1
@@ -292,10 +292,10 @@ class Game:
     @staticmethod
     def get_ratio(count):
         if count < 6:
-            return 4
+            return 5
         if count < 11:
-            return 3
-        return 2
+            return 4
+        return 3
 
     def move(self, color, dice):
         checkers_list = self.get_possible_checker_list(color)
@@ -340,7 +340,7 @@ class Game:
                     count -= 1
 
                 if isinstance(new_position, MyStack):
-                    count -= new_position.count // self.get_ratio(new_position.count)
+                    count -= new_position.count * self.get_ratio(new_position.count)
 
                 else:
                     count += 2
