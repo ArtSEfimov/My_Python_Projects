@@ -158,7 +158,7 @@ class Game:
         if current_phase == 1:
             return {
                 1: 15, 2: 5, 3: 5, 4: 5, 5: 6, 6: 6,
-                7: 7, 8: 8, 9: 8, 10: 8, 11: 8, 12: 8,
+                7: 7, 8: 9, 9: 9, 10: 9, 11: 9, 12: 9,
                 13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
                 19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1
             }
@@ -187,13 +187,13 @@ class Game:
             return {
                 2: 10, 3: 10, 4: 10, 5: 10, 6: 10, 7: 10,
                 8: 10, 9: 10, 10: 10, 11: 10, 12: 10,
-                13: 9, 14: 9, 15: 8, 16: 8, 17: 7, 18: 7,
+                13: 10, 14: 10, 15: 9, 16: 9, 17: 8, 18: 8,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
         if current_phase == 2:
             return {
-                2: 5, 3: 5, 4: 5, 5: 5, 6: 6, 7: 6,
+                2: 7, 3: 7, 4: 7, 5: 7, 6: 8, 7: 8,
                 8: 9, 9: 9, 10: 11, 11: 11, 12: 11,
                 13: 19, 14: 19, 15: 18, 16: 18, 17: 17, 18: 17,
                 19: 1, 20: 1, 21: 2, 22: 2, 23: 3, 24: 3
@@ -290,12 +290,12 @@ class Game:
         self.move_checker_to_new_position(checker)
 
     @staticmethod
-    def get_ratio(count):
-        if count < 6:
-            return 5
-        if count < 11:
-            return 4
-        return 3
+    def get_ratio_to(count):
+        return 3 if count < 6 else (2 if count < 11 else 1)
+
+    @staticmethod
+    def get_ratio_from(count):
+        return 6 if count < 6 else (4 if count < 11 else 2)
 
     def move(self, color, dice):
         checkers_list = self.get_possible_checker_list(color)
@@ -326,7 +326,7 @@ class Game:
 
                 if isinstance(old_position, MyStack):
 
-                    value = old_position.count * self.get_ratio(old_position.count)
+                    value = old_position.count * self.get_ratio_from(old_position.count)
 
                     if old_position is self.black_head or old_position is self.white_head:
                         value += 15
@@ -334,16 +334,16 @@ class Game:
                     count += value
 
                     if old_position.count == 1:
-                        count -= 1
+                        count -= 2
 
                 else:
-                    count -= 1
+                    count -= 2
 
                 if isinstance(new_position, MyStack):
-                    count -= new_position.count * self.get_ratio(new_position.count)
+                    count -= new_position.count * self.get_ratio_to(new_position.count)
 
                 else:
-                    count += 3
+                    count += 2
 
                 counts[checker_value] = count
 
