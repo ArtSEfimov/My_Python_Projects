@@ -123,10 +123,11 @@ class Game:
                 for checker in (self.white_checkers if color == 'white' else self.black_checkers)
                 if checker.is_up]
 
-    def seventh_position(self, color='black'):
-        value = self.field.black_yard.data[1]
+    def get_position_color(self, position_number, color='black'):
+        value, position = self.get_position(color, position_number)
+        value = value.data[position]
         if isinstance(value, MyStack):
-            if value.color == 'black':
+            if value.color == color:
                 return 1
 
         return 0
@@ -134,11 +135,13 @@ class Game:
     def get_phase_of_game(self):
         if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 \
                 and self.field.get_occupied_of_structure(self.field.black_home, 'black') \
-                + self.seventh_position('black') <= 4:
+                + self.get_position_color(7) <= 4 or \
+                (self.black_head.count > 2 and
+                 self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4):
             return 1
         if self.field.get_occupied_of_structure(self.field.white_home, 'black') < 3:
             return 2
-        if self.field.get_occupied_of_structure(self.field.black_yard, 'black') <= 4:
+        if self.field.get_occupied_of_structure(self.field.black_yard, 'black') < 4:
             return 3
         return 4
 
@@ -157,33 +160,33 @@ class Game:
 
         if current_phase == 1:
             return {
-                1: 15, 2: 5, 3: 5, 4: 5, 5: 6, 6: 6,
-                7: 7, 8: 9, 9: 9, 10: 9, 11: 9, 12: 9,
-                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+                1: 15, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                13: -5, 14: -5, 15: -5, 16: -5, 17: -5, 18: -5,
                 19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1
             }
 
         if current_phase == 2:
             return {
-                1: 15, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
-                7: 19, 8: 19, 9: 18, 10: 18, 11: 17, 12: 17,
-                13: -1, 14: -1, 15: -1, 16: 0, 17: 0, 18: 0,
+                1: 15, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10,
+                7: 11, 8: 21, 9: 20, 10: 19, 11: 18, 12: 17,
+                13: -5, 14: -5, 15: -5, 16: -5, 17: -5, 18: -5,
                 19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1
             }
 
         if current_phase == 3:
             return {
-                1: 10, 2: 9, 3: 9, 4: 8, 5: 8, 6: 7,
-                7: 6, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1,
-                13: 4, 14: 2, 15: 2, 16: 3, 17: 3, 18: 3,
+                1: 15, 2: 12, 3: 11, 4: 10, 5: 9, 6: 8,
+                7: 7, 8: 15, 9: 14, 10: 13, 11: 12, 12: 11,
+                13: -5, 14: -5, 15: -5, 16: -5, 17: -5, 18: -5,
                 19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1
             }
 
         if current_phase == 4:
             return {
-                1: 25, 2: 25, 3: 24, 4: 24, 5: 23, 6: 23,
-                7: 3, 8: 3, 9: 2, 10: 2, 11: 1, 12: 1,
-                13: 4, 14: 2, 15: 2, 16: 3, 17: 3, 18: 3,
+                1: 128, 2: 64, 3: 32, 4: 16, 5: 8, 6: 4,
+                7: 0, 8: -1, 9: -2, 10: -3, 11: -4, 12: -5,
+                13: -6, 14: -6, 15: -5, 16: -5, 17: -4, 18: -4,
                 19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1, 25: 1
             }
 
@@ -193,34 +196,34 @@ class Game:
 
         if current_phase == 1:
             return {
-                2: 10, 3: 10, 4: 10, 5: 10, 6: 10, 7: 10,
-                8: 10, 9: 10, 10: 10, 11: 10, 12: 10,
-                13: 10, 14: 10, 15: 9, 16: 9, 17: 8, 18: 8,
+                2: 11, 3: 10, 4: 9, 5: 8, 6: 7, 7: 6,
+                8: 11, 9: 12, 10: 13, 11: 14, 12: 15,
+                13: 18, 14: 18, 15: 18, 16: 14, 17: 12, 18: 10,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
         if current_phase == 2:
             return {
-                2: 7, 3: 7, 4: 7, 5: 7, 6: 8, 7: 8,
-                8: 9, 9: 9, 10: 11, 11: 11, 12: 11,
-                13: 19, 14: 19, 15: 18, 16: 18, 17: 17, 18: 17,
+                2: 5, 3: 6, 4: 7, 5: 8, 6: 9, 7: 10,
+                8: 11, 9: 12, 10: 13, 11: 14, 12: 15,
+                13: 22, 14: 21, 15: 20, 16: 19, 17: 18, 18: 17,
                 19: 1, 20: 1, 21: 2, 22: 2, 23: 3, 24: 3
             }
 
         if current_phase == 3:
             return {
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-                8: 8, 9: 9, 10: 10, 11: 10, 12: 10,
-                13: 5, 14: 5, 15: 5, 16: 5, 17: 5, 18: 5,
+                8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                13: 20, 14: 19, 15: 18, 16: 17, 17: 16, 18: 15,
                 19: 1, 20: 1, 21: 2, 22: 2, 23: 3, 24: 3
             }
 
         if current_phase == 4:
             return {
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                7: 14, 8: 14, 9: 14, 10: 15, 11: 15, 12: 15,
-                13: 9, 14: 9, 15: 9, 16: 9, 17: 9, 18: 9,
-                19: 1, 20: 1, 21: 2, 22: 2, 23: 3, 24: 3
+                7: 12, 8: 13, 9: 14, 10: 15, 11: 16, 12: 17,
+                13: 15, 14: 14, 15: 13, 16: 12, 17: 11, 18: 10,
+                19: -5, 20: -5, 21: -5, 22: -5, 23: -5, 24: -5
             }
 
     def compare_counts(self, tuple_12, tuple_21):
@@ -351,16 +354,16 @@ class Game:
 
                     if old_position.count == 1:
                         if old_position is not self.black_head:
-                            count -= 2
+                            count -= 3
 
                 else:
-                    count -= 2
+                    count -= 3
 
                 if isinstance(new_position, MyStack):
                     count -= new_position.count * self.get_ratio_to(new_position.count)
 
                 else:
-                    count += 2
+                    count += 3
 
                 counts[checker_value] = count
 
