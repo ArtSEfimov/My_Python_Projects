@@ -65,6 +65,14 @@ class Field:
                     summa += 1
         return summa
 
+    @staticmethod
+    def get_count_of_free_cells(structure):
+        count = 0
+        for element in structure.data:
+            if not isinstance(element, MyStack):
+                count += 1
+        return count
+
     def init_field_and_create_field_structure(self):
         self.white_home.connect_elements(next_element=self.white_yard)
         self.white_yard.connect_elements(previous_element=self.white_home, next_element=self.black_home)
