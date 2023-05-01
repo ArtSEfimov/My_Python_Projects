@@ -139,7 +139,7 @@ class Game:
                 (self.black_head.count > 2 and
                  self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4):
             return 1
-        if self.field.get_count_of_free_cells(self.field.white_home) != 0\
+        if self.field.get_count_of_free_cells(self.field.white_home) != 0 \
                 and self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4:
             return 2
         if self.field.get_occupied_of_structure(self.field.black_yard, 'black') < 4:
@@ -161,32 +161,32 @@ class Game:
 
         if current_phase == 1:
             return {
-                1: 20, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                1: 13, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+                13: -7, 14: -6, 15: -5, 16: -4, 17: -3, 18: -2,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
 
         if current_phase == 2:
             return {
-                1: 20, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10,
-                7: 11, 8: 20, 9: 19, 10: 18, 11: 17, 12: 16,
-                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+                1: 13, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                7: 7, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
+                13: -7, 14: -6, 15: -5, 16: -4, 17: -3, 18: -2,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
 
         if current_phase == 3:
             return {
-                1: 20, 2: 12, 3: 11, 4: 10, 5: 9, 6: 8,
-                7: 7, 8: 19, 9: 18, 10: 17, 11: 16, 12: 15,
+                1: 17, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
+                7: 1, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
 
         if current_phase == 4:
             return {
-                1: 128, 2: 64, 3: 32, 4: 16, 5: 8, 6: 4,
-                7: 0, 8: -1, 9: -2, 10: -3, 11: -4, 12: -5,
+                1: 81, 2: 64, 3: 49, 4: 36, 5: 25, 6: 16,
+                7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
@@ -197,33 +197,33 @@ class Game:
 
         if current_phase == 1:
             return {
-                2: 10, 3: 9, 4: 8, 5: 7, 6: 6, 7: 5,
-                8: 11, 9: 12, 10: 13, 11: 14, 12: 15,
-                13: 21, 14: 20, 15: 19, 16: 18, 17: 17, 18: 16,
+                2: 7, 3: 6, 4: 5, 5: 4, 6: 3, 7: 2,
+                8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
         if current_phase == 2:
             return {
-                2: 5, 3: 6, 4: 7, 5: 8, 6: 9, 7: 10,
-                8: 11, 9: 12, 10: 13, 11: 14, 12: 15, # попробовать сделать "разрыв" сильнее
-                13: 23, 14: 22, 15: 21, 16: 20, 17: 19, 18: 18,
+                2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
+                8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                13: 21, 14: 20, 15: 19, 16: 18, 17: 17, 18: 16,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
         if current_phase == 3:
             return {
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-                8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
+                8: 14, 9: 15, 10: 16, 11: 17, 12: 18,
+                13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
         if current_phase == 4:
             return {
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                7: 13, 8: 14, 9: 15, 10: 16, 11: 17, 12: 18,
-                13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,
+                7: 15, 8: 16, 9: 17, 10: 18, 11: 19, 12: 20,
+                13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
@@ -342,23 +342,23 @@ class Game:
                 if isinstance(new_position, MyStack) and new_position.color != color:
                     continue
 
-                count = cell_weight[cell_value] + (checker_weight[checker_value.position]) // 2
+                count = cell_weight[cell_value] + checker_weight[checker_value.position]
 
                 if isinstance(old_position, MyStack):
 
                     value = old_position.count * self.get_ratio_from(old_position.count)
 
                     if old_position is self.black_head or old_position is self.white_head:
-                        value += 15
+                        value += 12
 
                     count += value
 
                     if old_position.count == 1:
                         if old_position is not self.black_head:
-                            count -= 3
+                            count -= 1
 
                 else:
-                    count -= 3
+                    count -= 2
 
                 if isinstance(new_position, MyStack):
                     count -= new_position.count * self.get_ratio_to(new_position.count)
