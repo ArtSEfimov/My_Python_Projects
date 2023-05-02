@@ -161,17 +161,17 @@ class Game:
 
         if current_phase == 1:
             return {
-                1: 13, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                13: -7, 14: -6, 15: -5, 16: -4, 17: -3, 18: -2,
+                1: 13, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7,
+                7: 8, 8: 9, 9: 10, 10: 11, 11: 12, 12: 13,
+                13: -9, 14: -8, 15: -7, 16: -6, 17: -5, 18: -4,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
 
         if current_phase == 2:
             return {
-                1: 13, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                7: 7, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
-                13: -7, 14: -6, 15: -5, 16: -4, 17: -3, 18: -2,
+                1: 13, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7,
+                7: 8, 8: 13, 9: 12, 10: 11, 11: 10, 12: 9,
+                13: -6, 14: -5, 15: -4, 16: -3, 17: -2, 18: -1,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
 
@@ -185,7 +185,7 @@ class Game:
 
         if current_phase == 4:
             return {
-                1: 81, 2: 64, 3: 49, 4: 36, 5: 25, 6: 16,
+                1: 20, 2: 18, 3: 16, 4: 14, 5: 12, 6: 10,
                 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
@@ -197,8 +197,8 @@ class Game:
 
         if current_phase == 1:
             return {
-                2: 7, 3: 6, 4: 5, 5: 4, 6: 3, 7: 2,
-                8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                2: 8, 3: 7, 4: 6, 5: 5, 6: 4, 7: 3,
+                8: 9, 9: 10, 10: 11, 11: 12, 12: 13,
                 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -214,7 +214,7 @@ class Game:
         if current_phase == 3:
             return {
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-                8: 14, 9: 15, 10: 16, 11: 17, 12: 18,
+                8: 15, 9: 16, 10: 17, 11: 18, 12: 19,
                 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -311,11 +311,15 @@ class Game:
 
     @staticmethod
     def get_ratio_to(count):
-        return 3 if count < 6 else (2 if count < 11 else 1)
+        # return 3 if count < 6 else (2 if count < 11 else 1)
+
+        return 4 if count < 6 else (3 if count < 11 else 2)
 
     @staticmethod
     def get_ratio_from(count):
-        return 6 if count < 6 else (4 if count < 11 else 2)
+        # return 6 if count < 6 else (4 if count < 11 else 2)
+
+        return 6 if count < 6 else (5 if count < 11 else 4)
 
     def move(self, color, dice):
         checkers_list = self.get_possible_checker_list(color)
@@ -355,16 +359,16 @@ class Game:
 
                     if old_position.count == 1:
                         if old_position is not self.black_head:
-                            count -= 1
+                            count -= 2
 
-                else:
-                    count -= 2
+                # else:
+                #     count -= 4
 
                 if isinstance(new_position, MyStack):
                     count -= new_position.count * self.get_ratio_to(new_position.count)
 
                 else:
-                    count += 3
+                    count += 7
 
                 counts[checker_value] = count
 
