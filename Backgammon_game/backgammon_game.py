@@ -161,16 +161,16 @@ class Game:
 
         if current_phase == 1:
             return {
-                1: 13, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7,
-                7: 8, 8: 9, 9: 10, 10: 11, 11: 12, 12: 13,
-                13: -9, 14: -8, 15: -7, 16: -6, 17: -5, 18: -4,
+                1: 15, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                13: -6, 14: -5, 15: -4, 16: -3, 17: -2, 18: -1,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
 
         if current_phase == 2:
             return {
-                1: 13, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7,
-                7: 8, 8: 13, 9: 12, 10: 11, 11: 10, 12: 9,
+                1: 15, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                7: 7, 8: 14, 9: 13, 10: 12, 11: 11, 12: 10,
                 13: -6, 14: -5, 15: -4, 16: -3, 17: -2, 18: -1,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
@@ -313,13 +313,14 @@ class Game:
     def get_ratio_to(count):
         # return 3 if count < 6 else (2 if count < 11 else 1)
 
-        return 4 if count < 6 else (3 if count < 11 else 2)
+        return 6 if count < 6 else (3 if count < 11 else 2) # подумать над пропорциональностью распределения коэффициентов при умножении
+        # 1 * 2, 2 * 2, 3 * 2, и так далее 10 * 2, ..., 15 * 2
 
     @staticmethod
     def get_ratio_from(count):
         # return 6 if count < 6 else (4 if count < 11 else 2)
 
-        return 6 if count < 6 else (5 if count < 11 else 4)
+        return 6 if count < 6 else (3 if count < 11 else 2)
 
     def move(self, color, dice):
         checkers_list = self.get_possible_checker_list(color)
@@ -349,17 +350,18 @@ class Game:
                 count = cell_weight[cell_value] + checker_weight[checker_value.position]
 
                 if isinstance(old_position, MyStack):
+                    if old_position.count > 1:
 
-                    value = old_position.count * self.get_ratio_from(old_position.count)
+                        value = old_position.count * self.get_ratio_from(old_position.count)
 
-                    if old_position is self.black_head or old_position is self.white_head:
-                        value += 12
+                        if old_position is self.black_head or old_position is self.white_head:
+                            value += 10 # будем брать (плюсовать) в зависимости от длины этой башни
 
-                    count += value
+                        count += value
 
-                    if old_position.count == 1:
-                        if old_position is not self.black_head:
-                            count -= 2
+                    # elif old_position.count == 1:
+                    #     if old_position is not self.black_head:
+                    #         count -= 2
 
                 # else:
                 #     count -= 4
@@ -368,7 +370,8 @@ class Game:
                     count -= new_position.count * self.get_ratio_to(new_position.count)
 
                 else:
-                    count += 7
+                    count += 5 # в зависимости от четверти и фазы игры (
+                    # например надо приоритетнее снять в 3-й четверти во второй фазе)
 
                 counts[checker_value] = count
 
