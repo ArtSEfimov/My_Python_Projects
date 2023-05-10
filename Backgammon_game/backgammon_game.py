@@ -177,8 +177,12 @@ class Game:
 
         if current_phase == 3:
             return {
+                # 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
+                # 7: 1, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
+
                 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-                7: 1, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
+                7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
@@ -215,7 +219,8 @@ class Game:
             return {
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                 8: 14, 9: 15, 10: 16, 11: 17, 12: 18,
-                13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
+                # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
+                13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,  # trying
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
@@ -343,14 +348,16 @@ class Game:
                 if isinstance(old_position, MyStack):
                     if old_position.count > 1:
 
-                        count += old_position.count * self.get_ratio(old_position.count)
+                        # надо как-то исключить head чтобы можно было брать шашки ни с головы, а закрывать более выгодные позиции
+
+                        count += (old_position.count * self.get_ratio(old_position.count) + old_position.count)
 
                     elif old_position.count == 1:
                         count -= 0  # в зависимости от четверти и фазы игры (
                     # например надо приоритетнее снять в 3-й четверти во второй фазе)
 
                 if isinstance(new_position, MyStack):
-                    count -= new_position.count * self.get_ratio(old_position.count)
+                    count -= (new_position.count * self.get_ratio(new_position.count) + new_position.count)
 
                 else:
                     count += 0  # в зависимости от четверти и фазы игры (
