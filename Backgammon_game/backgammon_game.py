@@ -169,7 +169,7 @@ class Game:
 
         if current_phase == 2:
             return {
-                1: 12, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                1: 13, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                 7: 7, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
                 13: -5, 14: -4, 15: -3, 16: -2, 17: -1, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
@@ -177,16 +177,16 @@ class Game:
 
         if current_phase == 3:
             return {
-                1: 12, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-                7: 1, 8: 11, 9: 10, 10: 9, 11: 8, 12: 7,
+                1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
+                7: 1, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
 
         if current_phase == 4:
             return {
-                1: 12, 2: 11, 3: 10, 4: 9, 5: 8, 6: 7,
-                7: 6, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1,
+                1: 25, 2: 22, 3: 19, 4: 16, 5: 13, 6: 10,
+                7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
@@ -213,17 +213,17 @@ class Game:
 
         if current_phase == 3:
             return {
-                2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6,
+                2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                 8: 14, 9: 15, 10: 16, 11: 17, 12: 18,
-                13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,
+                13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
         if current_phase == 4:
             return {
-                2: 1, 3: 2, 4: 3, 5: 4, 6: 5,
-                7: 12, 8: 13, 9: 14, 10: 15, 11: 16, 12: 17,
-                13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                7: 15, 8: 16, 9: 17, 10: 18, 11: 19, 12: 20,
+                13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
@@ -310,19 +310,8 @@ class Game:
         self.move_checker_to_new_position(checker)
 
     @staticmethod
-    def get_ratio_to(count):
-        return 1
-        # return 3 if count < 6 else (2 if count < 11 else 1)
-
-        # return 6 if count < 6 else (3 if count < 11 else 2) # подумать над пропорциональностью распределения коэффициентов при умножении
-        # 1 * 2, 2 * 2, 3 * 2, и так далее 10 * 2, ..., 15 * 2
-
-    @staticmethod
-    def get_ratio_from(count):
-        return 1
-        # return 6 if count < 6 else (4 if count < 11 else 2)
-
-        # return 6 if count < 6 else (3 if count < 11 else 2)
+    def get_ratio(count):
+        return 6 if count < 6 else (3 if count < 11 else 2)
 
     def move(self, color, dice):
         checkers_list = self.get_possible_checker_list(color)
@@ -354,18 +343,14 @@ class Game:
                 if isinstance(old_position, MyStack):
                     if old_position.count > 1:
 
-
-                        # if old_position is self.black_head or old_position is self.white_head:
-                        #     value += old_position.count
-
-                        count += old_position.count
+                        count += old_position.count * self.get_ratio(old_position.count)
 
                     elif old_position.count == 1:
-                        count -= 0 # в зависимости от четверти и фазы игры (
+                        count -= 0  # в зависимости от четверти и фазы игры (
                     # например надо приоритетнее снять в 3-й четверти во второй фазе)
 
                 if isinstance(new_position, MyStack):
-                    count -= new_position.count
+                    count -= new_position.count * self.get_ratio(old_position.count)
 
                 else:
                     count += 0  # в зависимости от четверти и фазы игры (
@@ -374,7 +359,6 @@ class Game:
                 counts[checker_value] = count
 
         if counts:
-
             sorted_counts = sorted(counts, key=lambda c: counts[c], reverse=True)
             checker = sorted_counts[0]
             count = counts[checker]
