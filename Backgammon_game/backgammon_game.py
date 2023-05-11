@@ -327,6 +327,10 @@ class Game:
     def get_ratio(count):
         return 6 if count < 6 else (3 if count < 11 else 2)
 
+    @staticmethod
+    def get_low_ratio(count):
+        return 3 if count < 6 else (1.5 if count < 11 else 1)
+
     def move(self, color, dice):
         checkers_list = self.get_possible_checker_list(color)
         checker_weight = self.get_from(color)
@@ -356,14 +360,14 @@ class Game:
 
                 if isinstance(old_position, MyStack):
                     if old_position.count > 1:
-                        if not (old_position is self.black_head or old_position is self.white_head):
+                        if checker_value.position != 1:
                             # пробуем исключить [white/black]head,
                             # чтобы можно было брать шашки не только с головы,
                             # а закрывать более выгодные позиции
 
-                            count += (old_position.count * self.get_ratio(old_position.count) + old_position.count)
+                            count += old_position.count * self.get_ratio(old_position.count)
                         else:
-                            count += ((old_position.count * (self.get_ratio(old_position.count)//2)) + old_position.count)
+                            count += old_position.count * self.get_low_ratio(old_position.count)
 
                     elif old_position.count == 1:
                         count -= 0  # в зависимости от четверти и фазы игры (
