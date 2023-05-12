@@ -146,6 +146,10 @@ class Game:
             return 3
         return 4
 
+    # Обязательно нужно добавить условие при котором может не быть свободных мест и тогда придется
+    # выбирать другую фазу
+
+
     def get_field_map(self, color):
         field_map = dict()
         current_field_element = self.field.white_home if color == 'white' else self.field.black_home
@@ -184,7 +188,7 @@ class Game:
                 # 7: 1, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
 
                 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-                7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                7: 5, 8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
 
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
@@ -329,7 +333,8 @@ class Game:
 
     @staticmethod
     def get_low_ratio(count):
-        return 3 if count < 6 else (1.5 if count < 11 else 1)
+        # return 3 if count < 6 else (1.5 if count < 11 else 1)
+        return 4 if count < 6 else (2 if count < 11 else 1.33)  # надо 2/3, но пусть будет 1 (без сложных вычисленийй)
 
     def move(self, color, dice):
         checkers_list = self.get_possible_checker_list(color)
