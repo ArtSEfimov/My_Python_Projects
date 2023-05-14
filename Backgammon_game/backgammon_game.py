@@ -151,7 +151,6 @@ class Game:
 
     # ДОБАВИТЬ дополнительную фазу, где учесть, что есть "забытые" дома шашки, когда все уже "убежали" вперед
 
-
     def get_field_map(self, color):
         field_map = dict()
         current_field_element = self.field.white_home if color == 'white' else self.field.black_home
@@ -168,7 +167,10 @@ class Game:
         if current_phase == 1:
             return {
                 1: 13, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+
                 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                # 7: 9, 8: 10, 9: 11, 10: 12, 11: 13, 12: 14, # trying
+
                 13: -5, 14: -4, 15: -3, 16: -2, 17: -1, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
@@ -176,11 +178,15 @@ class Game:
         if current_phase == 2:
             return {
                 1: 13, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                7: 7, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
 
-                # 7: 7, 8: 14, 9: 13, 10: 12, 11: 11, 12: 10,
+                # 7: 7, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,  # trying_1
+
+                # 7: 7, 8: 14, 9: 13, 10: 12, 11: 11, 12: 10, # original
+
+                7: 7, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,  # trying_2
 
                 13: -5, 14: -4, 15: -3, 16: -2, 17: -1, 18: 0,
+
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
 
@@ -200,7 +206,7 @@ class Game:
             return {
                 1: 25, 2: 22, 3: 19, 4: 16, 5: 13, 6: 10,
                 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
+                13: 5, 14: 4, 15: 3, 16: 2, 17: 1, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
 
@@ -212,7 +218,10 @@ class Game:
             return {
                 2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
                 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
+
+                # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
+                13: 21, 14: 20, 15: 19, 16: 18, 17: 17, 18: 16,
+
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
@@ -220,7 +229,10 @@ class Game:
             return {
                 2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
                 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+
                 13: 23, 14: 22, 15: 21, 16: 20, 17: 19, 18: 18,
+                # 13: 21, 14: 20, 15: 19, 16: 18, 17: 17, 18: 16,  # trying
+
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
@@ -230,7 +242,9 @@ class Game:
                 8: 12, 9: 13, 10: 14, 11: 15, 12: 16,
                 # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
 
-                13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,  # trying_1
+                13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,  # trying_3
+
+                # 13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,  # trying_1
 
                 # 13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,  # trying_2
 
@@ -333,13 +347,19 @@ class Game:
 
     @staticmethod
     def get_ratio(count):
-        return 6 if count < 6 else (3 if count < 11 else 2)
+        # return 6 if count < 6 else (3 if count < 11 else 2) # ORIGINAL
+        # return 3 if count < 6 else (4 if count < 11 else 5) # trying_1
+        return 3  # trying_2
 
     @staticmethod
     def get_low_ratio(count):
+        # return 2 if count < 6 else (3 if count < 11 else 4) # trying_1
+        # return 4.5 if count == 2 else (4.8 if count < 6 else (2.4 if count < 11 else 1.6)) # Original
+        return 1  # trying_2
 
-        return 4.5 if count == 2 else (4.8 if count < 6 else (2.4 if count < 11 else 1.6))
-        # return 3.5 if count < 6 else (2.5 if count < 11 else 1)  # надо 2/3, но пусть будет 1 (без сложных вычисленийй)
+    @staticmethod
+    def get_new_position_ratio(count):
+        return 2.5 if count < 6 else (3.5 if count < 11 else 4.5)
 
     def move(self, color, dice):
         checkers_list = self.get_possible_checker_list(color)
@@ -384,13 +404,15 @@ class Game:
                     # например надо приоритетнее снять в 3-й четверти во второй фазе)
 
                 if isinstance(new_position, MyStack):
-                    count -= (new_position.count * self.get_ratio(new_position.count) + new_position.count)
+                    # count -= (new_position.count * self.get_ratio(new_position.count) + new_position.count) # ??? непонятно зачем прибавлять new_position.count
+
+                    count -= new_position.count * 3
 
                 else:
                     count += 0  # в зависимости от четверти и фазы игры (
                     # например надо приоритетнее снять в 3-й четверти во второй фазе)
 
-                counts[checker_value] = count
+                counts[checker_value] = round(count, 1)
 
         if counts:
             sorted_counts = sorted(counts, key=lambda c: counts[c], reverse=True)
