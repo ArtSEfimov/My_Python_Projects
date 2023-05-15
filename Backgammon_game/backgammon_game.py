@@ -395,10 +395,11 @@ class Game:
                             # чтобы можно было брать шашки не только с головы,
                             # а закрывать более выгодные позиции
 
-                            count += old_position.count * self.get_ratio(old_position.count)
+                            # count += old_position.count * self.get_ratio(old_position.count)
+                            count += old_position.count
                         else:
                             pass
-                            # count += old_position.count * self.get_low_ratio(old_position.count)
+                            # count -= old_position.count
 
                     elif old_position.count == 1:
                         count -= 0  # в зависимости от четверти и фазы игры (
@@ -407,7 +408,7 @@ class Game:
                 if isinstance(new_position, MyStack):
                     # count -= (new_position.count * self.get_ratio(new_position.count) + new_position.count) # ??? непонятно зачем прибавлять new_position.count
 
-                    count -= new_position.count * 2
+                    count -= new_position.count
 
                 else:
                     count += 0  # в зависимости от четверти и фазы игры (
