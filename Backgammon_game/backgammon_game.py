@@ -349,13 +349,13 @@ class Game:
     def get_ratio(count):
         # return 6 if count < 6 else (3 if count < 11 else 2) # ORIGINAL
         # return 3 if count < 6 else (4 if count < 11 else 5) # trying_1
-        return 3  # trying_2
+        return 2  # trying_2
 
     @staticmethod
     def get_low_ratio(count):
         # return 2 if count < 6 else (3 if count < 11 else 4) # trying_1
         # return 4.5 if count == 2 else (4.8 if count < 6 else (2.4 if count < 11 else 1.6)) # Original
-        return 1  # trying_2
+        return 3  # trying_2
 
     @staticmethod
     def get_new_position_ratio(count):
@@ -397,7 +397,8 @@ class Game:
 
                             count += old_position.count * self.get_ratio(old_position.count)
                         else:
-                            count += old_position.count * self.get_low_ratio(old_position.count)
+                            pass
+                            # count += old_position.count * self.get_low_ratio(old_position.count)
 
                     elif old_position.count == 1:
                         count -= 0  # в зависимости от четверти и фазы игры (
@@ -406,7 +407,7 @@ class Game:
                 if isinstance(new_position, MyStack):
                     # count -= (new_position.count * self.get_ratio(new_position.count) + new_position.count) # ??? непонятно зачем прибавлять new_position.count
 
-                    count -= new_position.count * 3
+                    count -= new_position.count * 2
 
                 else:
                     count += 0  # в зависимости от четверти и фазы игры (
