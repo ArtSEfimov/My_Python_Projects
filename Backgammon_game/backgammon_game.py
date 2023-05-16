@@ -349,17 +349,27 @@ class Game:
     def get_ratio(count):
         # return 6 if count < 6 else (3 if count < 11 else 2) # ORIGINAL
         # return 3 if count < 6 else (4 if count < 11 else 5) # trying_1
-        return 2  # trying_2
+
+        ratios = {
+            1: 10, 2: 12, 3: 16, 4: 18, 5: 20,
+            6: 22, 7: 24, 8: 26, 9: 28, 10: 30,
+            11: 32, 12: 34, 13: 36, 14: 38, 15: 40
+        }
+
+        return ratios[count]  # trying_2
 
     @staticmethod
     def get_low_ratio(count):
         # return 2 if count < 6 else (3 if count < 11 else 4) # trying_1
         # return 4.5 if count == 2 else (4.8 if count < 6 else (2.4 if count < 11 else 1.6)) # Original
-        return 3  # trying_2
 
-    @staticmethod
-    def get_new_position_ratio(count):
-        return 2.5 if count < 6 else (3.5 if count < 11 else 4.5)
+        ratios = {
+            1: 5, 2: 6, 3: 8, 4: 9, 5: 10,
+            6: 11, 7: 12, 8: 13, 9: 14, 10: 15,
+            11: 16, 12: 17, 13: 18, 14: 19, 15: 20
+        }
+
+        return ratios[count]  # trying_2
 
     def move(self, color, dice):
         checkers_list = self.get_possible_checker_list(color)
@@ -391,30 +401,25 @@ class Game:
                 if isinstance(old_position, MyStack):
                     if old_position.count > 1:
                         if checker_value.position != 1:
-                            # пробуем исключить [white/black]head,
-                            # чтобы можно было брать шашки не только с головы,
-                            # а закрывать более выгодные позиции
 
-                            # count += old_position.count * self.get_ratio(old_position.count)
-                            count += old_position.count
+                            count += self.get_ratio(old_position.count)
                         else:
-                            pass
-                            # count -= old_position.count
+
+                            count += self.get_low_ratio(old_position.count)
 
                     elif old_position.count == 1:
                         count -= 0  # в зависимости от четверти и фазы игры (
                     # например надо приоритетнее снять в 3-й четверти во второй фазе)
 
                 if isinstance(new_position, MyStack):
-                    # count -= (new_position.count * self.get_ratio(new_position.count) + new_position.count) # ??? непонятно зачем прибавлять new_position.count
 
-                    count -= new_position.count
+                    count -= self.get_ratio(new_position.count)
 
                 else:
                     count += 0  # в зависимости от четверти и фазы игры (
                     # например надо приоритетнее снять в 3-й четверти во второй фазе)
 
-                counts[checker_value] = round(count, 1)
+                counts[checker_value] = count
 
         if counts:
             sorted_counts = sorted(counts, key=lambda c: counts[c], reverse=True)
