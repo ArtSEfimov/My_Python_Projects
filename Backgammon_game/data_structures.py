@@ -35,16 +35,20 @@ class MyStack:
 
     def pop_element(self):
         if not self.is_empty():
-            if self.top.prev_element is not None:
+
+            if self.top.prev_element is not None:  # если есть еще элементы ниже верхнего
+                tmp_element = self.top
                 self.top = self.top.prev_element
                 self.top.next_element = None
+                tmp_element.prev_element = None
                 self.top.is_up = True
                 # проверим, остался ли один элемент
-                self.top.is_single = (True if self.top.prev_element is None else False)
+                self.top.is_single = self.top.prev_element is None
             else:
                 self.top = None
                 self.color = None
             self.count -= 1
+            # вот здесь надо смотреть на счетчик если он станет равным 0
 
     def __repr__(self):
         return f'{self.count} - {self.color}'

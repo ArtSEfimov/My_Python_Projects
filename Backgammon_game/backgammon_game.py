@@ -96,6 +96,7 @@ class Game:
         old_home, position_in_mylist = self.get_position(color, old_position)
         old_home = old_home.data
         old_home[position_in_mylist].pop_element()
+
         if old_home[position_in_mylist].is_empty():
             old_home[position_in_mylist] = 0
 
@@ -240,9 +241,9 @@ class Game:
             return {
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                 8: 12, 9: 13, 10: 14, 11: 15, 12: 16,
-                # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
+                13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
 
-                13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,  # trying_3
+                # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,  # trying_3
 
                 # 13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,  # trying_1
 
