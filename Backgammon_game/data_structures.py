@@ -28,9 +28,11 @@ class MyStack:
             element.prev_element = self.top
             self.top.is_up = False
             self.top.is_single = False
+
             self.top = element
             self.top.is_single = False
-        self.top.is_up = True
+            self.top.is_up = True
+
         self.count += 1
 
     def pop_element(self):
