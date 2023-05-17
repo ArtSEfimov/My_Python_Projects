@@ -350,7 +350,7 @@ class Game:
     def get_ratio(count):
         # return 6 if count < 6 else (3 if count < 11 else 2) # ORIGINAL
         # return 3 if count < 6 else (4 if count < 11 else 5) # trying_1
-
+        c=1
         ratios = {
             1: 10, 2: 12, 3: 16, 4: 18, 5: 20,
             6: 22, 7: 24, 8: 26, 9: 28, 10: 30,

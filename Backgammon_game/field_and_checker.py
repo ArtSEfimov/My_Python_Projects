@@ -12,8 +12,8 @@ class Checker:
         self.prev_element = None
         self.next_element = None
 
-        self.is_up = False
-        self.is_single = False
+        self.is_up = None
+        self.is_single = None
 
     def get_position(self):
         return self.__position

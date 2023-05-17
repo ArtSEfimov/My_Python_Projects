@@ -29,22 +29,27 @@ class MyStack:
             self.top.is_up = False
             self.top.is_single = False
             self.top = element
-            element.is_single = False
-        element.is_up = True
+            self.top.is_single = False
+        self.top.is_up = True
         self.count += 1
 
     def pop_element(self):
         if not self.is_empty():
 
-            if self.top.prev_element is not None:  # если есть еще элементы ниже верхнего
+            if not self.top.is_single:  # если есть еще элементы ниже верхнего
                 tmp_element = self.top
                 self.top = self.top.prev_element
                 self.top.next_element = None
                 tmp_element.prev_element = None
+                tmp_element.is_single = None
+                tmp_element.is_up = None
                 self.top.is_up = True
+
                 # проверим, остался ли один элемент
                 self.top.is_single = self.top.prev_element is None
             else:
+                self.top.is_single = None
+                self.top.is_up = None
                 self.top = None
                 self.color = None
             self.count -= 1
