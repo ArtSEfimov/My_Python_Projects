@@ -45,9 +45,7 @@ class Game:
 
     def play_the_game(self):
         color = 'black' if self.who_steps == 'computer' else 'white'
-        # self.dcount = 0
-        # self.throw_list = [(6, 5), (2, 2), (3, 6), (1, 5), (2, 6), (3, 4), (1, 6), (5, 3), (6, 4), (6, 1), (1, 6), (6, 2), (1, 1), (1, 6), (5, 4)]
-        # self.gen = self.debag_func()
+
         while not self.finished(color):
             self.head_reset = True
 
@@ -62,14 +60,13 @@ class Game:
 
     def computer_step(self):  # black checkers
 
-        self.first_dice, self.second_dice = self.throw_dices()
+        # self.first_dice, self.second_dice = self.throw_dices()
         # self.throw_list.append((self.first_dice, self.second_dice))
         # print(self.throw_list)
 
         # self.first_dice, self.second_dice = next(self.gen)
-        # self.first_dice, self.second_dice = [int(i) for i in input().split()]
-        # self.dcount += 1
-        # c = 1
+        self.first_dice, self.second_dice = [int(i) for i in input().split()]
+
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
             self.first_step_flag = False
@@ -308,8 +305,8 @@ class Game:
                 return self.first_dice, None
             if tuple_21 > tuple_12:
                 return self.second_dice, None
-            # return random.choice((self.first_dice, self.second_dice)), None
-            return self.first_dice, None  # ДЛЯ ОТЛАДКИ (ЧТОБЫ БЫЛО ОДНОЗНАЧНО)
+            return random.choice((self.first_dice, self.second_dice)), None
+            # return self.first_dice, None  # ДЛЯ ОТЛАДКИ (ЧТОБЫ БЫЛО ОДНОЗНАЧНО)
 
         if any(map(lambda x: x is not None, tuple_12)):
             return self.first_dice, None
@@ -368,12 +365,17 @@ class Game:
     def get_ratio(count):
         # return 6 if count < 6 else (3 if count < 11 else 2) # ORIGINAL
         # return 3 if count < 6 else (4 if count < 11 else 5) # trying_1
-        c = 1
         ratios = {
-            1: 10, 2: 12, 3: 16, 4: 18, 5: 20,
+            1: 12, 2: 14, 3: 16, 4: 18, 5: 20,
             6: 22, 7: 24, 8: 26, 9: 28, 10: 30,
             11: 32, 12: 34, 13: 36, 14: 38, 15: 40
         }
+
+        # ratios = {
+        #     1: 10, 2: 12, 3: 15, 4: 18, 5: 20,
+        #     6: 21, 7: 22, 8: 23, 9: 24, 10: 25,
+        #     11: 26, 12: 27, 13: 28, 14: 29, 15: 30
+        # }
 
         return ratios[count]  # trying_2
 
@@ -383,10 +385,16 @@ class Game:
         # return 4.5 if count == 2 else (4.8 if count < 6 else (2.4 if count < 11 else 1.6)) # Original
 
         ratios = {
-            1: 5, 2: 6, 3: 8, 4: 9, 5: 10,
-            6: 11, 7: 12, 8: 13, 9: 14, 10: 15,
-            11: 16, 12: 17, 13: 18, 14: 19, 15: 20
+            1: 5, 2: 7, 3: 9, 4: 11, 5: 13,
+            6: 15, 7: 17, 8: 19, 9: 21, 10: 23,
+            11: 25, 12: 27, 13: 29, 14: 31, 15: 33
         }
+
+        # ratios = {
+        #     1: 5, 2: 7, 3: 8, 4: 9, 5: 10,
+        #     6: 11, 7: 12, 8: 13, 9: 14, 10: 15,
+        #     11: 16, 12: 17, 13: 18, 14: 19, 15: 20
+        # }
 
         return ratios[count]  # trying_2
 
