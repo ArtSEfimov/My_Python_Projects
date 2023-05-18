@@ -45,14 +45,31 @@ class Game:
 
     def play_the_game(self):
         color = 'black' if self.who_steps == 'computer' else 'white'
+        # self.dcount = 0
+        # self.throw_list = [(6, 5), (2, 2), (3, 6), (1, 5), (2, 6), (3, 4), (1, 6), (5, 3), (6, 4), (6, 1), (1, 6), (6, 2), (1, 1), (1, 6), (5, 4)]
+        # self.gen = self.debag_func()
         while not self.finished(color):
             self.head_reset = True
+
             self.computer_step()
-            time.sleep(3)
+            # time.sleep(3)
+
+    # def debag_func(self):
+    #     for i, e in enumerate(self.throw_list):
+    #         if i == len(self.throw_list) - 1:
+    #             c = 1
+    #         yield e
 
     def computer_step(self):  # black checkers
-        # self.first_dice, self.second_dice = self.throw_dices()
-        self.first_dice, self.second_dice = [int(i) for i in input().split()]
+
+        self.first_dice, self.second_dice = self.throw_dices()
+        # self.throw_list.append((self.first_dice, self.second_dice))
+        # print(self.throw_list)
+
+        # self.first_dice, self.second_dice = next(self.gen)
+        # self.first_dice, self.second_dice = [int(i) for i in input().split()]
+        # self.dcount += 1
+        # c = 1
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
             self.first_step_flag = False
@@ -291,7 +308,8 @@ class Game:
                 return self.first_dice, None
             if tuple_21 > tuple_12:
                 return self.second_dice, None
-            return random.choice((self.first_dice, self.second_dice)), None
+            # return random.choice((self.first_dice, self.second_dice)), None
+            return self.first_dice, None  # ДЛЯ ОТЛАДКИ (ЧТОБЫ БЫЛО ОДНОЗНАЧНО)
 
         if any(map(lambda x: x is not None, tuple_12)):
             return self.first_dice, None
@@ -306,13 +324,13 @@ class Game:
 
         print(count_12)
 
-        if result_1:
-            self.remove_checker_from_old_position(checker_1)
-            self.move_checker_to_new_position(checker_1, reverse_flag=True)
-
         if result_2:
             self.remove_checker_from_old_position(checker_2)
             self.move_checker_to_new_position(checker_2, reverse_flag=True)
+
+        if result_1:
+            self.remove_checker_from_old_position(checker_1)
+            self.move_checker_to_new_position(checker_1, reverse_flag=True)
 
         result_2, checker_2, count_2 = self.move('black', self.second_dice)
         result_1, checker_1, count_1 = self.move('black', self.first_dice)
@@ -321,13 +339,13 @@ class Game:
 
         print(count_21)
 
-        if result_2:
-            self.remove_checker_from_old_position(checker_2)
-            self.move_checker_to_new_position(checker_2, reverse_flag=True)
-
         if result_1:
             self.remove_checker_from_old_position(checker_1)
             self.move_checker_to_new_position(checker_1, reverse_flag=True)
+
+        if result_2:
+            self.remove_checker_from_old_position(checker_2)
+            self.move_checker_to_new_position(checker_2, reverse_flag=True)
 
         value_1, value_2 = self.compare_counts(count_12, count_21)
         if value_1 is not None:
@@ -350,7 +368,7 @@ class Game:
     def get_ratio(count):
         # return 6 if count < 6 else (3 if count < 11 else 2) # ORIGINAL
         # return 3 if count < 6 else (4 if count < 11 else 5) # trying_1
-        c=1
+        c = 1
         ratios = {
             1: 10, 2: 12, 3: 16, 4: 18, 5: 20,
             6: 22, 7: 24, 8: 26, 9: 28, 10: 30,
