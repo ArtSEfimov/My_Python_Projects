@@ -278,80 +278,78 @@ class Game:
                 19: 1, 20: 2, 21: 3, 22: 4, 23: 5, 24: 6
             }
 
-        def get_from_1(self, color):  # может быть color понадобится для определения фазы игры в зависимости от цвета
-            current_phase = self.get_phase_of_game()
+    def get_from_1(self, color):  # может быть color понадобится для определения фазы игры в зависимости от цвета
+        current_phase = self.get_phase_of_game()
 
-            if current_phase == 1:
-                return {
-                    1: 5,
-                    2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
-                    8: 4, 9: 4, 10: 4, 11: 4, 12: 4,
-                    13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
-                    19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
-                }
+        if current_phase == 1:
+            return {
+                1: 5,
+                2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3,
+                8: 3, 9: 3, 10: 3, 11: 3, 12: 3,
+                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            }
 
-            if current_phase == 2:
-                return {
-                    1: 4,
-                    2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1  ,
-                    8: 5, 9: 5, 10: 5, 11: 5, 12: 5,  # original
-                    13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
-                    19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
-                }
+        if current_phase == 2:
+            return {
+                1: 4,
+                2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
+                8: 5, 9: 5, 10: 5, 11: 5, 12: 5,  # original
+                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            }
 
-            if current_phase == 3:
-                return {
-                    1: 7,
-                    2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
-                    8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
-                    13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
-                    19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
-                }
+        if current_phase == 3:
+            return {
+                1: 3, 2: 3, 3: 3, 4: 3, 5: 2, 6: 2, 7: 2,
+                8: 2, 9: 1, 10: 1, 11: 1, 12: 1,
+                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            }
 
-            if current_phase == 4:
-                return {
-                    1: 25,
-                    2: 22, 3: 19, 4: 16, 5: 13, 6: 10,
-                    7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                    13: 5, 14: 4, 15: 3, 16: 2, 17: 1, 18: 0,
-                    19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
-                }
+        if current_phase == 4:
+            return {
+                1: 5, 2: 5, 3: 5, 4: 4, 5: 4, 6: 4,
+                7: 3, 8: 3, 9: 3, 10: 2, 11: 2, 12: 2,
+                13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            }
 
-        def get_to_1(self, color):
+    def get_to_1(self, color):
 
-            current_phase = self.get_phase_of_game()
+        current_phase = self.get_phase_of_game()
 
-            if current_phase == 1:
-                return {
-                    2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
-                    8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                    13: 21, 14: 20, 15: 19, 16: 18, 17: 17, 18: 16,
-                    19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                }
+        if current_phase == 1:
+            return {
+                2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3,
+                8: 3, 9: 3, 10: 3, 11: 3, 12: 3,
+                13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+            }
 
-            if current_phase == 2:
-                return {
-                    2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
-                    8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                    13: 23, 14: 22, 15: 21, 16: 20, 17: 19, 18: 18,
-                    19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                }
+        if current_phase == 2:
+            return {
+                2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3,
+                8: 4, 9: 4, 10: 4, 11: 4, 12: 4,
+                13: 5, 14: 5, 15: 5, 16: 5, 17: 5, 18: 5,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+            }
 
-            if current_phase == 3:
-                return {
-                    2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-                    8: 12, 9: 13, 10: 14, 11: 15, 12: 16,
-                    13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
-                    19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                }
+        if current_phase == 3:
+            return {
+                2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2,
+                8: 4, 9: 4, 10: 4, 11: 4, 12: 4,
+                13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+            }
 
-            if current_phase == 4:
-                return {
-                    2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                    7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                    13: 7, 14: 8, 15: 9, 16: 10, 17: 11, 18: 12,
-                    19: 1, 20: 2, 21: 3, 22: 4, 23: 5, 24: 6
-                }
+        if current_phase == 4:
+            return {
+                2: 3, 3: 3, 4: 3, 5: 3, 6: 3,
+                7: 4, 8: 4, 9: 4, 10: 4, 11: 4, 12: 4,
+                13: 4, 14: 4, 15: 4, 16: 4, 17: 4, 18: 4,
+                19: 1, 20: 2, 21: 3, 22: 4, 23: 5, 24: 6
+            }
 
     def compare_counts(self, tuple_12, tuple_21):
         if all(map(lambda x: x is not None, tuple_12)) and all(map(lambda x: x is not None, tuple_21)):
@@ -426,11 +424,11 @@ class Game:
             checker_1, checker_2 = checker_21, checker_22
 
         if value_1 is not None:
-            # self.move('black', value_1)
-            self.is_success_move(checker_1, value_1)
+            self.move('black', value_1)
+            # self.is_success_move(checker_1, value_1)
         if value_2 is not None:
-            # self.move('black', value_2)
-            self.is_success_move(checker_2, value_2)
+            self.move('black', value_2)
+            # self.is_success_move(checker_2, value_2)
 
     def is_success_move(self, checker, dice):
         if self.is_checker_from_head(checker):
@@ -502,16 +500,17 @@ class Game:
 
     def move(self, color, dice, recursion=False, checkers=None):
         if recursion:
-            checkers_list = self.get_possible_checker_list(color)
+            checkers_list = checkers
             checker_weight = self.get_from(color)
             cell_weight = self.get_to(color)
         else:
-            checkers_list = checkers
+            checkers_list = self.get_possible_checker_list(color)
             checker_weight = self.get_from_1(color)
             cell_weight = self.get_to_1(color)
 
         first_count = None
         first_checker = None
+        counts = dict()
 
         if checkers_list:
 
@@ -567,7 +566,7 @@ class Game:
         if counts:
             return self.move(color, dice, recursion=True, checkers=list(counts.values())[0])
 
-        else:
+        if first_count is not None:
             self.is_success_move(first_checker, dice)
 
             return True, first_checker, first_count

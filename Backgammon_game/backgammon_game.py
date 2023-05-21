@@ -456,11 +456,11 @@ class Game:
                 if isinstance(old_position, MyStack):
                     if old_position.count > 1:
                         if checker_value.position != 1:
-
-                            count += self.get_plus_ratio(old_position.count)
+                            count += old_position.count
+                            # count += self.get_plus_ratio(old_position.count)
                         else:
-
-                            count += self.get_head_ratio(old_position.count)
+                            count += old_position.count
+                            # count += self.get_head_ratio(old_position.count)
 
                     elif old_position.count == 1:
                         count -= 0  # в зависимости от четверти и фазы игры (
@@ -468,7 +468,8 @@ class Game:
 
                 if isinstance(new_position, MyStack):
 
-                    count -= self.get_plus_ratio(new_position.count)
+                    # count -= self.get_plus_ratio(new_position.count)
+                    count -= new_position.count
 
                 else:
                     count += 0  # в зависимости от четверти и фазы игры (
