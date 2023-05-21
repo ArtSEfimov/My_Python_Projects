@@ -431,7 +431,8 @@ class Game:
         checker_weight = self.get_from(color)
         cell_weight = self.get_to(color)
 
-        counts = dict()
+        first_count = None
+        first_checker = None
 
         if checkers_list:
 
@@ -457,10 +458,12 @@ class Game:
                     if old_position.count > 1:
                         if checker_value.position != 1:
 
-                            count += self.get_plus_ratio(old_position.count)
+                            # count += self.get_plus_ratio(old_position.count)
+                            count += old_position.count
                         else:
 
-                            count += self.get_head_ratio(old_position.count)
+                            # count += self.get_head_ratio(old_position.count)
+                            count += old_position.count
 
                     elif old_position.count == 1:
                         count -= 0  # в зависимости от четверти и фазы игры (
@@ -468,21 +471,27 @@ class Game:
 
                 if isinstance(new_position, MyStack):
 
-                    count -= self.get_plus_ratio(new_position.count)
+                    # count -= self.get_plus_ratio(new_position.count)
+                    count -= new_position.count
 
                 else:
                     count += 0  # в зависимости от четверти и фазы игры (
                     # например надо приоритетнее снять в 3-й четверти во второй фазе)
 
-                counts[checker_value] = count
+                if first_count is None or first_count < count:
+                    counts = dict()
+                    first_count = count
+                    first_checker = checker_value
+                elif count == first_count:
+                    counts[count] = (first_checker, checker_value)
 
         if counts:
             sorted_counts = sorted(counts, key=lambda c: counts[c], reverse=True)
             checker = sorted_counts[0]
             count = counts[checker]
 
-            self.is_success_move(checker, dice)
-            return True, checker, count
+            self.is_success_move(first_checker, dice)
+            return True, first_checker, first_count
 
         return False, None, None  # ход не удался
 
