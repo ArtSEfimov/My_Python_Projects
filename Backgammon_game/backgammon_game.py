@@ -192,11 +192,11 @@ class Game:
 
         if current_phase == 2:
             return {
-                1: 9, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                1: 13, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
 
-                # 7: 7, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,  # trying_1
+                7: 7, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,  # trying_1
 
-                7: 7, 8: 14, 9: 13, 10: 12, 11: 11, 12: 10,  # original
+                # 7: 7, 8: 14, 9: 13, 10: 12, 11: 11, 12: 10,  # original
 
                 # 7: 7, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,  # trying_2
 
@@ -212,6 +212,7 @@ class Game:
 
                 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
                 8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
+                # 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
 
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
@@ -345,17 +346,12 @@ class Game:
 
         value_1, value_2 = self.compare_counts(count_12, count_21)
 
-        if (value_1, value_2) == (self.first_dice, self.second_dice):
-            checker_1, checker_2 = checker_11, checker_12
-        else:
-            checker_1, checker_2 = checker_21, checker_22
-
         if value_1 is not None:
-            # self.move('black', value_1)
-            self.is_success_move(checker_1, value_1)
+            self.move('black', value_1)
+            # self.is_success_move(checker_1, value_1)
         if value_2 is not None:
-            # self.move('black', value_2)
-            self.is_success_move(checker_2, value_2)
+            self.move('black', value_2)
+            # self.is_success_move(checker_2, value_2)
 
     def is_success_move(self, checker, dice):
         if self.is_checker_from_head(checker):
@@ -368,62 +364,60 @@ class Game:
         # размещаем ее на новой позиции
         self.move_checker_to_new_position(checker)
 
-    # @staticmethod
-    # def get_plus_ratio(count):
-    #     # return 6 if count < 6 else (3 if count < 11 else 2) # ORIGINAL
-    #     # return 3 if count < 6 else (4 if count < 11 else 5) # trying_1
-    #     # ratios = {
-    #     #     1: 6, 2: 11, 3: 16, 4: 19, 5: 21,
-    #     #     6: 23, 7: 25, 8: 27, 9: 29, 10: 31,
-    #     #     11: 33, 12: 35, 13: 37, 14: 39, 15: 40
-    #     # }
-    #
-    #     ratios = {
-    #         1: 10, 2: 20, 3: 21, 4: 22, 5: 23,
-    #         6: 24, 7: 25, 8: 26, 9: 27, 10: 28,
-    #         11: 29, 12: 30, 13: 31, 14: 32, 15: 33
-    #     }
-    #
-    #     return ratios[count]  # trying_2
+    @staticmethod
+    def get_plus_ratio(count):
+        # return 6 if count < 6 else (3 if count < 11 else 2) # ORIGINAL
+        # return 3 if count < 6 else (4 if count < 11 else 5) # trying_1
+        # ratios = {
+        #     1: 6, 2: 11, 3: 16, 4: 19, 5: 21,
+        #     6: 23, 7: 25, 8: 27, 9: 29, 10: 31,
+        #     11: 33, 12: 35, 13: 37, 14: 39, 15: 40
+        # }
 
-    # @staticmethod
-    # def get_minus_ratio(count):
-    #
-    #     # return 2 if count < 6 else (3 if count < 11 else 4) # trying_1
-    #     # return 4.5 if count == 2 else (4.8 if count < 6 else (2.4 if count < 11 else 1.6)) # Original
-    #
-    #     # ratios = {
-    #     #     1: 3, 2: 4, 3: 5, 4: 6, 5: 7,
-    #     #     6: 8, 7: 9, 8: 10, 9: 11, 10: 12,
-    #     #     11: 13, 12: 14, 13: 15, 14: 16, 15: 17
-    #     # }
-    #
-    #     ratios = {
-    #         1: 6, 2: 7, 3: 8, 4: 9, 5: 10,
-    #         6: 11, 7: 12, 8: 13, 9: 14, 10: 15,
-    #         11: 16, 12: 17, 13: 18, 14: 19, 15: 20
-    #     }
-    #
-    #     return ratios[count]
+        ratios = {
+            2: 8, 3: 9, 4: 10, 5: 11,
+            6: 12, 7: 13, 8: 14, 9: 15, 10: 16,
+            11: 17, 12: 18, 13: 19, 14: 20, 15: 21
+        }
 
-    # @staticmethod
-    # def get_head_ratio(count):
-    #     # return 2 if count < 6 else (3 if count < 11 else 4) # trying_1
-    #     # return 4.5 if count == 2 else (4.8 if count < 6 else (2.4 if count < 11 else 1.6)) # Original
-    #
-    #     # ratios = {
-    #     #     1: 3, 2: 4, 3: 5, 4: 6, 5: 7,
-    #     #     6: 8, 7: 9, 8: 10, 9: 11, 10: 12,
-    #     #     11: 13, 12: 14, 13: 15, 14: 16, 15: 17
-    #     # }
-    #
-    #     ratios = {
-    #         1: 11, 2: 12, 3: 13, 4: 14, 5: 15,
-    #         6: 16, 7: 17, 8: 18, 9: 19, 10: 20,
-    #         11: 21, 12: 22, 13: 23, 14: 24, 15: 25
-    #     }
-    #
-    #     return ratios[count]  # trying_2
+        return ratios[count]  # trying_2
+
+    @staticmethod
+    def get_minus_ratio(count):
+        # return 6 if count < 6 else (3 if count < 11 else 2) # ORIGINAL
+        # return 3 if count < 6 else (4 if count < 11 else 5) # trying_1
+        # ratios = {
+        #     1: 6, 2: 11, 3: 16, 4: 19, 5: 21,
+        #     6: 23, 7: 25, 8: 27, 9: 29, 10: 31,
+        #     11: 33, 12: 35, 13: 37, 14: 39, 15: 40
+        # }
+
+        ratios = {
+            1: 5, 2: 6, 3: 7, 4: 8, 5: 9,
+            6: 10, 7: 11, 8: 12, 9: 13, 10: 14,
+            11: 15, 12: 16, 13: 17, 14: 18, 15: 19
+        }
+
+        return ratios[count]  # trying_2
+
+    @staticmethod
+    def get_head_ratio(count):
+        # return 2 if count < 6 else (3 if count < 11 else 4) # trying_1
+        # return 4.5 if count == 2 else (4.8 if count < 6 else (2.4 if count < 11 else 1.6)) # Original
+
+        # ratios = {
+        #     1: 3, 2: 4, 3: 5, 4: 6, 5: 7,
+        #     6: 8, 7: 9, 8: 10, 9: 11, 10: 12,
+        #     11: 13, 12: 14, 13: 15, 14: 16, 15: 17
+        # }
+        ratios = {
+            1: 5, 2: 6, 3: 7, 4: 8, 5: 9,
+            6: 10, 7: 11, 8: 12, 9: 13, 10: 14,
+            11: 15, 12: 16, 13: 17, 14: 18, 15: 19
+        }
+
+
+        return ratios[count]  # trying_2
 
     def move(self, color, dice):
 
@@ -456,11 +450,12 @@ class Game:
                 if isinstance(old_position, MyStack):
                     if old_position.count > 1:
                         if checker_value.position != 1:
-                            count += old_position.count
-                            # count += self.get_plus_ratio(old_position.count)
+
+                            # count += old_position.count
+                            count += self.get_plus_ratio(old_position.count)
                         else:
-                            count += old_position.count
-                            # count += self.get_head_ratio(old_position.count)
+                            # count += old_position.count
+                            count += self.get_head_ratio(old_position.count)
 
                     elif old_position.count == 1:
                         count -= 0  # в зависимости от четверти и фазы игры (
@@ -468,8 +463,9 @@ class Game:
 
                 if isinstance(new_position, MyStack):
 
+                    count -= self.get_minus_ratio(new_position.count)
                     # count -= self.get_plus_ratio(new_position.count)
-                    count -= new_position.count
+                    # count -= new_position.count
 
                 else:
                     count += 0  # в зависимости от четверти и фазы игры (
