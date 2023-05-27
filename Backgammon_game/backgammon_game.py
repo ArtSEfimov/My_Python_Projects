@@ -147,6 +147,17 @@ class Game:
 
         return 0
 
+    def get_emptiness_from_last_checker(self, color):
+        last_checker_position = sorted(self.black_checkers if color == 'black' else self.white_checkers,
+                                       key=lambda x: x.position)[0].position
+
+        empty_position_count = 0
+        for position in range(last_checker_position, 18 + 1):
+            home, position_in_mylist = self.get_position(color, position)
+            if home.data[position_in_mylist] == 0:
+                empty_position_count += 1
+        return empty_position_count
+
     def get_phase_of_game(self):
         if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 \
                 and self.field.get_occupied_of_structure(self.field.black_home, 'black') \
@@ -154,11 +165,17 @@ class Game:
                 (self.black_head.count > 2 and
                  self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4):
             return 1
+
         if self.field.get_count_of_free_cells(self.field.white_home) != 0 \
                 and self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4:
             return 2
+
         if self.field.get_occupied_of_structure(self.field.black_yard, 'black') < 4:
             return 3
+
+        if self.get_emptiness_from_last_checker('black') < 4:
+            return 4
+
         return 4
 
     # Обязательно нужно добавить условие при котором может не быть свободных мест и тогда придется
@@ -181,7 +198,7 @@ class Game:
 
         if current_phase == 1:
             return {
-                1: 13, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
 
                 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
                 # 7: 9, 8: 10, 9: 11, 10: 12, 11: 13, 12: 14, # trying
@@ -192,7 +209,7 @@ class Game:
 
         if current_phase == 2:
             return {
-                1: 13, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
 
                 7: 7, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,  # trying_1
 
@@ -211,19 +228,25 @@ class Game:
                 # 7: 1, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
 
                 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
-                8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
-                # 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                # 8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
+                8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
 
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
 
         if current_phase == 4:
+            # return {
+            #     # 1: 25, 2: 22, 3: 19, 4: 16, 5: 13, 6: 10, # original
+            #     1: 13, 2: 12, 3: 11, 4: 10, 5: 9, 6: 8,
+            #     7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+            #     13: 5, 14: 4, 15: 3, 16: 2, 17: 1, 18: 0,
+            #     19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            # }
             return {
-                # 1: 25, 2: 22, 3: 19, 4: 16, 5: 13, 6: 10, # original
                 1: 13, 2: 12, 3: 11, 4: 10, 5: 9, 6: 8,
                 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                13: 5, 14: 4, 15: 3, 16: 2, 17: 1, 18: 0,
+                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
             }
 
@@ -256,7 +279,8 @@ class Game:
         if current_phase == 3:
             return {
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-                8: 12, 9: 13, 10: 14, 11: 15, 12: 16,
+                # 8: 12, 9: 13, 10: 14, 11: 15, 12: 16,
+                8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
                 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
 
                 # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,  # trying_3
@@ -269,6 +293,16 @@ class Game:
             }
 
         if current_phase == 4:
+            # return {
+            #     2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+            #     7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+            #
+            #     # 7: 15, 8: 16, 9: 17, 10: 18, 11: 19, 12: 20,
+            #     # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
+            #
+            #     13: 7, 14: 8, 15: 9, 16: 10, 17: 11, 18: 12,
+            #     19: 1, 20: 2, 21: 3, 22: 4, 23: 5, 24: 6
+            # }
             return {
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
@@ -276,166 +310,246 @@ class Game:
                 # 7: 15, 8: 16, 9: 17, 10: 18, 11: 19, 12: 20,
                 # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
 
-                13: 7, 14: 8, 15: 9, 16: 10, 17: 11, 18: 12,
-                19: 1, 20: 2, 21: 3, 22: 4, 23: 5, 24: 6
+                13: 13, 14: 14, 15: 15, 16: 16, 17: 17, 18: 18,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
     def compare_counts(self, tuple_12, tuple_21):
-        if all(map(lambda x: x is not None, tuple_12)) and all(map(lambda x: x is not None, tuple_21)):
-            tuple_12 = sum(tuple_12)
-            tuple_21 = sum(tuple_21)
-            if tuple_21 < tuple_12:  # если True, то прямой порядок хода (первый, второй)
-                return self.first_dice, self.second_dice
-            if tuple_21 > tuple_12:
-                return self.second_dice, self.first_dice
+        count_12, checker_11, checker_12 = tuple_12
+        count_21, checker_21, checker_22 = tuple_21
+
+        if all(map(lambda x: x is not None, count_12)) and all(map(lambda x: x is not None, count_21)):
+            count_12 = sum(count_12)
+            count_21 = sum(count_21)
+            if count_21 < count_12:  # если True, то прямой порядок хода (первый, второй)
+                return self.first_dice, checker_11, self.second_dice, checker_12
+            if count_21 > count_12:
+                return self.second_dice, checker_21, self.first_dice, checker_22
             return random.choice(
                 (
-                    (self.first_dice, self.second_dice),
-                    (self.second_dice, self.first_dice)
+                    (self.first_dice, checker_11, self.second_dice, checker_12),
+                    (self.second_dice, checker_21, self.first_dice, checker_22)
                 )
             )
 
-        if all(map(lambda x: x is not None, tuple_12)):
-            return self.first_dice, self.second_dice
-        if all(map(lambda x: x is not None, tuple_21)):
-            return self.second_dice, self.first_dice
+        if all(map(lambda x: x is not None, count_12)):
+            return self.first_dice, checker_11, self.second_dice, checker_12
+        if all(map(lambda x: x is not None, count_21)):
+            return self.second_dice, checker_21, self.first_dice, checker_22
 
-        if any(map(lambda x: x is not None, tuple_12)) and any(map(lambda x: x is not None, tuple_21)):
-            tuple_12, _ = tuple_12
-            tuple_21, _ = tuple_21
-            if tuple_21 < tuple_12:  # если True, то прямой порядок хода (первый, второй)
-                return self.first_dice, None
-            if tuple_21 > tuple_12:
-                return self.second_dice, None
-            return random.choice((self.first_dice, self.second_dice)), None
+        if any(map(lambda x: x is not None, count_12)) and any(map(lambda x: x is not None, count_21)):
+            count_12 = tuple(0 if x is None else x for x in count_12)
+            count_21 = tuple(0 if x is None else x for x in count_21)
 
-        if any(map(lambda x: x is not None, tuple_12)):
-            return self.first_dice, None
-        return self.second_dice, None
+            if sum(count_21) < sum(count_12):  # если True, то прямой порядок хода (первый, второй)
+                count_1, count_2 = count_12
+                if count_1:
+                    return self.first_dice, checker_11, None, None
+                return self.first_dice, checker_12, None, None
+            if sum(count_21) > sum(count_12):
+                count_2, count_1 = count_21
+                if count_1:
+                    return self.second_dice, checker_21, None, None
+                return self.second_dice, checker_22, None, None
+            checker_1 = checker_11 if count_12[0] else checker_12
+            checker_2 = checker_22 if count_21[0] else checker_21
+            return random.choice(((self.first_dice, checker_1), (self.second_dice, checker_2))), None, None
+
+        if any(map(lambda x: x is not None, count_12)):
+            checker = checker_11 if count_12[0] else checker_12
+
+            return self.first_dice, checker, None, None
+        checker = checker_22 if count_21[0] else checker_21
+        return self.second_dice, checker, None, None
 
     def checking_move(self):
 
-        result_1, checker_11, count_1 = self.move('black', self.first_dice)
-        result_2, checker_12, count_2 = self.move('black', self.second_dice)
+        # ПРЯМОЙ порядок хода (ПЕРВЫЙ -> ВТОРОЙ)
 
-        count_12 = (count_1, count_2)  # порядок хода такой: первый, второй
+        result_11, checker_11, count_1 = self.move('black', self.first_dice)
+        result_12, checker_12, count_2 = self.move('black', self.second_dice)
+
+        count_12 = (count_1, count_2)
 
         print(count_12)
 
-        if result_2:
+        if result_12:
             self.remove_checker_from_old_position(checker_12)
             self.move_checker_to_new_position(checker_12, reverse_flag=True)
 
-        if result_1:
+        if result_11:
             self.remove_checker_from_old_position(checker_11)
             self.move_checker_to_new_position(checker_11, reverse_flag=True)
 
-        result_2, checker_22, count_2 = self.move('black', self.second_dice)
-        result_1, checker_21, count_1 = self.move('black', self.first_dice)
+        # ОБРАТНЫЙ порядок хода (ВТОРОЙ -> ПЕРВЫЙ)
+
+        result_21, checker_21, count_1 = self.move('black', self.second_dice)
+        result_22, checker_22, count_2 = self.move('black', self.first_dice)
 
         count_21 = (count_2, count_1)  # порядок хода такой: второй, первый
 
         print(count_21)
 
-        if result_1:
-            self.remove_checker_from_old_position(checker_21)
-            self.move_checker_to_new_position(checker_21, reverse_flag=True)
-
-        if result_2:
+        if result_22:
             self.remove_checker_from_old_position(checker_22)
             self.move_checker_to_new_position(checker_22, reverse_flag=True)
 
-        value_1, value_2 = self.compare_counts(count_12, count_21)
+        if result_21:
+            self.remove_checker_from_old_position(checker_21)
+            self.move_checker_to_new_position(checker_21, reverse_flag=True)
 
-        if value_1 is not None:
-            self.move('black', value_1)
-            # self.is_success_move(checker_1, value_1)
-        if value_2 is not None:
-            self.move('black', value_2)
-            # self.is_success_move(checker_2, value_2)
+        dice_1, checker_1, dice_2, checker_2 = self.compare_counts((count_12, checker_11, checker_12),
+                                                                   (count_21, checker_21, checker_22)
+                                                                   )
+
+        if dice_1 is not None:
+            self.is_success_move(checker_1, dice_1)
+        if dice_2 is not None:
+            self.is_success_move(checker_2, dice_2)
 
     def is_success_move(self, checker, dice):
         if self.is_checker_from_head(checker):
             self.head_reset = False
-        # убираем шашку со старой позиции)
 
+        # убираем шашку со старой позиции
         self.remove_checker_from_old_position(checker)
+
         # присваеваем ей ноувю позицию
         checker.position += dice
+
         # размещаем ее на новой позиции
         self.move_checker_to_new_position(checker)
 
     @staticmethod
     def get_plus_ratio(count):
-        # return 6 if count < 6 else (3 if count < 11 else 2) # ORIGINAL
-        # return 3 if count < 6 else (4 if count < 11 else 5) # trying_1
-        # ratios = {
-        #     1: 6, 2: 11, 3: 16, 4: 19, 5: 21,
-        #     6: 23, 7: 25, 8: 27, 9: 29, 10: 31,
-        #     11: 33, 12: 35, 13: 37, 14: 39, 15: 40
+
+        # ratios = {  # 1 choice
+        #     2: 9, 3: 10, 4: 11, 5: 12,
+        #     6: 13, 7: 14, 8: 15, 9: 16, 10: 17,
+        #     11: 18, 12: 19, 13: 20, 14: 21, 15: 22
         # }
 
-        # ratios = {
-        #     2: 8, 3: 9, 4: 10, 5: 11,
-        #     6: 12, 7: 13, 8: 14, 9: 15, 10: 16,
-        #     11: 17, 12: 18, 13: 19, 14: 20, 15: 21
-        # }
-        ratios = {
-            2: 12, 3: 13, 4: 14, 5: 15,
-            6: 16, 7: 17, 8: 18, 9: 19, 10: 20,
-            11: 21, 12: 22, 13: 23, 14: 24, 15: 25
+        ratios = {  # 1 choice
+            2: 8, 3: 9, 4: 10, 5: 11,
+            6: 12, 7: 13, 8: 14, 9: 15, 10: 16,
+            11: 17, 12: 18, 13: 19, 14: 20, 15: 21
         }
 
         return ratios[count]  # trying_2
 
     @staticmethod
     def get_minus_ratio(count):
-        # return 6 if count < 6 else (3 if count < 11 else 2) # ORIGINAL
-        # return 3 if count < 6 else (4 if count < 11 else 5) # trying_1
-        # ratios = {
-        #     1: 6, 2: 11, 3: 16, 4: 19, 5: 21,
-        #     6: 23, 7: 25, 8: 27, 9: 29, 10: 31,
-        #     11: 33, 12: 35, 13: 37, 14: 39, 15: 40
-        # }
 
-        # ratios = {
-        #     1: 5, 2: 6, 3: 7, 4: 8, 5: 9,
-        #     6: 10, 7: 11, 8: 12, 9: 13, 10: 14,
-        #     11: 15, 12: 16, 13: 17, 14: 18, 15: 19
-        # }
-        ratios = {
-            1: 11, 2: 12, 3: 13, 4: 14, 5: 15,
-            6: 16, 7: 17, 8: 18, 9: 19, 10: 20,
-            11: 21, 12: 22, 13: 23, 14: 24, 15: 25
+        ratios = {  # 1 choice
+            1: 7, 2: 14, 3: 15, 4: 16, 5: 17,
+            6: 18, 7: 19, 8: 20, 9: 21, 10: 22,
+            11: 23, 12: 24, 13: 25, 25: 26, 15: 27
         }
 
         return ratios[count]  # trying_2
 
     @staticmethod
     def get_head_ratio(count):
-        # return 2 if count < 6 else (3 if count < 11 else 4) # trying_1
-        # return 4.5 if count == 2 else (4.8 if count < 6 else (2.4 if count < 11 else 1.6)) # Original
 
         # ratios = {
-        #     1: 3, 2: 4, 3: 5, 4: 6, 5: 7,
-        #     6: 8, 7: 9, 8: 10, 9: 11, 10: 12,
-        #     11: 13, 12: 14, 13: 15, 14: 16, 15: 17
+        #     1: 15, 2: 14, 3: 13, 4: 12, 5: 11,
+        #     6: 10, 7: 9, 8: 8, 9: 7, 10: 6,
+        #     11: 5, 12: 4, 13: 3, 14: 2, 15: 1
+        # }
+        # ratios = {
+        #     1: 6, 2: 7, 3: 8, 4: 9, 5: 10,
+        #     6: 11, 7: 12, 8: 13, 9: 14, 10: 15,
+        #     11: 16, 12: 17, 13: 18, 14: 19, 15: 20
         # }
         ratios = {
-            1: 15, 2: 14, 3: 13, 4: 12, 5: 11,
-            6: 10, 7: 9, 8: 8, 9: 7, 10: 6,
-            11: 5, 12: 4, 13: 3, 14: 2, 15: 1
+            1: 20, 2: 19, 3: 18, 4: 17, 5: 16,
+            6: 15, 7: 14, 8: 13, 9: 14, 10: 15,
+            11: 16, 12: 17, 13: 18, 14: 19, 15: 20
         }
 
         return ratios[count]  # trying_2
 
-    def move(self, color, dice):
+    @staticmethod
+    def punishment(current_phase, old_position):  # штраф за оставление позиции
+        if current_phase == 1:
+            ratios = {
+                1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2,
+                8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            }
+            return ratios[old_position]
 
-        checkers_list = self.get_possible_checker_list(color)
+        if current_phase == 2:
+            ratios = {
+                1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
+                8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            }
+            return ratios[old_position]
+
+        if current_phase == 3:
+            ratios = {
+                1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
+                8: 3, 9: 3, 10: 3, 11: 3, 12: 3,
+                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            }
+            return ratios[old_position]
+
+        if current_phase == 4:
+            ratios = {
+                1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
+                8: 2, 9: 2, 10: 2, 11: 2, 12: 2,
+                13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            }
+            return ratios[old_position]
+
+        return 0
+
+    @staticmethod
+    def encouragement(current_phase, new_position):  # поощрение за занятие пустой позиции
+        if current_phase == 1:
+            ratios = {
+                2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2,
+                8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            }
+            return ratios[new_position]
+
+        if current_phase == 2:
+            ratios = {
+                2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2,
+                8: 1, 9: 1, 10: 1, 11: 1, 12: 1,
+                13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            }
+            return ratios[new_position]
+
+        if current_phase == 3:
+            ratios = {
+                2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
+                8: 3, 9: 3, 10: 3, 11: 3, 12: 3,
+                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            }
+            return ratios[new_position]
+
+        return 0
+
+    def move(self, color, dice, recursion=False, checkers=None):
+        if recursion:
+            checkers_list = checkers
+        else:
+            checkers_list = self.get_possible_checker_list(color)
+
         checker_weight = self.get_from(color)
         cell_weight = self.get_to(color)
 
-        counts = dict()
+        main_mark = None
 
         if checkers_list:
 
@@ -460,38 +574,68 @@ class Game:
                 if isinstance(old_position, MyStack):
                     if old_position.count > 1:
                         if checker_value.position != 1:
-
-                            # count += old_position.count
                             count += self.get_plus_ratio(old_position.count)
+
                         else:
-                            # count += old_position.count
                             count += self.get_head_ratio(old_position.count)
 
                     elif old_position.count == 1:
-                        count -= 0  # в зависимости от четверти и фазы игры (
-                    # например надо приоритетнее снять в 3-й четверти во второй фазе)
+                        if recursion:
+                            count -= self.punishment(self.get_phase_of_game(), checker_value.position)
 
                 if isinstance(new_position, MyStack):
-
                     count -= self.get_minus_ratio(new_position.count)
-                    # count -= self.get_plus_ratio(new_position.count)
-                    # count -= new_position.count
 
                 else:
-                    count += 0  # в зависимости от четверти и фазы игры (
-                    # например надо приоритетнее снять в 3-й четверти во второй фазе)
+                    if recursion:
+                        count += self.encouragement(self.get_phase_of_game(), cell_value)
 
-                counts[checker_value] = count
+                if main_mark is None or main_mark < count:
+                    marks = None
+                    main_mark = count
+                    main_checker = checker_value
+                elif count == main_mark:
+                    if marks is None:
+                        marks = dict()
+                        marks[main_mark] = (main_checker, checker_value)
+                    else:
+                        marks[main_mark] += (checker_value,)
 
-        if counts:
-            sorted_counts = sorted(counts, key=lambda c: counts[c], reverse=True)
-            checker = sorted_counts[0]
-            count = counts[checker]
+        if marks:
+            if recursion:
+                main_mark = list(marks.keys())[0]
+                main_checker = random.choice(list(marks.values())[0])
+                return None, main_checker, main_mark
 
-            self.is_success_move(checker, dice)
-            return True, checker, count
+            _, main_checker, main_mark = self.move(color, dice, recursion=True, checkers=list(marks.values())[0])
+            self.is_success_move(main_checker, dice)
+            return True, main_checker, main_mark
+
+        if main_mark:
+            if not recursion:
+                self.is_success_move(main_checker, dice)
+            return True, main_checker, main_mark
 
         return False, None, None  # ход не удался
+
+
+        # if marks is None:
+        #     if main_mark is None:
+        #         return False, None, None  # ход не удался
+        #
+        #     if not recursion:
+        #         self.is_success_move(main_checker, dice)
+        #     return True, main_checker, main_mark
+        #
+        # else:
+        #     if recursion:
+        #         main_mark = list(marks.keys())[0]
+        #         main_checker = random.choice(list(marks.values())[0])
+        #         return None, main_checker, main_mark
+        #
+        #     _, main_checker, main_mark = self.move(color, dice, recursion=True, checkers=list(marks.values())[0])
+        #     self.is_success_move(main_checker, dice)
+        #     return True, main_checker, main_mark
 
 
 g = Game()

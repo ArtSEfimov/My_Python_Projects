@@ -352,6 +352,7 @@ class Game:
             }
 
     def compare_counts(self, tuple_12, tuple_21):
+
         if all(map(lambda x: x is not None, tuple_12)) and all(map(lambda x: x is not None, tuple_21)):
             tuple_12 = sum(tuple_12)
             tuple_21 = sum(tuple_21)
