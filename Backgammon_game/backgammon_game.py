@@ -147,16 +147,16 @@ class Game:
 
         return 0
 
-    def get_emptiness_from_last_checker(self, color):
-        last_checker_position = sorted(self.black_checkers if color == 'black' else self.white_checkers,
-                                       key=lambda x: x.position)[0].position
-
-        empty_position_count = 0
-        for position in range(last_checker_position, 19):
-            home, position_in_mylist = self.get_position(color, position)
-            if home.data[position_in_mylist] == 0:
-                empty_position_count += 1
-        return empty_position_count
+    # def get_emptiness_from_last_checker(self, color):
+    #     last_checker_position = sorted(self.black_checkers if color == 'black' else self.white_checkers,
+    #                                    key=lambda x: x.position)[0].position
+    #
+    #     empty_position_count = 0
+    #     for position in range(last_checker_position, 19):
+    #         home, position_in_mylist = self.get_position(color, position)
+    #         if home.data[position_in_mylist] == 0:
+    #             empty_position_count += 1
+    #     return empty_position_count
 
     def get_phase_of_game(self):
         if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 \
@@ -166,19 +166,40 @@ class Game:
                  self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4):
             return 1
 
-        if self.field.get_count_of_free_cells(self.field.white_home) != 0 \
-                and self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4:
+        if self.field.get_count_of_free_cells(self.field.white_home) != 0 and self.field.get_occupied_of_structure(
+                self.field.white_yard, 'black') == 0 and self.field.get_sum_of_structure(self.field.white_home,
+                                                                                         'black') <= self.field.get_occupied_of_structure(
+            self.field.white_home, 'black'):  # + self.field.get_count_of_free_cells(self.field.white_home):
+            # and self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4 \
+
             return 2
 
-        if self.field.get_sum_of_structure(self.field.white_yard,
-                                           'black') == 0 and self.field.get_occupied_of_structure(self.field.black_yard,
-                                                                                                  'black') < 4:
+        # если:
+        # в ЧЕРНОМ ДОМЕ есть еще шашки
+        # ИЛИ в ЧЕРНОМ САДУ меньше или равно 4 занятых ЧЕРНЫМИ клеток И там есть свободные клетки
+        # ??? И ЧЕРНЫХ шашек в ЧЕРНОМ САДУ и ЧЕРНОМ ДОМЕ больше чем занятых клеток в ЧЕРНОМ САДУ
+        # if self.field.get_sum_of_structure(self.field.black_home, 'black') != 0 or self.field.get_occupied_of_structure(
+        #         self.field.black_yard, 'black') <= 4 and \
+        #         self.field.get_count_of_free_cells(self.field.black_yard) != 0 and (
+        #         self.field.get_sum_of_structure(self.field.black_home, 'black') + self.field.get_sum_of_structure(
+        #     self.field.black_yard, 'black') > self.field.get_occupied_of_structure(self.field.black_yard, 'black')
+        # ):
+        if self.field.get_count_of_free_cells(self.field.white_yard) == 6 and (
+                self.field.get_count_of_free_cells(self.field.black_yard) != 0 or (
+                self.field.get_sum_of_structure(self.field.black_home, 'black') + self.field.get_sum_of_structure(
+            self.field.black_yard, 'black') > self.field.get_occupied_of_structure(self.field.black_yard, 'black'))
+        ):
             return 3
 
-        if self.get_emptiness_from_last_checker('black') > 1:
+        # if self.get_emptiness_from_last_checker('black') > 1:
+        # if self.field.get_count_of_free_cells(self.field.black_yard) != 0
+        if (
+                self.field.get_sum_of_structure(self.field.black_home, 'black') + self.field.get_sum_of_structure(
+            self.field.black_yard, 'black') != 0
+        ):
             return 4
 
-        if self.field.get_sum_of_structure(self.field.white_yard, 'black') < 15:
+        if self.field.get_sum_of_structure(self.field.white_yard, 'black') <= 15:
             return 5
 
     # Обязательно нужно добавить условие при котором может не быть свободных мест и тогда придется
@@ -231,8 +252,10 @@ class Game:
                 # 7: 1, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
 
                 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
+
                 # 8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
-                8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                # 8: 6, 9: 5, 10: 4, 11: 3, 12: 2, # original
+                8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
 
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -250,7 +273,10 @@ class Game:
                 1: 19, 2: 18, 3: 17, 4: 16, 5: 15, 6: 14,
                 7: 13, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
                 13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                # 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
+
+                19: 25, 20: 24, 21: 23, 22: 22, 23: 21, 24: 0
             }
 
         if current_phase == 5:
@@ -292,11 +318,12 @@ class Game:
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                 # 8: 12, 9: 13, 10: 14, 11: 15, 12: 16,
                 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
+
+                # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8, # original
 
                 # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,  # trying_3
 
-                # 13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,  # trying_1
+                13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,  # trying_1
 
                 # 13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,  # trying_2
 
@@ -358,7 +385,7 @@ class Game:
                 return self.second_dice, checker_22, None, None
             checker_1 = checker_11 if count_12[0] else checker_12
             checker_2 = checker_22 if count_21[0] else checker_21
-            return random.choice(((self.first_dice, checker_1), (self.second_dice, checker_2))), None, None
+            return *random.choice(((self.first_dice, checker_1), (self.second_dice, checker_2))), None, None
 
         if any(map(lambda x: x is not None, count_12)):
             checker = checker_11 if count_12[0] else checker_12
@@ -496,9 +523,9 @@ class Game:
 
         if current_phase == 3:
             ratios = {
-                1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
-                8: 3, 9: 3, 10: 3, 11: 3, 12: 3,
-                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+                1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
+                7: 2, 8: 2, 9: 2, 10: 2, 11: 2, 12: 2,
+                13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
             return ratios[old_position]
@@ -564,6 +591,7 @@ class Game:
         cell_weight = self.get_to(color)
 
         main_mark = None
+        marks = None
 
         if checkers_list:
 
