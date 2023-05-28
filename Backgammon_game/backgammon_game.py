@@ -159,19 +159,22 @@ class Game:
     #     return empty_position_count
 
     def get_phase_of_game(self):
-        if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 \
-                and self.field.get_occupied_of_structure(self.field.black_home, 'black') \
-                + self.get_position_color(7) <= 4 or \
-                (self.black_head.count > 2 and
-                 self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4):
+        # if (self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 \
+        #         and self.field.get_occupied_of_structure(self.field.black_home, 'black') \
+        #         + self.get_position_color(7) <= 4) or \
+        #         (self.black_head.count > 2 and
+        #          self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4):
+        #     return 1
+
+        if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 and (self.field.get_count_of_free_cells(
+                self.field.black_home) + self.get_position_color(7)) != 0 and self.black_head.count > 2 and (
+                self.field.get_occupied_of_structure(self.field.black_home, 'black') + self.get_position_color(7)) <= 4:
             return 1
 
-        if self.field.get_count_of_free_cells(self.field.white_home) != 0 and self.field.get_occupied_of_structure(
-                self.field.white_yard, 'black') == 0 and self.field.get_sum_of_structure(self.field.white_home,
-                                                                                         'black') <= self.field.get_occupied_of_structure(
-            self.field.white_home, 'black'):  # + self.field.get_count_of_free_cells(self.field.white_home):
-            # and self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4 \
-
+        if (self.field.get_count_of_free_cells(self.field.white_home) != 0 and \
+            self.field.get_sum_of_structure(self.field.white_home, 'black') < self.field.get_occupied_of_structure(
+                    self.field.white_home, 'black') + self.field.get_count_of_free_cells(self.field.white_home)) or \
+                self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4:
             return 2
 
         # если:
@@ -241,7 +244,8 @@ class Game:
 
                 # 7: 7, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,  # trying_2
 
-                13: -5, 14: -4, 15: -3, 16: -2, 17: -1, 18: 0,
+                # 13: -5, 14: -4, 15: -3, 16: -2, 17: -1, 18: 0, ORIGINAL
+                13: -7, 14: -6, 15: -5, 16: -4, 17: -3, 18: -2,
 
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -276,7 +280,7 @@ class Game:
                 # 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
                 # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
 
-                19: 25, 20: 24, 21: 23, 22: 22, 23: 21, 24: 0
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
         if current_phase == 5:
@@ -440,6 +444,8 @@ class Game:
             self.is_success_move(checker_2, dice_2)
 
     def is_success_move(self, checker, dice):
+        if checker is None:
+            c = 1
         if self.is_checker_from_head(checker):
             self.head_reset = False
 
@@ -454,12 +460,6 @@ class Game:
 
     @staticmethod
     def get_plus_ratio(count):
-
-        # ratios = {  # 1 choice
-        #     2: 9, 3: 10, 4: 11, 5: 12,
-        #     6: 13, 7: 14, 8: 15, 9: 16, 10: 17,
-        #     11: 18, 12: 19, 13: 20, 14: 21, 15: 22
-        # }
 
         ratios = {  # 1 choice
             2: 8, 3: 9, 4: 10, 5: 11,
@@ -483,16 +483,6 @@ class Game:
     @staticmethod
     def get_head_ratio(count):
 
-        # ratios = {
-        #     1: 15, 2: 14, 3: 13, 4: 12, 5: 11,
-        #     6: 10, 7: 9, 8: 8, 9: 7, 10: 6,
-        #     11: 5, 12: 4, 13: 3, 14: 2, 15: 1
-        # }
-        # ratios = {
-        #     1: 6, 2: 7, 3: 8, 4: 9, 5: 10,
-        #     6: 11, 7: 12, 8: 13, 9: 14, 10: 15,
-        #     11: 16, 12: 17, 13: 18, 14: 19, 15: 20
-        # }
         ratios = {
             1: 20, 2: 19, 3: 18, 4: 17, 5: 16,
             6: 15, 7: 14, 8: 13, 9: 14, 10: 15,
@@ -581,6 +571,22 @@ class Game:
 
         return 0
 
+    def distance_assessment(self, new_position):
+        """Оценка расстояния от ближайшей сзади фишки. Применяется только в фазах 3, 4, 5."""
+
+        previous_checker = None
+
+        sorted_checker_list = sorted(self.black_checkers, key=lambda x: x.position)
+        for checker in sorted_checker_list:
+            if checker.position > new_position:
+                break
+            elif checker.position < new_position:
+                previous_checker = checker
+
+        if previous_checker:
+            return new_position - previous_checker.position
+        return 0
+
     def move(self, color, dice, recursion=False, checkers=None):
         if recursion:
             checkers_list = checkers
@@ -615,6 +621,9 @@ class Game:
 
                 count = cell_weight[cell_value] + checker_weight[checker_value.position]
 
+                if self.get_phase_of_game() > 2:
+                    count -= self.distance_assessment(cell_value)
+
                 if isinstance(old_position, MyStack):
                     if old_position.count > 1:
                         if checker_value.position != 1:
@@ -645,7 +654,7 @@ class Game:
                     else:
                         marks[main_mark] += (checker_value,)
 
-        if marks:
+        if marks is not None:
             if recursion:
                 main_mark = list(marks.keys())[0]
                 main_checker = random.choice(list(marks.values())[0])
@@ -655,30 +664,12 @@ class Game:
             self.is_success_move(main_checker, dice)
             return True, main_checker, main_mark
 
-        if main_mark:
+        if main_mark is not None:
             if not recursion:
                 self.is_success_move(main_checker, dice)
             return True, main_checker, main_mark
 
         return False, None, None  # ход не удался
-
-        # if marks is None:
-        #     if main_mark is None:
-        #         return False, None, None  # ход не удался
-        #
-        #     if not recursion:
-        #         self.is_success_move(main_checker, dice)
-        #     return True, main_checker, main_mark
-        #
-        # else:
-        #     if recursion:
-        #         main_mark = list(marks.keys())[0]
-        #         main_checker = random.choice(list(marks.values())[0])
-        #         return None, main_checker, main_mark
-        #
-        #     _, main_checker, main_mark = self.move(color, dice, recursion=True, checkers=list(marks.values())[0])
-        #     self.is_success_move(main_checker, dice)
-        #     return True, main_checker, main_mark
 
 
 g = Game()
