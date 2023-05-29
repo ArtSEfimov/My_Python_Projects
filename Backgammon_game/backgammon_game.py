@@ -147,16 +147,7 @@ class Game:
 
         return 0
 
-    # def get_emptiness_from_last_checker(self, color):
-    #     last_checker_position = sorted(self.black_checkers if color == 'black' else self.white_checkers,
-    #                                    key=lambda x: x.position)[0].position
-    #
-    #     empty_position_count = 0
-    #     for position in range(last_checker_position, 19):
-    #         home, position_in_mylist = self.get_position(color, position)
-    #         if home.data[position_in_mylist] == 0:
-    #             empty_position_count += 1
-    #     return empty_position_count
+
 
     def get_phase_of_game(self):
         # if (self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 \
@@ -569,6 +560,37 @@ class Game:
             }
             return ratios[new_position]
 
+        return 0
+
+
+    def get_emptiness_from_last_checker(self, color):
+        checkers_from_19_till_24 = sorted((checker for checker in (self.black_checkers if color == 'black' else self.white_checkers) if checker.position > 12),
+                                       key=lambda x: x.position)[0].position
+
+        white_checkers = 0
+        for position in range(last_checker_position, 19):
+            home, position_in_mylist = self.get_position(color, position)
+            if home.data[position_in_mylist] == 0:
+                empty_position_count += 1
+        return empty_position_count
+
+    def manage_the_last_quarter(self, old_position):
+        """Управление зоной сброса шашек. Если сзади еще есть белые шашки, нельзя освобождать ячейки"""
+        """Делаем так, что если с 13 по 18 позиции есть белые шашки, то свои не двигаем,
+        если с 19 по 24, надо смотреть по расстоянию между своими шашками в этой зоне"""
+
+
+
+        punishment = {13: -11, 14: -10, 15: -9, 16: -8, 17: -7, 18: -6,
+                      19: -5, 20: -4, 21: -3, 22: -2, 23: -1, 24: 0}
+
+        encouragement = {19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0}
+        if
+            return punishment[old_position]
+
+
+        if white_checkers_count > 0:
+            return punishment_and_encouragement[old_position]
         return 0
 
     def distance_assessment(self, new_position):
