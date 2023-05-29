@@ -147,8 +147,6 @@ class Game:
 
         return 0
 
-
-
     def get_phase_of_game(self):
         # if (self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 \
         #         and self.field.get_occupied_of_structure(self.field.black_home, 'black') \
@@ -196,10 +194,6 @@ class Game:
         if self.field.get_sum_of_structure(self.field.white_yard, 'black') <= 15:
             return 5
 
-    # Обязательно нужно добавить условие при котором может не быть свободных мест и тогда придется
-    # выбирать другую фазу
-
-    # ДОБАВИТЬ дополнительную фазу, где учесть, что есть "забытые" дома шашки, когда все уже "убежали" вперед
 
     def get_field_map(self, color):
         field_map = dict()
@@ -435,8 +429,7 @@ class Game:
             self.is_success_move(checker_2, dice_2)
 
     def is_success_move(self, checker, dice):
-        if checker is None:
-            c = 1
+
         if self.is_checker_from_head(checker):
             self.head_reset = False
 
@@ -562,35 +555,39 @@ class Game:
 
         return 0
 
+    def get_last_white_checker_position(self):
 
-    def get_emptiness_from_last_checker(self, color):
-        checkers_from_19_till_24 = sorted((checker for checker in (self.black_checkers if color == 'black' else self.white_checkers) if checker.position > 12),
-                                       key=lambda x: x.position)[0].position
+        last_white_checker_position = None
 
-        white_checkers = 0
-        for position in range(last_checker_position, 19):
-            home, position_in_mylist = self.get_position(color, position)
-            if home.data[position_in_mylist] == 0:
-                empty_position_count += 1
-        return empty_position_count
+        match_positions = {None: None,
+                           1: 13, 2: 14, 3: 15, 4: 16, 5: 17, 6: 18,
+                           7: 19, 8: 20, 9: 21, 10: 22, 11: 23, 12: 24
+                           }
+        if any(
+                map(
+                    lambda x: 1 <= x.position <= 12, self.white_checkers
+                )
+        ):
+            last_white_checker_position = sorted((checker for checker in self.white_checkers if checker.position >= 1),
+                                                 key=lambda x: x.position)[0].position
+
+        return match_positions[last_white_checker_position]
 
     def manage_the_last_quarter(self, old_position):
-        """Управление зоной сброса шашек. Если сзади еще есть белые шашки, нельзя освобождать ячейки"""
-        """Делаем так, что если с 13 по 18 позиции есть белые шашки, то свои не двигаем,
-        если с 19 по 24, надо смотреть по расстоянию между своими шашками в этой зоне"""
-
-
+        """Если на позициях с 13 по 24 есть белые шашки, смотрим на расположение последней из них относительно черных
+        шашек. Можем двигать черные шашки только если их позиция меньше последней белой"""
 
         punishment = {13: -11, 14: -10, 15: -9, 16: -8, 17: -7, 18: -6,
                       19: -5, 20: -4, 21: -3, 22: -2, 23: -1, 24: 0}
 
         encouragement = {19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0}
-        if
+
+        last_white_checker_position = self.get_last_white_checker_position()
+
+        if last_white_checker_position is not None and old_position > last_white_checker_position:
             return punishment[old_position]
-
-
-        if white_checkers_count > 0:
-            return punishment_and_encouragement[old_position]
+        if old_position in encouragement:
+            return encouragement[old_position]
         return 0
 
     def distance_assessment(self, new_position):
@@ -607,6 +604,28 @@ class Game:
 
         if previous_checker:
             return new_position - previous_checker.position
+        return 0
+
+    def punishment_and_encouragement(self, old_position=None, new_position=None):
+
+        phase_of_game = self.get_phase_of_game()
+
+        if phase_of_game == 1:
+            if old_position is not None and 1 <= old_position <= 6:
+                # punishment = {2: -1, 3: -1, 4: -1, 5: -1, 6: -1}
+                return -phase_of_game
+
+            if new_position is not None and 2 <= new_position <= 7:
+                # encouragement = {2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1}
+                return phase_of_game
+
+        if phase_of_game == 2:
+            if old_position is not None and 13 <= old_position <= 18:
+                return -phase_of_game
+
+            if new_position is not None and 13 <= new_position <= 18:
+                return phase_of_game
+
         return 0
 
     def move(self, color, dice, recursion=False, checkers=None):
