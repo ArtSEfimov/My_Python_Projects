@@ -194,7 +194,6 @@ class Game:
         if self.field.get_sum_of_structure(self.field.white_yard, 'black') <= 15:
             return 5
 
-
     def get_field_map(self, color):
         field_map = dict()
         current_field_element = self.field.white_home if color == 'white' else self.field.black_home
@@ -342,7 +341,7 @@ class Game:
         if all(map(lambda x: x is not None, count_12)) and all(map(lambda x: x is not None, count_21)):
             count_12 = sum(count_12)
             count_21 = sum(count_21)
-            if count_21 < count_12:  # если True, то прямой порядок хода (первый, второй)
+            if count_12 > count_21:  # если True, то прямой порядок хода (первый, второй)
                 return self.first_dice, checker_11, self.second_dice, checker_12
             if count_21 > count_12:
                 return self.second_dice, checker_21, self.first_dice, checker_22
@@ -359,29 +358,56 @@ class Game:
             return self.second_dice, checker_21, self.first_dice, checker_22
 
         if any(map(lambda x: x is not None, count_12)) and any(map(lambda x: x is not None, count_21)):
-            count_12 = tuple(0 if x is None else x for x in count_12)
-            count_21 = tuple(0 if x is None else x for x in count_21)
+            mark_12 = sum(0 if x is None else x for x in count_12)
+            mark_21 = sum(0 if x is None else x for x in count_21)
 
-            if sum(count_21) < sum(count_12):  # если True, то прямой порядок хода (первый, второй)
+            if mark_12 > mark_21:  # если True, то прямой порядок хода (первый, второй)
                 count_1, count_2 = count_12
-                if count_1:
+                if count_1 is not None:
                     return self.first_dice, checker_11, None, None
-                return self.first_dice, checker_12, None, None
-            if sum(count_21) > sum(count_12):
+                return self.second_dice, checker_12, None, None
+            if mark_21 > mark_12:
                 count_2, count_1 = count_21
-                if count_1:
+                if count_2 is not None:
                     return self.second_dice, checker_21, None, None
-                return self.second_dice, checker_22, None, None
-            checker_1 = checker_11 if count_12[0] else checker_12
-            checker_2 = checker_22 if count_21[0] else checker_21
-            return *random.choice(((self.first_dice, checker_1), (self.second_dice, checker_2))), None, None
+                return self.first_dice, checker_22, None, None
+
+            count, _ = count_12
+            if count is not None:
+                checker_1 = checker_11
+                dice_1 = self.first_dice
+            else:
+                checker_1 = checker_12
+                dice_1 = self.second_dice
+
+            count, _ = count_21
+            if count is not None:
+                checker_2 = checker_21
+                dice_2 = self.second_dice
+            else:
+                checker_2 = checker_22
+                dice_2 = self.first_dice
+
+            return *random.choice(((dice_1, checker_1), (dice_2, checker_2))), None, None
 
         if any(map(lambda x: x is not None, count_12)):
-            checker = checker_11 if count_12[0] else checker_12
+            count, _ = count_12
+            if count is not None:
+                checker = checker_11
+                dice = self.first_dice
+            else:
+                checker = checker_12
+                dice = self.second_dice
 
-            return self.first_dice, checker, None, None
-        checker = checker_22 if count_21[0] else checker_21
-        return self.second_dice, checker, None, None
+            return dice, checker, None, None
+        count, _ = count_21
+        if count is not None:
+            checker = checker_21
+            dice = self.second_dice
+        else:
+            checker = checker_22
+            dice = self.first_dice
+        return dice, checker, None, None
 
     def checking_move(self):
 
@@ -404,8 +430,8 @@ class Game:
 
         # ОБРАТНЫЙ порядок хода (ВТОРОЙ -> ПЕРВЫЙ)
 
-        result_21, checker_21, count_1 = self.move('black', self.second_dice)
-        result_22, checker_22, count_2 = self.move('black', self.first_dice)
+        result_21, checker_21, count_2 = self.move('black', self.second_dice)
+        result_22, checker_22, count_1 = self.move('black', self.first_dice)
 
         count_21 = (count_2, count_1)  # порядок хода такой: второй, первый
 
@@ -575,7 +601,8 @@ class Game:
 
     def manage_the_last_quarter(self, old_position):
         """Если на позициях с 13 по 24 есть белые шашки, смотрим на расположение последней из них относительно черных
-        шашек. Можем двигать черные шашки только если их позиция меньше последней белой"""
+        шашек. Можем двигать черные шашки только если их позиция меньше последней белой
+        Применительно только к шашкам, являющимся единственными в ячейке"""
 
         punishment = {13: -11, 14: -10, 15: -9, 16: -8, 17: -7, 18: -6,
                       19: -5, 20: -4, 21: -3, 22: -2, 23: -1, 24: 0}
@@ -584,10 +611,12 @@ class Game:
 
         last_white_checker_position = self.get_last_white_checker_position()
 
-        if last_white_checker_position is not None and old_position > last_white_checker_position:
+        if last_white_checker_position is not None and old_position in punishment and old_position > last_white_checker_position:
             return punishment[old_position]
+
         if old_position in encouragement:
             return encouragement[old_position]
+
         return 0
 
     def distance_assessment(self, new_position):
@@ -604,9 +633,12 @@ class Game:
 
         if previous_checker:
             return new_position - previous_checker.position
+
         return 0
 
     def punishment_and_encouragement(self, old_position=None, new_position=None):
+        """Штрафы за освобождение позиций и поощрения за занятия позиций в зависимости от фазы и от позиции.
+        Использование при переходе на позицию, где еще нет стека и освобождении позиций с одной шашкой"""
 
         phase_of_game = self.get_phase_of_game()
 
@@ -624,6 +656,13 @@ class Game:
                 return -phase_of_game
 
             if new_position is not None and 13 <= new_position <= 18:
+                return phase_of_game
+
+        if phase_of_game == 3:
+            if old_position is not None and 7 <= old_position <= 12:
+                return -phase_of_game
+
+            if new_position is not None and 7 <= new_position <= 13:
                 return phase_of_game
 
         return 0
@@ -674,6 +713,11 @@ class Game:
                             count += self.get_head_ratio(old_position.count)
 
                     elif old_position.count == 1:
+                        if self.get_phase_of_game() in (4, 5):
+                            count += self.manage_the_last_quarter(checker_value.position)
+
+                        count += self.punishment_and_encouragement(old_position=checker_value.position)
+
                         if recursion:
                             count -= self.punishment(self.get_phase_of_game(), checker_value.position)
 
@@ -681,6 +725,8 @@ class Game:
                     count -= self.get_minus_ratio(new_position.count)
 
                 else:
+                    count += self.punishment_and_encouragement(new_position=cell_value)
+
                     if recursion:
                         count += self.encouragement(self.get_phase_of_game(), cell_value)
 
