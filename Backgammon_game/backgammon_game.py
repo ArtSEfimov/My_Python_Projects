@@ -673,7 +673,7 @@ class Game:
 
         return 0
 
-    def is_first_checker_in_another_yard(self, line_color):
+    def is_checker_in_another_yard(self, line_color):
         """Функция должна проверять, есть ли во дворе шашка противника"""
 
         enemy_color = 'white' if line_color == 'black' else 'black'
@@ -683,6 +683,7 @@ class Game:
 
         if enemy_checker_in_my_yard:  # можно выстраивать линию длиной >= 6
             return True
+
         return False
 
     def is_six_checkers_in_line(self, my_color):
@@ -694,12 +695,28 @@ class Game:
 
         my_first_checker_position = sorted(my_checkers, key=lambda x: x.position)[0].position
 
-        # пройтись от этой шашки вперед по структурам и найти (если есть) пустые ячейки или шашки другого цвета,
-        # если счетчик меньше 6, то дальше будем проходить от позиции, следующей за найденной (если следующая позиция)
-        # занята шашкой моего цвета
-        # и так до 12-й позиции
-        # если насчитали 6, возвращаем на переход
-        # либо что всё нормально
+        # current_structure,_ = self.get_position(my_color, my_first_checker_position)
+        pointer = my_first_checker_position
+        count = 0
+
+        while pointer <= 12:
+            current_structure, position_in_structure_data = self.get_position(my_color, pointer)
+            current_structure_data = current_structure.data
+            current_element = current_structure_data[position_in_structure_data]
+
+            if isinstance(current_element, MyStack) and current_element.color == my_color:
+                count += 1
+            else:
+                count = 0
+                pointer += 1
+                continue
+
+            if count == 6:
+                return False  # 6 в ряд, так ходить нельзя
+
+            pointer += 1
+
+        return True  # НЕТ 6 в ряд, так ходить можно
 
     def move(self, color, dice, recursion=False, checkers=None):
         if recursion:
@@ -723,6 +740,20 @@ class Game:
                 cell_value = checker_value.position + dice
                 if cell_value > 24:
                     continue
+
+                if not self.is_checker_in_another_yard(color):
+
+                    self.remove_checker_from_old_position(checker_value)
+                    checker_value.position += dice
+                    self.move_checker_to_new_position(checker_value)
+
+                    result_is_six_checkers_in_line = self.is_six_checkers_in_line(color)
+
+                    self.remove_checker_from_old_position(checker_value)
+                    self.move_checker_to_new_position(checker_value, reverse_flag=True)
+
+                    if not result_is_six_checkers_in_line:
+                        continue
 
                 old_position, position = self.get_position(color, checker_value.position)
                 old_position = old_position.data[position]
