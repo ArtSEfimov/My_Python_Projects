@@ -454,6 +454,12 @@ class Game:
         if dice_2 is not None:
             self.is_success_move(checker_2, dice_2)
 
+        if all(map(lambda x: x is not None, (dice_1, dice_2))):
+            return True
+        elif any(map(lambda x: x is not None, (dice_1, dice_2))):
+            return None
+        return False
+
     def is_success_move(self, checker, dice):
 
         if self.is_checker_from_head(checker):
@@ -666,6 +672,34 @@ class Game:
                 return phase_of_game
 
         return 0
+
+    def is_first_checker_in_another_yard(self, line_color):
+        """Функция должна проверять, есть ли во дворе шашка противника"""
+
+        enemy_color = 'white' if line_color == 'black' else 'black'
+        my_structure = self.field.white_yard if enemy_color == 'black' else self.field.black_yard
+
+        enemy_checker_in_my_yard = self.field.get_sum_of_structure(my_structure, enemy_color) > 0
+
+        if enemy_checker_in_my_yard:  # можно выстраивать линию длиной >= 6
+            return True
+        return False
+
+    def is_six_checkers_in_line(self, my_color):
+        """Функция должна проверять, что до того, как в зоне выброса появится шашка противника, мы не можем выстроить
+        6 и более шашек в своем доме и дворе"""
+
+        my_checkers = (x for x in (self.black_checkers if my_color == 'black' else self.white_checkers)
+                       if 1 <= x.position <= 12)
+
+        my_first_checker_position = sorted(my_checkers, key=lambda x: x.position)[0].position
+
+        # пройтись от этой шашки вперед по структурам и найти (если есть) пустые ячейки или шашки другого цвета,
+        # если счетчик меньше 6, то дальше будем проходить от позиции, следующей за найденной (если следующая позиция)
+        # занята шашкой моего цвета
+        # и так до 12-й позиции
+        # если насчитали 6, возвращаем на переход
+        # либо что всё нормально
 
     def move(self, color, dice, recursion=False, checkers=None):
         if recursion:
