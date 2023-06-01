@@ -645,26 +645,33 @@ class Game:
 
         if phase_of_game == 1:
             if old_position is not None and 1 <= old_position <= 6:
-                # punishment = {2: -1, 3: -1, 4: -1, 5: -1, 6: -1}
-                return -phase_of_game
-
+                return -8
             if new_position is not None and 2 <= new_position <= 7:
-                # encouragement = {2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1}
-                return phase_of_game
+                return 2
+            if old_position is not None and 13 <= old_position <= 18:
+                return -4
+            if new_position is not None and 13 <= new_position <= 18:
+                return 1
 
         if phase_of_game == 2:
+            if old_position is not None and 1 <= old_position <= 6:
+                return -4
+            if new_position is not None and 2 <= new_position <= 7:
+                return 1
             if old_position is not None and 13 <= old_position <= 18:
-                return -phase_of_game
-
+                return -8
             if new_position is not None and 13 <= new_position <= 18:
-                return phase_of_game
+                return 2
 
         if phase_of_game == 3:
             if old_position is not None and 7 <= old_position <= 12:
-                return -phase_of_game
-
+                return -8
             if new_position is not None and 7 <= new_position <= 13:
-                return phase_of_game
+                return 2
+            if old_position is not None and 13 <= old_position <= 18:
+                return -4
+            if new_position is not None and 13 <= new_position <= 18:
+                return 1
 
         return 0
 
@@ -688,9 +695,13 @@ class Game:
         my_checkers = (x for x in (self.black_checkers if my_color == 'black' else self.white_checkers)
                        if 1 <= x.position <= 12)
 
-        my_first_checker_position = sorted(my_checkers, key=lambda x: x.position)[0].position
+        sorted_my_checkers = sorted(my_checkers, key=lambda x: x.position)
 
-        # current_structure,_ = self.get_position(my_color, my_first_checker_position)
+        if not sorted_my_checkers:
+            return True
+
+        my_first_checker_position = sorted_my_checkers[0].position
+
         pointer = my_first_checker_position
         count = 0
 
@@ -829,18 +840,26 @@ class Game:
         match_cells = {
             6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
         }
-        first_place = self.get_exact_element(color, match_cells[throw_dice_1])
-        second_place = self.get_exact_element(color, match_cells[throw_dice_2])
 
-        # Цикл
-        for current_place in (first_place, second_place):
+        for current_dice in (max(throw_dice_1, throw_dice_2), min(throw_dice_1, throw_dice_2)):
+            above_flag = False
+
+            current_place = self.get_exact_element(color, match_cells[current_dice])
+
             if isinstance(current_place, MyStack) and current_place.color == color:
                 self.remove_checker_from_old_position(current_place.top)
             else:
-                # надо смотреть, если ли элемент раньше
+                for current_position in range(current_dice + 1, 7):
+                    current_place = self.get_exact_element(color, match_cells[current_position])
+                    if isinstance(current_place, MyStack) and current_place.color == color:
+                        above_flag = True
+                        break
+            if above_flag:
                 pass
+
             # а потом смотреть есть ли элемент позже
             # Именно в таком порядке
+        # надо предусмотреть если броска два, а фишка осталась одна
 
 
 g = Game()
