@@ -50,13 +50,8 @@ class Game:
             self.head_reset = True
 
             self.computer_step()
-            # time.sleep(3)
 
-    # def debag_func(self):
-    #     for i, e in enumerate(self.throw_list):
-    #         if i == len(self.throw_list) - 1:
-    #             c = 1
-    #         yield e
+        # функция выброса
 
     def computer_step(self):  # black checkers
 
@@ -822,6 +817,30 @@ class Game:
             return True, main_checker, main_mark
 
         return False, None, None  # ход не удался
+
+    def get_exact_element(self, color, position_value):
+        structure, position_in_structure_data = self.get_position(color, position_value)
+        structure_data = structure.data
+        return structure_data[position_in_structure_data]
+
+    def throw_away(self, color):
+
+        throw_dice_1, throw_dice_2 = self.throw_dices()
+        match_cells = {
+            6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
+        }
+        first_place = self.get_exact_element(color, match_cells[throw_dice_1])
+        second_place = self.get_exact_element(color, match_cells[throw_dice_2])
+
+        # Цикл
+        for current_place in (first_place, second_place):
+            if isinstance(current_place, MyStack) and current_place.color == color:
+                self.remove_checker_from_old_position(current_place.top)
+            else:
+                # надо смотреть, если ли элемент раньше
+                pass
+            # а потом смотреть есть ли элемент позже
+            # Именно в таком порядке
 
 
 g = Game()
