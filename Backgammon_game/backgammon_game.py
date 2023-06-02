@@ -834,12 +834,42 @@ class Game:
         structure_data = structure.data
         return structure_data[position_in_structure_data]
 
-    def throw_away(self, color):
+    def try_simple_variant(self, color, match_cells, dice_1, dice_2):
+        position_1 = match_cells[dice_1]
+        position_2 = match_cells[dice_2]
 
+        current_place_1 = self.get_exact_element(color, position_1)
+        current_place_2 = self.get_exact_element(color, position_2)
+
+        if all(
+                map(
+                    lambda x: isinstance(x, MyStack), (current_place_1, current_place_2)
+                )
+        ) and all(
+            map(
+                lambda x: x.color == color, (current_place_1, current_place_2)
+            )
+        ):
+            self.remove_checker_from_old_position(current_place_1.top)
+            self.remove_checker_from_old_position(current_place_2.top)
+
+            return True
+
+        if dice_1 + dice_2 <= 6:
+            exact_element = self.get_exact_element(color, match_cells[dice_1 + dice_2])
+            if isinstance(exact_element, MyStack) and exact_element.color == color:
+                self.remove_checker_from_old_position(exact_element.top)
+                return True
+
+    def throw_away(self, color):
+        current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
         throw_dice_1, throw_dice_2 = self.throw_dices()
         match_cells = {
             6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
         }
+
+        if self.try_simple_variant(color, match_cells, throw_dice_1, throw_dice_2):
+            return True
 
         for current_dice in (max(throw_dice_1, throw_dice_2), min(throw_dice_1, throw_dice_2)):
             above_flag = False
@@ -848,6 +878,8 @@ class Game:
 
             if isinstance(current_place, MyStack) and current_place.color == color:
                 self.remove_checker_from_old_position(current_place.top)
+                if self.field.get_sum_of_structure(current_structure, 'black') == 0:
+                    return True
             else:
                 for current_position in range(current_dice + 1, 7):
                     current_place = self.get_exact_element(color, match_cells[current_position])
@@ -855,7 +887,15 @@ class Game:
                         above_flag = True
                         break
             if above_flag:
+                for current_position in range(match_cells[current_dice] + 1, 25):
+                    current_place = self.get_exact_element(color, current_position)
+                    if isinstance(current_place, MyStack) and current_place.color == color:
+                        # self.remove_checker_from_old_position(current_place.top)
+
+                        break
+            else:
                 pass
+                # скидываем ту, что ниже
 
             # а потом смотреть есть ли элемент позже
             # Именно в таком порядке
