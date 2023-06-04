@@ -38,43 +38,54 @@ class Game:
         second_dice = random.randint(1, 6)
         return first_dice, second_dice
 
-    def finished(self, color):
+    def is_movement_over(self, color):
         if color == 'black':
-            return self.field.get_sum_of_structure(self.field.white_yard, color) == 15
+            return self.field.get_sum_of_structure(self.field.black_home, color) + self.field.get_sum_of_structure(
+                self.field.black_yard, color) + self.field.get_sum_of_structure(self.field.white_home, color) == 0
+
         return self.field.get_sum_of_structure(self.field.black_yard, color) == 15
 
     def play_the_game(self):
         color = 'black' if self.who_steps == 'computer' else 'white'
 
-        while not self.finished(color):
+        while not self.is_movement_over(color):
             self.head_reset = True
 
-            self.computer_step()
+            computer_step_result = self.computer_step()
 
-        # функция выброса
+        while self.field.get_sum_of_structure(self.field.white_yard, 'black') > 0:
+            self.throw_away('black')
+            self.field.show_field()
+
+        self.field.show_field()
+        print("ВСЁ!")
 
     def computer_step(self):  # black checkers
 
-        # self.first_dice, self.second_dice = self.throw_dices()
-        # self.throw_list.append((self.first_dice, self.second_dice))
-        # print(self.throw_list)
+        self.first_dice, self.second_dice = self.throw_dices()
 
-        # self.first_dice, self.second_dice = next(self.gen)
-        self.first_dice, self.second_dice = [int(i) for i in input().split()]
+        # self.first_dice, self.second_dice = [int(i) for i in input().split()]
 
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
             self.first_step_flag = False
-        step_result = self.checking_move()
-        if isinstance(step_result, bool):
-            if step_result:
-                print('success')  # ход удался, ходит следующий игрок
-            else:
-                print('no success')
-        else:
-            print('50/50 success')
 
-        self.who_steps = 'human'
+        step_result_1 = self.checking_move()
+
+        if isinstance(step_result_1, (bool, tuple)):
+            if self.first_dice == self.second_dice:
+                step_result_2 = self.checking_move()
+                if isinstance(step_result_2, (bool, tuple)):
+                    print(step_result_1, step_result_2)
+                else:
+                    self.emergency_throw_away('black', step_result_2)
+            else:
+                print(step_result_1)
+        else:
+            self.emergency_throw_away('black', step_result_1)
+            if self.first_dice == self.second_dice:
+                for _ in range(2):
+                    self.throw_away('black', outers=(self.first_dice, self.second_dice))
 
         print(self.first_dice, self.second_dice)
         self.field.show_field()
@@ -395,14 +406,17 @@ class Game:
                 dice = self.second_dice
 
             return dice, checker, None, None
-        count, _ = count_21
-        if count is not None:
-            checker = checker_21
-            dice = self.second_dice
-        else:
-            checker = checker_22
-            dice = self.first_dice
-        return dice, checker, None, None
+        if any(map(lambda x: x is not None, count_21)):
+            count, _ = count_21
+            if count is not None:
+                checker = checker_21
+                dice = self.second_dice
+            else:
+                checker = checker_22
+                dice = self.first_dice
+            return dice, checker, None, None
+
+        return None, None, None, None
 
     def checking_move(self):
 
@@ -446,17 +460,26 @@ class Game:
 
         if dice_1 is not None:
             self.is_success_move(checker_1, dice_1)
+
+        # if self.is_movement_over('black'):
+        #     return dice_2
+        # Здесь надо сходить этими шашками,
+        # проверить, что всё кончено, если кончено, узнать после двух или после одной всё кончено,
+        # а затем посмотреть какой выгоднее сходить, чтобы сразу вторым ходом скинуть из дома
+
+
         if dice_2 is not None:
             self.is_success_move(checker_2, dice_2)
 
         if all(map(lambda x: x is not None, (dice_1, dice_2))):
             return True
         elif any(map(lambda x: x is not None, (dice_1, dice_2))):
-            return None
+            return None if dice_1 is None else dice_1, None if dice_2 is None else dice_2
         return False
 
     def is_success_move(self, checker, dice):
-
+        if checker is None:
+            c = 1
         if self.is_checker_from_head(checker):
             self.head_reset = False
 
@@ -571,6 +594,15 @@ class Game:
             }
             return ratios[new_position]
 
+        if current_phase == 4:
+            ratios = {
+                2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
+                8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+                19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1
+            }
+            return ratios[new_position]
+
         if current_phase == 5:
             ratios = {
                 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
@@ -666,12 +698,18 @@ class Game:
         if phase_of_game == 3:
             if old_position is not None and 7 <= old_position <= 12:
                 return -8
-            if new_position is not None and 7 <= new_position <= 13:
+            if new_position is not None and 7 <= new_position <= 12:
                 return 2
             if old_position is not None and 13 <= old_position <= 18:
                 return -4
             if new_position is not None and 13 <= new_position <= 18:
                 return 1
+
+        if phase_of_game == 4:
+            if old_position is not None and 13 <= old_position <= 18:
+                return -8
+            if new_position is not None and 13 <= new_position <= 18:
+                return 2
 
         return 0
 
@@ -835,6 +873,27 @@ class Game:
         return structure_data[position_in_structure_data]
 
     def try_simple_variant(self, color, match_cells, dice_1, dice_2):
+        if dice_1 == dice_2:
+            current_place = self.get_exact_element(color, match_cells[dice_1])
+
+            if isinstance(current_place, MyStack) and current_place.color == color:
+                if current_place.count >= 4:
+                    for _ in range(4):
+                        self.remove_checker_from_old_position(current_place.top)
+                    return True
+
+                return False
+
+            if dice_1 + dice_2 <= 6:
+                current_place = self.get_exact_element(color, match_cells[dice_1 + dice_2])
+                if isinstance(current_place, MyStack) and current_place.color == color:
+                    if current_place.count >= 2:
+                        for _ in range(2):
+                            self.remove_checker_from_old_position(current_place.top)
+                        return True
+
+            return False
+
         position_1 = match_cells[dice_1]
         position_2 = match_cells[dice_2]
 
@@ -852,56 +911,115 @@ class Game:
         ):
             self.remove_checker_from_old_position(current_place_1.top)
             self.remove_checker_from_old_position(current_place_2.top)
-
             return True
 
         if dice_1 + dice_2 <= 6:
-            exact_element = self.get_exact_element(color, match_cells[dice_1 + dice_2])
-            if isinstance(exact_element, MyStack) and exact_element.color == color:
-                self.remove_checker_from_old_position(exact_element.top)
+            current_place = self.get_exact_element(color, match_cells[dice_1 + dice_2])
+            if isinstance(current_place, MyStack) and current_place.color == color:
+                self.remove_checker_from_old_position(current_place.top)
                 return True
 
-    def throw_away(self, color):
+        return False
+
+    def emergency_throw_away(self, color, dice):
+        if dice is None:
+            c = 1
+        match_cells = {
+            6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
+        }
+        above_flag = False
+        current_place = self.get_exact_element(color, match_cells[dice])
+        if isinstance(current_place, MyStack) and current_place.color == color:
+            self.remove_checker_from_old_position(current_place.top)
+            return
+
+        for current_position in range(dice + 1, 7):
+            current_place = self.get_exact_element(color, match_cells[current_position])
+            if isinstance(current_place, MyStack) and current_place.color == color:
+                above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
+                break
+
+        if above_flag:
+            for current_position in range(match_cells[dice] - 1, 18, -1):
+                current_place = self.get_exact_element(color, current_position)
+                if isinstance(current_place, MyStack) and current_place.color == color:
+                    new_place = self.get_exact_element(color, current_position + dice)
+                    if isinstance(new_place, MyStack):
+                        if new_place.color == color:
+                            self.is_success_move(current_place.top, dice)
+
+                    else:
+                        self.is_success_move(current_place.top, dice)
+
+                    break
+        else:
+            for current_position in range(match_cells[dice] + 1, 25):
+                current_place = self.get_exact_element(color, current_position)
+                if isinstance(current_place, MyStack) and current_place.color == color:
+                    self.remove_checker_from_old_position(current_place.top)
+                    break
+        return
+
+    def throw_away(self, color, outers=None):
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
-        throw_dice_1, throw_dice_2 = self.throw_dices()
+        if outers is None:
+            throw_dice_1, throw_dice_2 = self.throw_dices()
+            # throw_dice_1, throw_dice_2 = [int(i) for i in input().split()]
+        else:
+            throw_dice_1, throw_dice_2 = outers
+
         match_cells = {
             6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
         }
 
         if self.try_simple_variant(color, match_cells, throw_dice_1, throw_dice_2):
-            return True
+            print('hello from simple!')
+            return
 
-        for current_dice in (max(throw_dice_1, throw_dice_2), min(throw_dice_1, throw_dice_2)):
-            above_flag = False
+        iteration_number = 2 if throw_dice_1 == throw_dice_2 else 1
 
-            current_place = self.get_exact_element(color, match_cells[current_dice])
+        for _ in range(iteration_number):
+            for current_dice in (max(throw_dice_1, throw_dice_2), min(throw_dice_1, throw_dice_2)):
+                above_flag = False
 
-            if isinstance(current_place, MyStack) and current_place.color == color:
-                self.remove_checker_from_old_position(current_place.top)
-                if self.field.get_sum_of_structure(current_structure, 'black') == 0:
-                    return True
-            else:
-                for current_position in range(current_dice + 1, 7):
-                    current_place = self.get_exact_element(color, match_cells[current_position])
-                    if isinstance(current_place, MyStack) and current_place.color == color:
-                        above_flag = True
-                        break
-            if above_flag:
-                for current_position in range(match_cells[current_dice] + 1, 25):
-                    current_place = self.get_exact_element(color, current_position)
-                    if isinstance(current_place, MyStack) and current_place.color == color:
-                        # self.remove_checker_from_old_position(current_place.top)
+                current_place = self.get_exact_element(color, match_cells[current_dice])
 
-                        break
-            else:
-                pass
-                # скидываем ту, что ниже
+                if isinstance(current_place, MyStack) and current_place.color == color:
+                    self.remove_checker_from_old_position(current_place.top)
+                    if self.field.get_sum_of_structure(current_structure, 'black') == 0:
+                        return
+                    continue
 
-            # а потом смотреть есть ли элемент позже
-            # Именно в таком порядке
-        # надо предусмотреть если броска два, а фишка осталась одна
+                else:
+                    for current_position in range(current_dice + 1, 7):
+                        current_place = self.get_exact_element(color, match_cells[current_position])
+                        if isinstance(current_place, MyStack) and current_place.color == color:
+                            above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
+                            break
+
+                if above_flag:
+                    for current_position in range(match_cells[current_dice] - 1, 18, -1):
+                        current_place = self.get_exact_element(color, current_position)
+                        if isinstance(current_place, MyStack) and current_place.color == color:
+                            new_place = self.get_exact_element(color, current_position + current_dice)
+                            if isinstance(new_place, MyStack):
+                                if new_place.color == color:
+                                    self.is_success_move(current_place.top, current_dice)
+
+                            else:
+                                self.is_success_move(current_place.top, current_dice)
+
+                            break
+                else:
+                    for current_position in range(match_cells[current_dice] + 1, 25):
+                        current_place = self.get_exact_element(color, current_position)
+                        if isinstance(current_place, MyStack) and current_place.color == color:
+                            self.remove_checker_from_old_position(current_place.top)
+                            if self.field.get_sum_of_structure(current_structure, 'black') == 0:
+                                return
+                            break
 
 
-g = Game()
-
-g.play_the_game()
+for _ in range(1):
+    g = Game()
+    g.play_the_game()
