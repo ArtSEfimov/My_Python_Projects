@@ -1,8 +1,12 @@
-t=3
+def func(a):
+    if a > 5:
+        return 3, 4
+    if a < 3:
+        return None
+    if a == 4:
+        return 1, 2, 3
 
-for i in range(10):
-    print(i)
-    # if i > t:
-    #     break
-else:
-    print('block else')
+
+res = func(4)
+
+print(res)

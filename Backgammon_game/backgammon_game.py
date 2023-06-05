@@ -32,6 +32,10 @@ class Game:
         self.black_head.top.is_up = True
         self.black_head.color = self.black_head.top.color
 
+        self.match_cells = {
+            6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
+        }
+
     @staticmethod
     def throw_dices():
         first_dice = random.randint(1, 6)
@@ -419,6 +423,53 @@ class Game:
         return None, None, None, None
 
     def checking_move(self):
+        color = 'black'
+        one_step_to_the_end_result = self.one_step_to_the_end(color, self.first_dice, self.second_dice)
+        if one_step_to_the_end_result is not None:
+            last_checker, dice_1, dice_2 = one_step_to_the_end_result
+            if dice_2 is None:
+                current_place = self.get_exact_element(color, self.match_cells[last_checker.position + dice_1])
+                if (isinstance(current_place, MyStack) and current_place.color == color) or current_place == 0:
+                    self.is_success_move(last_checker, dice_1)
+                    return dice_2
+
+            min_dice = min(dice_1, dice_2)
+            max_dice = max(dice_1, dice_2)
+            result_1 = result_2 = False
+
+            current_place_1 = self.get_exact_element(color, self.match_cells[last_checker.position + min_dice])
+
+            if (isinstance(current_place_1, MyStack) and current_place_1.color == color) or current_place_1 == 0:
+                result_1 = True
+                self.is_success_move(last_checker, min_dice)
+                current_place_2 = self.get_exact_element(color, self.match_cells[max_dice])
+                if isinstance(current_place_2, MyStack) and current_place_2.color == color:
+                    return max_dice
+
+                self.remove_checker_from_old_position(last_checker)
+                self.move_checker_to_new_position(last_checker, reverse_flag=True)
+
+            current_place_2 = self.get_exact_element(color, self.match_cells[last_checker.position + max_dice])
+
+            if (isinstance(current_place_2, MyStack) and current_place_2.color == color) or current_place_2 == 0:
+                result_2 = True
+                self.is_success_move(last_checker, max_dice)
+                current_place_1 = self.get_exact_element(color, self.match_cells[min_dice])
+                if isinstance(current_place_1, MyStack) and current_place_1.color == color:
+                    return min_dice
+
+                self.remove_checker_from_old_position(last_checker)
+                self.move_checker_to_new_position(last_checker, reverse_flag=True)
+
+            if result_2:
+                self.is_success_move(last_checker, max_dice)
+                return min_dice
+
+            if result_1:
+                self.is_success_move(last_checker, min_dice)
+                return max_dice
+
+
 
         # ПРЯМОЙ порядок хода (ПЕРВЫЙ -> ВТОРОЙ)
 
@@ -428,6 +479,15 @@ class Game:
         count_12 = (count_1, count_2)
 
         print(count_12)
+
+        # Здесь не будет обратного порядка хода, потому что это не имеет смысла
+        # Ни лучше, ни хуже уже не будет
+        if self.first_dice == self.second_dice:
+            if result_11:
+                self.is_success_move(checker_11, self.first_dice)
+            if result_12 is not None:
+                self.is_success_move(checker_12, self.second_dice)
+            return True
 
         if result_12:
             self.remove_checker_from_old_position(checker_12)
@@ -469,7 +529,7 @@ class Game:
 
         # if dice_2 is not None:
         #     self.is_success_move(checker_2, dice_2)
-        color='black'
+
         if all(map(lambda dice: dice is not None, (dice_1, dice_2))):
 
             if self.one_step_to_the_end is not None:
@@ -479,7 +539,7 @@ class Game:
 
                 current_place = self.get_exact_element(color, self.match_cells[dice_2])
                 if isinstance(current_place, MyStack) and current_place.color == color:
-                       dices.append(dice_1)
+                    dices.append(dice_1)
                 self.remove_checker_from_old_position(checker_1)
                 self.move_checker_to_new_position(checker_1, reverse_flag=True)
 
@@ -502,15 +562,13 @@ class Game:
                         return dice_2
                     return dice_1
 
-
             return True
         elif any(map(lambda x: x is not None, (dice_1, dice_2))):
             return None if dice_1 is None else dice_1, None if dice_2 is None else dice_2
         return False
 
     def is_success_move(self, checker, dice):
-        if checker is None:
-            c = 1
+
         if self.is_checker_from_head(checker):
             self.head_reset = False
 
@@ -533,11 +591,11 @@ class Game:
             if count > 1:
                 return
         if last_checker.position + dice_1 >= 19 and last_checker.position + dice_2 >= 19:
-            return dice_1, dice_2
+            return last_checker, dice_1, dice_2
         if last_checker.position + dice_1 >= 19:
-            return dice_1
+            return last_checker, dice_1, None
         if last_checker.position + dice_2 >= 19:
-            return dice_2
+            return last_checker, dice_2, None
         return
 
     @staticmethod
@@ -970,25 +1028,21 @@ class Game:
         return False
 
     def emergency_throw_away(self, color, dice):
-        if dice is None:
-            c = 1
-        match_cells = {
-            6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
-        }
+
         above_flag = False
-        current_place = self.get_exact_element(color, match_cells[dice])
+        current_place = self.get_exact_element(color, self.match_cells[dice])
         if isinstance(current_place, MyStack) and current_place.color == color:
             self.remove_checker_from_old_position(current_place.top)
             return
 
         for current_position in range(dice + 1, 7):
-            current_place = self.get_exact_element(color, match_cells[current_position])
+            current_place = self.get_exact_element(color, self.match_cells[current_position])
             if isinstance(current_place, MyStack) and current_place.color == color:
                 above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
                 break
 
         if above_flag:
-            for current_position in range(match_cells[dice] - 1, 18, -1):
+            for current_position in range(self.match_cells[dice] - 1, 18, -1):
                 current_place = self.get_exact_element(color, current_position)
                 if isinstance(current_place, MyStack) and current_place.color == color:
                     new_place = self.get_exact_element(color, current_position + dice)
@@ -1001,7 +1055,7 @@ class Game:
 
                     break
         else:
-            for current_position in range(match_cells[dice] + 1, 25):
+            for current_position in range(self.match_cells[dice] + 1, 25):
                 current_place = self.get_exact_element(color, current_position)
                 if isinstance(current_place, MyStack) and current_place.color == color:
                     self.remove_checker_from_old_position(current_place.top)
@@ -1016,11 +1070,7 @@ class Game:
         else:
             throw_dice_1, throw_dice_2 = outers
 
-        self.match_cells = {
-            6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
-        }
-
-        if self.try_simple_variant(color, match_cells, throw_dice_1, throw_dice_2):
+        if self.try_simple_variant(color, self.match_cells, throw_dice_1, throw_dice_2):
             print('hello from simple!')
             return
 
@@ -1030,7 +1080,7 @@ class Game:
             for current_dice in (max(throw_dice_1, throw_dice_2), min(throw_dice_1, throw_dice_2)):
                 above_flag = False
 
-                current_place = self.get_exact_element(color, match_cells[current_dice])
+                current_place = self.get_exact_element(color, self.match_cells[current_dice])
 
                 if isinstance(current_place, MyStack) and current_place.color == color:
                     self.remove_checker_from_old_position(current_place.top)
@@ -1040,13 +1090,13 @@ class Game:
 
                 else:
                     for current_position in range(current_dice + 1, 7):
-                        current_place = self.get_exact_element(color, match_cells[current_position])
+                        current_place = self.get_exact_element(color, self.match_cells[current_position])
                         if isinstance(current_place, MyStack) and current_place.color == color:
                             above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
                             break
 
                 if above_flag:
-                    for current_position in range(match_cells[current_dice] - 1, 18, -1):
+                    for current_position in range(self.match_cells[current_dice] - 1, 18, -1):
                         current_place = self.get_exact_element(color, current_position)
                         if isinstance(current_place, MyStack) and current_place.color == color:
                             new_place = self.get_exact_element(color, current_position + current_dice)
@@ -1059,7 +1109,7 @@ class Game:
 
                             break
                 else:
-                    for current_position in range(match_cells[current_dice] + 1, 25):
+                    for current_position in range(self.match_cells[current_dice] + 1, 25):
                         current_place = self.get_exact_element(color, current_position)
                         if isinstance(current_place, MyStack) and current_place.color == color:
                             self.remove_checker_from_old_position(current_place.top)
