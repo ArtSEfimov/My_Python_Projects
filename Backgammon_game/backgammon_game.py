@@ -458,8 +458,8 @@ class Game:
                                                                    (count_21, checker_21, checker_22)
                                                                    )
 
-        if dice_1 is not None:
-            self.is_success_move(checker_1, dice_1)
+        # if dice_1 is not None:
+        #     self.is_success_move(checker_1, dice_1)
 
         # if self.is_movement_over('black'):
         #     return dice_2
@@ -467,11 +467,42 @@ class Game:
         # проверить, что всё кончено, если кончено, узнать после двух или после одной всё кончено,
         # а затем посмотреть какой выгоднее сходить, чтобы сразу вторым ходом скинуть из дома
 
+        # if dice_2 is not None:
+        #     self.is_success_move(checker_2, dice_2)
+        color='black'
+        if all(map(lambda dice: dice is not None, (dice_1, dice_2))):
 
-        if dice_2 is not None:
-            self.is_success_move(checker_2, dice_2)
+            if self.one_step_to_the_end is not None:
+                dices = list()
 
-        if all(map(lambda x: x is not None, (dice_1, dice_2))):
+                self.is_success_move(checker_1, dice_1)
+
+                current_place = self.get_exact_element(color, self.match_cells[dice_2])
+                if isinstance(current_place, MyStack) and current_place.color == color:
+                       dices.append(dice_1)
+                self.remove_checker_from_old_position(checker_1)
+                self.move_checker_to_new_position(checker_1, reverse_flag=True)
+
+                current_place = self.get_exact_element(color, self.match_cells[dice_2])
+                if isinstance(current_place, MyStack) and current_place.color == color:
+                    dices.append(dice_1)
+
+                self.is_success_move(checker_2, dice_2)
+                current_place = self.get_exact_element(color, self.match_cells[dice_1])
+                if isinstance(current_place, MyStack) and current_place.color == color:
+                    dices.append(dice_2)
+                self.remove_checker_from_old_position(checker_2)
+                self.move_checker_to_new_position(checker_2, reverse_flag=True)
+
+                if len(dices) == 2:
+                    max_dice = max(dices)
+                    min_dice = min(dices)
+                    if min_dice == dice_1:
+                        self.is_success_move(checker_1, dice_1)
+                        return dice_2
+                    return dice_1
+
+
             return True
         elif any(map(lambda x: x is not None, (dice_1, dice_2))):
             return None if dice_1 is None else dice_1, None if dice_2 is None else dice_2
@@ -491,6 +522,23 @@ class Game:
 
         # размещаем ее на новой позиции
         self.move_checker_to_new_position(checker)
+
+    def one_step_to_the_end(self, color, dice_1, dice_2):
+        count = 0
+        last_checker = None
+        for current_checker in (self.black_checkers if color == 'black' else self.white_checkers):
+            if current_checker.position < 19:
+                count += 1
+                last_checker = current_checker
+            if count > 1:
+                return
+        if last_checker.position + dice_1 >= 19 and last_checker.position + dice_2 >= 19:
+            return dice_1, dice_2
+        if last_checker.position + dice_1 >= 19:
+            return dice_1
+        if last_checker.position + dice_2 >= 19:
+            return dice_2
+        return
 
     @staticmethod
     def get_plus_ratio(count):
@@ -968,7 +1016,7 @@ class Game:
         else:
             throw_dice_1, throw_dice_2 = outers
 
-        match_cells = {
+        self.match_cells = {
             6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
         }
 
