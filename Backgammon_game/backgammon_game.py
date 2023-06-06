@@ -415,17 +415,22 @@ class Game:
 
         return None, None, None, None
 
+    def get_last_black_checker_position(self):
+
+        return sorted((checker for checker in self.black_checkers if 19 <= checker.position <= 24),
+                      key=lambda x: x.position)[0].position
+
     def checking_move(self):
         color = 'black'
 
-        one_step_to_the_end_result = self.one_step_to_the_end(color, self.first_dice, self.second_dice)
+        one_step_to_the_end_result = self.one_step_to_the_end(color, dice_1=self.first_dice, dice_2=self.second_dice)
         if one_step_to_the_end_result is not None:
             last_checker, dice_1, dice_2 = one_step_to_the_end_result
             if dice_2 is None:
-                current_place = self.get_exact_element(color, self.match_cells[last_checker.position + dice_1])
+                current_place = self.get_exact_element(color, last_checker.position + dice_1)
                 if (isinstance(current_place, MyStack) and current_place.color == color) or current_place == 0:
                     self.is_success_move(last_checker, dice_1)
-                    return dice_2
+                    return self.second_dice if dice_1 == self.first_dice else self.first_dice
 
             min_dice = min(dice_1, dice_2)
             max_dice = max(dice_1, dice_2)
@@ -437,24 +442,23 @@ class Game:
                 result_1 = True
                 self.is_success_move(last_checker, min_dice)
                 current_place_2 = self.get_exact_element(color, self.match_cells[max_dice])
-                if isinstance(current_place_2, MyStack) and current_place_2.color == color:
+                if isinstance(current_place_2, MyStack) and current_place_2.color == color or self.match_cells[
+                    max_dice] < self.get_last_black_checker_position():
                     return max_dice
 
-                # Здесь если шашка сброса попадает не на мой цвет, а на пустую клетку
-                # (и при этом можно сбросить шашку ниже), надо тоже возвращать эту шашку,
-                # для этого надо сделать новую функцию или модифицировать функцию экстренного сброса
-
+                # !!!!!!!!! Здесь надо рассмотреть если фишки равны, чтобы лишний код не выполнять !!!!!!!!!!!!!!!
 
                 self.remove_checker_from_old_position(last_checker)
                 self.move_checker_to_new_position(last_checker, reverse_flag=True)
 
-            current_place_2 = self.get_exact_element(color, self.match_cells[last_checker.position + max_dice])
+            current_place_2 = self.get_exact_element(color, last_checker.position + max_dice)
 
             if (isinstance(current_place_2, MyStack) and current_place_2.color == color) or current_place_2 == 0:
                 result_2 = True
                 self.is_success_move(last_checker, max_dice)
                 current_place_1 = self.get_exact_element(color, self.match_cells[min_dice])
-                if isinstance(current_place_1, MyStack) and current_place_1.color == color:
+                if isinstance(current_place_1, MyStack) and current_place_1.color == color or self.match_cells[
+                    min_dice] < self.get_last_black_checker_position():
                     return min_dice
 
                 self.remove_checker_from_old_position(last_checker)
@@ -708,8 +712,9 @@ class Game:
                     lambda x: 1 <= x.position <= 12, self.white_checkers
                 )
         ):
-            last_white_checker_position = sorted((checker for checker in self.white_checkers if checker.position >= 1),
-                                                 key=lambda x: x.position)[0].position
+            last_white_checker_position = \
+                sorted((checker for checker in self.white_checkers if 1 <= checker.position <= 12),
+                       key=lambda x: x.position)[0].position
 
         return match_positions[last_white_checker_position]
 
@@ -1093,6 +1098,6 @@ class Game:
                             break
 
 
-for _ in range(1):
+for _ in range(500):
     g = Game()
     g.play_the_game()
