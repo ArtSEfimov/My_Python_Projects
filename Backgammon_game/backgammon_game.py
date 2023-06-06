@@ -65,31 +65,24 @@ class Game:
         print("ВСЁ!")
 
     def computer_step(self):  # black checkers
+        color = 'black'
+        # self.first_dice, self.second_dice = self.throw_dices()
 
-        self.first_dice, self.second_dice = self.throw_dices()
-
-        # self.first_dice, self.second_dice = [int(i) for i in input().split()]
+        self.first_dice, self.second_dice = [int(i) for i in input().split()]
 
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
             self.first_step_flag = False
 
-        step_result_1 = self.checking_move()
+        step_result = self.checking_move()
 
-        if isinstance(step_result_1, (bool, tuple)):
-            if self.first_dice == self.second_dice:
-                step_result_2 = self.checking_move()
-                if isinstance(step_result_2, (bool, tuple)):
-                    print(step_result_1, step_result_2)
-                else:
-                    self.emergency_throw_away('black', step_result_2)
+        if type(step_result) == bool:
+            if step_result:
+                print(step_result)
             else:
-                print(step_result_1)
+                print(step_result)
         else:
-            self.emergency_throw_away('black', step_result_1)
-            if self.first_dice == self.second_dice:
-                for _ in range(2):
-                    self.throw_away('black', outers=(self.first_dice, self.second_dice))
+            self.emergency_throw_away(color, step_result)
 
         print(self.first_dice, self.second_dice)
         self.field.show_field()
@@ -424,6 +417,7 @@ class Game:
 
     def checking_move(self):
         color = 'black'
+
         one_step_to_the_end_result = self.one_step_to_the_end(color, self.first_dice, self.second_dice)
         if one_step_to_the_end_result is not None:
             last_checker, dice_1, dice_2 = one_step_to_the_end_result
@@ -469,8 +463,6 @@ class Game:
                 self.is_success_move(last_checker, min_dice)
                 return max_dice
 
-
-
         # ПРЯМОЙ порядок хода (ПЕРВЫЙ -> ВТОРОЙ)
 
         result_11, checker_11, count_1 = self.move('black', self.first_dice)
@@ -480,6 +472,14 @@ class Game:
 
         print(count_12)
 
+        if result_12:
+            self.remove_checker_from_old_position(checker_12)
+            self.move_checker_to_new_position(checker_12, reverse_flag=True)
+
+        if result_11:
+            self.remove_checker_from_old_position(checker_11)
+            self.move_checker_to_new_position(checker_11, reverse_flag=True)
+
         # Здесь не будет обратного порядка хода, потому что это не имеет смысла
         # Ни лучше, ни хуже уже не будет
         if self.first_dice == self.second_dice:
@@ -488,14 +488,6 @@ class Game:
             if result_12 is not None:
                 self.is_success_move(checker_12, self.second_dice)
             return True
-
-        if result_12:
-            self.remove_checker_from_old_position(checker_12)
-            self.move_checker_to_new_position(checker_12, reverse_flag=True)
-
-        if result_11:
-            self.remove_checker_from_old_position(checker_11)
-            self.move_checker_to_new_position(checker_11, reverse_flag=True)
 
         # ОБРАТНЫЙ порядок хода (ВТОРОЙ -> ПЕРВЫЙ)
 
@@ -531,40 +523,18 @@ class Game:
         #     self.is_success_move(checker_2, dice_2)
 
         if all(map(lambda dice: dice is not None, (dice_1, dice_2))):
-
-            if self.one_step_to_the_end is not None:
-                dices = list()
-
-                self.is_success_move(checker_1, dice_1)
-
-                current_place = self.get_exact_element(color, self.match_cells[dice_2])
-                if isinstance(current_place, MyStack) and current_place.color == color:
-                    dices.append(dice_1)
-                self.remove_checker_from_old_position(checker_1)
-                self.move_checker_to_new_position(checker_1, reverse_flag=True)
-
-                current_place = self.get_exact_element(color, self.match_cells[dice_2])
-                if isinstance(current_place, MyStack) and current_place.color == color:
-                    dices.append(dice_1)
-
-                self.is_success_move(checker_2, dice_2)
-                current_place = self.get_exact_element(color, self.match_cells[dice_1])
-                if isinstance(current_place, MyStack) and current_place.color == color:
-                    dices.append(dice_2)
-                self.remove_checker_from_old_position(checker_2)
-                self.move_checker_to_new_position(checker_2, reverse_flag=True)
-
-                if len(dices) == 2:
-                    max_dice = max(dices)
-                    min_dice = min(dices)
-                    if min_dice == dice_1:
-                        self.is_success_move(checker_1, dice_1)
-                        return dice_2
-                    return dice_1
-
+            self.is_success_move(checker_1, dice_1)
+            self.is_success_move(checker_2, dice_2)
             return True
-        elif any(map(lambda x: x is not None, (dice_1, dice_2))):
-            return None if dice_1 is None else dice_1, None if dice_2 is None else dice_2
+
+        if any(map(lambda dice: dice is not None, (dice_1, dice_2))):
+            if dice_1 is not None:
+                self.is_success_move(checker_1, dice_1)
+                return True
+            if dice_2 is not None:
+                self.is_success_move(checker_2, dice_2)
+                return True
+
         return False
 
     def is_success_move(self, checker, dice):
