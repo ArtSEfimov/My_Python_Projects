@@ -66,9 +66,9 @@ class Game:
 
     def computer_step(self):  # black checkers
         color = 'black'
-        # self.first_dice, self.second_dice = self.throw_dices()
+        self.first_dice, self.second_dice = self.throw_dices()
 
-        self.first_dice, self.second_dice = [int(i) for i in input().split()]
+        # self.first_dice, self.second_dice = [int(i) for i in input().split()]
 
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
@@ -431,7 +431,7 @@ class Game:
             max_dice = max(dice_1, dice_2)
             result_1 = result_2 = False
 
-            current_place_1 = self.get_exact_element(color, self.match_cells[last_checker.position + min_dice])
+            current_place_1 = self.get_exact_element(color, last_checker.position + min_dice)
 
             if (isinstance(current_place_1, MyStack) and current_place_1.color == color) or current_place_1 == 0:
                 result_1 = True
@@ -439,6 +439,11 @@ class Game:
                 current_place_2 = self.get_exact_element(color, self.match_cells[max_dice])
                 if isinstance(current_place_2, MyStack) and current_place_2.color == color:
                     return max_dice
+
+                # Здесь если шашка сброса попадает не на мой цвет, а на пустую клетку
+                # (и при этом можно сбросить шашку ниже), надо тоже возвращать эту шашку,
+                # для этого надо сделать новую функцию или модифицировать функцию экстренного сброса
+
 
                 self.remove_checker_from_old_position(last_checker)
                 self.move_checker_to_new_position(last_checker, reverse_flag=True)
@@ -485,7 +490,7 @@ class Game:
         if self.first_dice == self.second_dice:
             if result_11:
                 self.is_success_move(checker_11, self.first_dice)
-            if result_12 is not None:
+            if result_12:
                 self.is_success_move(checker_12, self.second_dice)
             return True
 
