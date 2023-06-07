@@ -436,6 +436,13 @@ class Game:
             max_dice = max(dice_1, dice_2)
             result_1 = result_2 = False
 
+            if min_dice == max_dice:
+                dice = min_dice
+                current_place = self.get_exact_element(color, last_checker.position + dice)
+                if (isinstance(current_place, MyStack) and current_place.color == color) or current_place == 0:
+                    self.is_success_move(last_checker, dice)
+                    return dice
+
             current_place_1 = self.get_exact_element(color, last_checker.position + min_dice)
 
             if (isinstance(current_place_1, MyStack) and current_place_1.color == color) or current_place_1 == 0:
@@ -445,8 +452,6 @@ class Game:
                 if isinstance(current_place_2, MyStack) and current_place_2.color == color or self.match_cells[
                     max_dice] < self.get_last_black_checker_position():
                     return max_dice
-
-                # !!!!!!!!! Здесь надо рассмотреть если фишки равны, чтобы лишний код не выполнять !!!!!!!!!!!!!!!
 
                 self.remove_checker_from_old_position(last_checker)
                 self.move_checker_to_new_position(last_checker, reverse_flag=True)
@@ -1098,6 +1103,6 @@ class Game:
                             break
 
 
-for _ in range(500):
+for _ in range(100_000):
     g = Game()
     g.play_the_game()
