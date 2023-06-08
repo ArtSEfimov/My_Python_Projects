@@ -887,18 +887,19 @@ class Game:
                     continue
 
                 if not self.is_checker_in_another_yard(color):
+                    new_tmp_place = self.get_exact_element(color, checker_value.position + dice)
+                    if new_tmp_place == 0:
+                        self.remove_checker_from_old_position(checker_value)
+                        checker_value.position += dice
+                        self.move_checker_to_new_position(checker_value)
 
-                    self.remove_checker_from_old_position(checker_value)
-                    checker_value.position += dice
-                    self.move_checker_to_new_position(checker_value)
+                        result_is_six_checkers_in_line = self.is_six_checkers_in_line(color)
 
-                    result_is_six_checkers_in_line = self.is_six_checkers_in_line(color)
+                        self.remove_checker_from_old_position(checker_value)
+                        self.move_checker_to_new_position(checker_value, reverse_flag=True)
 
-                    self.remove_checker_from_old_position(checker_value)
-                    self.move_checker_to_new_position(checker_value, reverse_flag=True)
-
-                    if not result_is_six_checkers_in_line:
-                        continue
+                        if not result_is_six_checkers_in_line:
+                            continue
 
                 old_position, position = self.get_position(color, checker_value.position)
                 old_position = old_position.data[position]
