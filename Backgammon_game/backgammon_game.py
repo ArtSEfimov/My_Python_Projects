@@ -66,13 +66,15 @@ class Game:
 
     def computer_step(self):  # black checkers
         color = 'black'
-        self.first_dice, self.second_dice = self.throw_dices()
+        # self.first_dice, self.second_dice = self.throw_dices()
 
-        # self.first_dice, self.second_dice = [int(i) for i in input().split()]
+        self.first_dice, self.second_dice = [int(i) for i in input().split()]
 
         # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
         if self.first_step_flag:
             self.first_step_flag = False
+
+        double_flag = self.first_dice == self.second_dice
 
         step_result = self.checking_move()
 
@@ -83,6 +85,22 @@ class Game:
                 print(step_result)
         else:
             self.emergency_throw_away(color, step_result)
+            if double_flag:
+                self.throw_away(color, dice=self.first_dice)
+
+
+        self.field.show_field()
+
+
+        if double_flag and step_result:
+            step_result = self.checking_move()
+            if type(step_result) == bool:
+                if step_result:
+                    print(step_result)
+                else:
+                    print(step_result)
+            else:
+                self.emergency_throw_away(color, step_result)
 
         print(self.first_dice, self.second_dice)
         self.field.show_field()
@@ -524,18 +542,6 @@ class Game:
                                                                    (count_21, checker_21, checker_22)
                                                                    )
 
-        # if dice_1 is not None:
-        #     self.is_success_move(checker_1, dice_1)
-
-        # if self.is_movement_over('black'):
-        #     return dice_2
-        # Здесь надо сходить этими шашками,
-        # проверить, что всё кончено, если кончено, узнать после двух или после одной всё кончено,
-        # а затем посмотреть какой выгоднее сходить, чтобы сразу вторым ходом скинуть из дома
-
-        # if dice_2 is not None:
-        #     self.is_success_move(checker_2, dice_2)
-
         if all(map(lambda dice: dice is not None, (dice_1, dice_2))):
             self.is_success_move(checker_1, dice_1)
             self.is_success_move(checker_2, dice_2)
@@ -771,6 +777,10 @@ class Game:
                 return -8
             if new_position is not None and 2 <= new_position <= 7:
                 return 2
+
+            # здесь надо разделить на половинки,
+            # чтобы можно было двигать вперед шашки из своего дома
+
             if old_position is not None and 13 <= old_position <= 18:
                 return -4
             if new_position is not None and 13 <= new_position <= 18:
@@ -1047,13 +1057,14 @@ class Game:
                     break
         return
 
-    def throw_away(self, color, outers=None):
+    def throw_away(self, color, dice=None):
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
-        if outers is None:
+
+        if dice is not None:
+            throw_dice_1 = throw_dice_2 = dice
+        else:
             throw_dice_1, throw_dice_2 = self.throw_dices()
             # throw_dice_1, throw_dice_2 = [int(i) for i in input().split()]
-        else:
-            throw_dice_1, throw_dice_2 = outers
 
         if self.try_simple_variant(color, self.match_cells, throw_dice_1, throw_dice_2):
             print('hello from simple!')
