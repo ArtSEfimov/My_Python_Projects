@@ -70,10 +70,6 @@ class Game:
 
         self.first_dice, self.second_dice = [int(i) for i in input().split()]
 
-        # флаг первого хода (пригодится, когда надо будет снимать с головы две шашки)
-        if self.first_step_flag:
-            self.first_step_flag = False
-
         double_flag = self.first_dice == self.second_dice
 
         step_result = self.checking_move()
@@ -81,26 +77,24 @@ class Game:
         if type(step_result) == bool:
             if step_result:
                 print(step_result)
+                if double_flag:
+                    if self.first_step_flag and self.first_dice in (3, 4, 6):
+                        self.first_step_flag = False
+                        self.head_reset = True
+                    step_result = self.checking_move()
+                    if type(step_result) == bool:
+                        if step_result:
+                            print(step_result)
+                        else:
+                            print(step_result)
+                    else:
+                        self.emergency_throw_away(color, step_result)
             else:
                 print(step_result)
         else:
             self.emergency_throw_away(color, step_result)
             if double_flag:
                 self.throw_away(color, dice=self.first_dice)
-
-
-        self.field.show_field()
-
-
-        if double_flag and step_result:
-            step_result = self.checking_move()
-            if type(step_result) == bool:
-                if step_result:
-                    print(step_result)
-                else:
-                    print(step_result)
-            else:
-                self.emergency_throw_away(color, step_result)
 
         print(self.first_dice, self.second_dice)
         self.field.show_field()
@@ -181,10 +175,14 @@ class Game:
                 self.field.get_occupied_of_structure(self.field.black_home, 'black') + self.get_position_color(7)) <= 4:
             return 1
 
-        if (self.field.get_count_of_free_cells(self.field.white_home) != 0 and \
-            self.field.get_sum_of_structure(self.field.white_home, 'black') < self.field.get_occupied_of_structure(
-                    self.field.white_home, 'black') + self.field.get_count_of_free_cells(self.field.white_home)) or \
-                self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4:
+        if (self.field.get_sum_of_structure(self.field.black_home, 'black') + self.field.get_sum_of_structure(
+                self.field.black_yard, 'black') > 0) and \
+                ((self.field.get_count_of_free_cells(self.field.white_home) != 0 and \
+                  self.field.get_sum_of_structure(self.field.white_home,
+                                                  'black') < self.field.get_occupied_of_structure(
+                            self.field.white_home, 'black') + self.field.get_count_of_free_cells(
+                            self.field.white_home)) or \
+                 self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4):
             return 2
 
         # если:
@@ -580,11 +578,15 @@ class Game:
                 last_checker = current_checker
             if count > 1:
                 return
-        if last_checker.position + dice_1 >= 19 and last_checker.position + dice_2 >= 19:
+
+        if last_checker is None:
+            return
+
+        if 19 <= last_checker.position + dice_1 <= 24 and 19 <= last_checker.position + dice_2 <= 24:
             return last_checker, dice_1, dice_2
-        if last_checker.position + dice_1 >= 19:
+        if 19 <= last_checker.position + dice_1 <= 24:
             return last_checker, dice_1, None
-        if last_checker.position + dice_2 >= 19:
+        if 19 <= last_checker.position + dice_2 <= 24:
             return last_checker, dice_2, None
         return
 
@@ -773,13 +775,12 @@ class Game:
         phase_of_game = self.get_phase_of_game()
 
         if phase_of_game == 1:
-            if old_position is not None and 1 <= old_position <= 6:
+            if old_position is not None and 1 <= old_position <= 3:
                 return -8
+            if old_position is not None and 4 <= old_position <= 6:
+                return -4
             if new_position is not None and 2 <= new_position <= 7:
                 return 2
-
-            # здесь надо разделить на половинки,
-            # чтобы можно было двигать вперед шашки из своего дома
 
             if old_position is not None and 13 <= old_position <= 18:
                 return -4
@@ -831,8 +832,7 @@ class Game:
         """Функция должна проверять, что до того, как в зоне выброса появится шашка противника, мы не можем выстроить
         6 и более шашек в своем доме и дворе"""
 
-        my_checkers = (x for x in (self.black_checkers if my_color == 'black' else self.white_checkers)
-                       if 1 <= x.position <= 12)
+        my_checkers = (x for x in (self.black_checkers if my_color == 'black' else self.white_checkers))
 
         sorted_my_checkers = sorted(my_checkers, key=lambda x: x.position)
 
@@ -844,7 +844,7 @@ class Game:
         pointer = my_first_checker_position
         count = 0
 
-        while pointer <= 12:
+        while pointer <= 24:
             current_structure, position_in_structure_data = self.get_position(my_color, pointer)
             current_structure_data = current_structure.data
             current_element = current_structure_data[position_in_structure_data]
@@ -887,8 +887,8 @@ class Game:
                     continue
 
                 if not self.is_checker_in_another_yard(color):
-                    new_tmp_place = self.get_exact_element(color, checker_value.position + dice)
-                    if new_tmp_place == 0:
+                    new_temporary_place = self.get_exact_element(color, checker_value.position + dice)
+                    if new_temporary_place == 0:
                         self.remove_checker_from_old_position(checker_value)
                         checker_value.position += dice
                         self.move_checker_to_new_position(checker_value)
@@ -1023,7 +1023,17 @@ class Game:
 
         return False
 
+    @staticmethod
+    def valid_throw_dice(*dices):
+        return all(
+            map(
+                lambda dice: 1 <= dice <= 6, dices
+            )
+        )
+
     def emergency_throw_away(self, color, dice):
+        if not self.valid_throw_dice(dice):
+            return
 
         above_flag = False
         current_place = self.get_exact_element(color, self.match_cells[dice])
@@ -1066,6 +1076,9 @@ class Game:
         else:
             throw_dice_1, throw_dice_2 = self.throw_dices()
             # throw_dice_1, throw_dice_2 = [int(i) for i in input().split()]
+
+        if not self.valid_throw_dice(throw_dice_1, throw_dice_2):
+            return
 
         if self.try_simple_variant(color, self.match_cells, throw_dice_1, throw_dice_2):
             print('hello from simple!')
@@ -1115,6 +1128,6 @@ class Game:
                             break
 
 
-for _ in range(100_000):
+for _ in range(500):
     g = Game()
     g.play_the_game()
