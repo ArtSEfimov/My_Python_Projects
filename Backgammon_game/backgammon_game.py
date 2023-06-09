@@ -47,28 +47,32 @@ class Game:
             return self.field.get_sum_of_structure(self.field.black_home, color) + self.field.get_sum_of_structure(
                 self.field.black_yard, color) + self.field.get_sum_of_structure(self.field.white_home, color) == 0
 
-        return self.field.get_sum_of_structure(self.field.black_yard, color) == 15
+        if color == 'white':
+
+    #
+    # return self.field.get_sum_of_structure(self.field.black_yard, color) == 15
 
     def play_the_game(self):
-        color = 'black' if self.who_steps == 'computer' else 'white'
+        while True:
+            color = 'black' if self.who_steps == 'computer' else 'white'
+            if color == 'black':
+                # computer part
+                while not self.is_movement_over(color):
+                    self.head_reset = True
+                    self.computer_step(color)
 
-        while not self.is_movement_over(color):
-            self.head_reset = True
-
-            computer_step_result = self.computer_step()
-
-        while self.field.get_sum_of_structure(self.field.white_yard, 'black') > 0:
-            self.throw_away('black')
-            self.field.show_field()
-
+                while self.field.get_sum_of_structure(self.field.white_yard, 'black') > 0:
+                    self.throw_away('black')
+                    self.field.show_field()
+                print('Computer win')
+                break
         self.field.show_field()
         print("ВСЁ!")
 
-    def computer_step(self):  # black checkers
-        color = 'black'
-        # self.first_dice, self.second_dice = self.throw_dices()
+    def computer_step(self, color):  # black checkers
+        self.first_dice, self.second_dice = self.throw_dices()
 
-        self.first_dice, self.second_dice = [int(i) for i in input().split()]
+        # self.first_dice, self.second_dice = [int(i) for i in input().split()]
 
         double_flag = self.first_dice == self.second_dice
 
@@ -1128,6 +1132,6 @@ class Game:
                             break
 
 
-for _ in range(500):
+for _ in range(5):
     g = Game()
     g.play_the_game()
