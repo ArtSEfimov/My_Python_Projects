@@ -15,8 +15,8 @@ class Game:
 
         self.who_steps = 'computer'
 
-        self.first_step_flag = True
-        self.head_reset = True
+        self.computer_first_step_flag = self.human_first_step_flag = True
+        self.computer_head_reset = self.human_head_reset = True
 
         self.first_dice = self.second_dice = None
 
@@ -36,6 +36,9 @@ class Game:
             6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
         }
 
+        self.computer_end_moving_flag = self.computer_end_throwing_flag = False
+        self.human_end_moving_flag = self.human_end_throwing_flag = False
+
     @staticmethod
     def throw_dices():
         first_dice = random.randint(1, 6)
@@ -48,26 +51,139 @@ class Game:
                 self.field.black_yard, color) + self.field.get_sum_of_structure(self.field.white_home, color) == 0
 
         if color == 'white':
-
-    #
-    # return self.field.get_sum_of_structure(self.field.black_yard, color) == 15
+            return self.field.get_sum_of_structure(self.field.white_home, color) + self.field.get_sum_of_structure(
+                self.field.white_yard, color) + self.field.get_sum_of_structure(self.field.black_home, color) == 0
 
     def play_the_game(self):
+
         while True:
             color = 'black' if self.who_steps == 'computer' else 'white'
-            if color == 'black':
-                # computer part
-                while not self.is_movement_over(color):
-                    self.head_reset = True
-                    self.computer_step(color)
 
-                while self.field.get_sum_of_structure(self.field.white_yard, 'black') > 0:
-                    self.throw_away('black')
-                    self.field.show_field()
-                print('Computer win')
-                break
+            # computer part
+            if color == 'black':
+
+                if not self.is_movement_over(color):
+                    self.computer_head_reset = True
+                    self.computer_step(color)
+                    self.who_steps = 'human'
+                    continue
+                else:
+                    self.computer_end_moving_flag = True
+
+                if self.computer_end_moving_flag:
+
+                    if self.field.get_sum_of_structure(self.field.white_yard, color) > 0:
+                        self.throw_away(color)
+                        self.field.show_field()
+                        self.who_steps = 'human'
+                        continue
+                    else:
+                        self.computer_end_throwing_flag = True
+
+                if self.computer_end_moving_flag and self.computer_end_throwing_flag:
+                    print('Computer won')
+                    break
+
+            # human part
+            if color == 'white':
+
+                if not self.is_movement_over(color):
+                    # self.head_reset = True
+                    # self.human_step(color)
+                    self.who_steps = 'computer'
+                    continue
+                else:
+                    self.human_end_moving_flag = True
+
+                if self.human_end_moving_flag:
+
+                    if self.field.get_sum_of_structure(self.field.black_yard, color) > 0:
+                        self.throw_away(color)
+                        self.field.show_field()
+                        self.who_steps = 'computer'
+                        continue
+                    else:
+                        self.human_end_throwing_flag = True
+
+                if self.human_end_moving_flag and self.human_end_throwing_flag:
+                    print('Human won')
+                    break
+
         self.field.show_field()
         print("ВСЁ!")
+
+    def checker_filter(self, first_dice, second_dice):
+        def inner_func(checker):
+            first_current_place = second_current_place = None
+            event_1 = event_2 = False
+
+            if checker.position + first_dice <= 24:
+                first_current_place = self.get_exact_element(checker.color, checker.position + first_dice)
+            if checker.position + second_dice <= 24:
+                second_current_place = self.get_exact_element(checker.color, checker.position + second_dice)
+
+            if first_current_place is not None:
+                event_1 = first_current_place == 0 or (
+                        isinstance(first_current_place, MyStack) and first_current_place.color == checker.color)
+            if second_current_place is not None:
+                event_2 = second_current_place == 0 or (
+                        isinstance(second_current_place, MyStack) and second_current_place.color == checker.color)
+
+            return event_1 or event_2
+
+        return inner_func
+
+    def cell_filter(self, free_cell_param=False):
+        def inner_func(cell, color):
+            current_place = self.get_exact_element(color, cell)
+            if free_cell_param:
+                return current_place == 0
+            else:
+                return isinstance(current_place, MyStack) and current_place.color == color
+
+        return inner_func
+
+    def filter_from_head(self, checker):
+        if self.is_checker_from_head(checker):
+            return self.human_head_reset
+        return True
+
+    def human_step(self, color):
+        first_dice, second_dice = self.throw_dices()
+        checkers_list = self.get_possible_checker_list(color)
+        checkers_list = list(
+            filter(
+                self.checker_filter(first_dice, second_dice), filter(
+                    self.filter_from_head, checkers_list
+                )
+            )
+        )
+
+        # надо написать функцию отображения поля с номерами ячеек
+        # в данном случае надо оставить только ячейки, где есть шашки из нашего списка,
+        # остальные пометить, например, крестами
+
+        if checkers_list:
+            print(checkers_list)
+        else:
+            print('Вариантов хода нет')
+            return
+
+        print("Выберите шашку")
+
+        position_number = int(input())
+
+        current_checker = (list(checker for checker in checkers_list if checker.position == position_number))[0]
+        # Возможные варианты хода для этой шашки
+        cells_list = [current_checker.position + dice for dice in (first_dice, second_dice)]
+
+        free_cells_list = list(filter(self.cell_filter(free_cell_param=True), cells_list))
+        others_cells_list = list(filter(self.cell_filter(), cells_list))
+
+        for cell in free_cells_list:
+            temporary_checker = Checker(color)
+            temporary_checker.position = cell
+            del temporary_checker
 
     def computer_step(self, color):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
@@ -82,9 +198,9 @@ class Game:
             if step_result:
                 print(step_result)
                 if double_flag:
-                    if self.first_step_flag and self.first_dice in (3, 4, 6):
-                        self.first_step_flag = False
-                        self.head_reset = True
+                    if self.computer_first_step_flag and self.first_dice in (3, 4, 6):
+                        self.computer_first_step_flag = False
+                        self.computer_head_reset = True
                     step_result = self.checking_move()
                     if type(step_result) == bool:
                         if step_result:
@@ -147,7 +263,7 @@ class Game:
         # это значит что там уже стэк
         new_home[position_in_mylist].add_element(checker)
         if new_home[position_in_mylist] is self.black_head or new_home[position_in_mylist] is self.white_head:
-            self.head_reset = True
+            self.computer_head_reset = True
 
     def is_checker_from_head(self, checker):
         return checker is self.black_head.top or checker is self.white_head.top
@@ -562,7 +678,7 @@ class Game:
     def is_success_move(self, checker, dice):
 
         if self.is_checker_from_head(checker):
-            self.head_reset = False
+            self.computer_head_reset = False
 
         # убираем шашку со старой позиции
         self.remove_checker_from_old_position(checker)
@@ -883,7 +999,7 @@ class Game:
 
             for checker_value in checkers_list:
                 if self.is_checker_from_head(checker_value):
-                    if not self.head_reset:
+                    if not self.computer_head_reset:
                         continue
 
                 cell_value = checker_value.position + dice
@@ -1132,6 +1248,6 @@ class Game:
                             break
 
 
-for _ in range(5):
+for _ in range(100):
     g = Game()
     g.play_the_game()

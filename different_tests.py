@@ -1,12 +1,13 @@
-def func(a):
-    if a > 5:
-        return 3, 4
-    if a < 3:
-        return None
-    if a == 4:
-        return 1, 2, 3
+class Checker:
+    def __init__(self):
+        self.color='black'
+        self.position = 1
 
+c=Checker()
+a=[c]
 
-res = func(4)
+print(a)
 
-print(res)
+del c
+n=3
+print(a)
