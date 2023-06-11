@@ -133,13 +133,32 @@ class Game:
 
         return inner_func
 
-    def cell_filter(self, free_cell_param=False):
-        def inner_func(cell, color):
+    def cell_filter(self, color):
+        def inner_func(cell):
             current_place = self.get_exact_element(color, cell)
-            if free_cell_param:
-                return current_place == 0
-            else:
-                return isinstance(current_place, MyStack) and current_place.color == color
+            return current_place == 0 or isinstance(current_place, MyStack) and current_place.color == color
+
+        return inner_func
+
+    def filter_six_in_line(self, color, dice_1, dice_2):
+        def inner_func(cell):
+            for dice in (dice_1, dice_2):
+                if cell == 0:
+                    checker_position = cell - dice
+                    if isinstance(checker_position, MyStack) and checker_position.color == color:
+                        self.remove_checker_from_old_position(checker_position.top)
+                        checker_position.top.position += dice
+                        self.move_checker_to_new_position(checker_position.top)
+
+                        result_is_six_checkers_in_line = self.is_six_checkers_in_line(checker_position.top.color)
+
+                        self.remove_checker_from_old_position(checker_position.top)
+                        self.move_checker_to_new_position(checker_position.top, reverse_flag=True)
+
+                        if not result_is_six_checkers_in_line:
+                            return False
+
+            return True
 
         return inner_func
 
@@ -171,19 +190,22 @@ class Game:
 
         print("Выберите шашку")
 
-        position_number = int(input())
+        position_from_number = int(input())
 
-        current_checker = (list(checker for checker in checkers_list if checker.position == position_number))[0]
+        current_checker = [checker for checker in checkers_list if checker.position == position_from_number][0]
         # Возможные варианты хода для этой шашки
         cells_list = [current_checker.position + dice for dice in (first_dice, second_dice)]
 
-        free_cells_list = list(filter(self.cell_filter(free_cell_param=True), cells_list))
-        others_cells_list = list(filter(self.cell_filter(), cells_list))
+        cells_list = list(filter(self.cell_filter(color), cells_list))
 
-        for cell in free_cells_list:
-            temporary_checker = Checker(color)
-            temporary_checker.position = cell
-            del temporary_checker
+        if not self.is_checker_in_another_yard(color):
+            cells_list = list(filter(self.filter_six_in_line(color, first_dice, second_dice), cells_list))
+
+        print('Выберите позицию куда хотите походить')
+
+        position_to_number = int(input())
+
+
 
     def computer_step(self, color):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
