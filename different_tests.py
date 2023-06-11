@@ -1,13 +1,5 @@
-class Checker:
-    def __init__(self):
-        self.color='black'
-        self.position = 1
+a={1:'1', 2:'2'}
 
-c=Checker()
-a=[c]
-
-print(a)
-
-del c
-n=3
+b = a.setdefault(3,tuple())
+print(b)
 print(a)

@@ -140,27 +140,27 @@ class Game:
 
         return inner_func
 
-    def filter_six_in_line(self, color, dice_1, dice_2):
-        def inner_func(cell):
-            for dice in (dice_1, dice_2):
-                if cell == 0:
-                    checker_position = cell - dice
-                    if isinstance(checker_position, MyStack) and checker_position.color == color:
-                        self.remove_checker_from_old_position(checker_position.top)
-                        checker_position.top.position += dice
-                        self.move_checker_to_new_position(checker_position.top)
-
-                        result_is_six_checkers_in_line = self.is_six_checkers_in_line(checker_position.top.color)
-
-                        self.remove_checker_from_old_position(checker_position.top)
-                        self.move_checker_to_new_position(checker_position.top, reverse_flag=True)
-
-                        if not result_is_six_checkers_in_line:
-                            return False
-
-            return True
-
-        return inner_func
+    # def filter_six_in_line(self, color, dice_1, dice_2):
+    #     def inner_func(cell):
+    #         for dice in (dice_1, dice_2):
+    #             if cell == 0:
+    #                 checker_position = cell - dice
+    #                 if isinstance(checker_position, MyStack) and checker_position.color == color:
+    #                     self.remove_checker_from_old_position(checker_position.top)
+    #                     checker_position.top.position += dice
+    #                     self.move_checker_to_new_position(checker_position.top)
+    #
+    #                     result_is_six_checkers_in_line = self.is_six_checkers_in_line(checker_position.top.color)
+    #
+    #                     self.remove_checker_from_old_position(checker_position.top)
+    #                     self.move_checker_to_new_position(checker_position.top, reverse_flag=True)
+    #
+    #                     if not result_is_six_checkers_in_line:
+    #                         return False
+    #
+    #         return True
+    #
+    #     return inner_func
 
     def filter_from_head(self, checker):
         if self.is_checker_from_head(checker):
@@ -177,6 +177,30 @@ class Game:
                 )
             )
         )
+        checker_way_map = dict()
+
+        for checker in checkers_list:
+            for dice in (first_dice, second_dice):
+                possible_position = self.get_exact_element(color, checker.position + dice)
+                if possible_position == 0:
+                    if self.is_checker_in_another_yard(color):
+                        self.remove_checker_from_old_position(checker)
+                        checker.position += dice
+                        self.move_checker_to_new_position(checker)
+
+                        result_is_six_checkers_in_line = self.is_six_checkers_in_line(color)
+
+                        self.remove_checker_from_old_position(checker)
+                        self.move_checker_to_new_position(checker, reverse_flag=True)
+
+                        if not result_is_six_checkers_in_line:
+                            continue
+                    checker_way_map.setdefault(checker, list()).append(dice)
+                else:
+                    checker_way_map.setdefault(checker, list()).append(dice)
+
+        
+
 
         # надо написать функцию отображения поля с номерами ячеек
         # в данном случае надо оставить только ячейки, где есть шашки из нашего списка,
@@ -193,19 +217,18 @@ class Game:
         position_from_number = int(input())
 
         current_checker = [checker for checker in checkers_list if checker.position == position_from_number][0]
+
         # Возможные варианты хода для этой шашки
-        cells_list = [current_checker.position + dice for dice in (first_dice, second_dice)]
+        # cells_list = [current_checker.position + dice for dice in (first_dice, second_dice)]
+        #
+        # cells_list = list(filter(self.cell_filter(color), cells_list))
 
-        cells_list = list(filter(self.cell_filter(color), cells_list))
-
-        if not self.is_checker_in_another_yard(color):
-            cells_list = list(filter(self.filter_six_in_line(color, first_dice, second_dice), cells_list))
+        # if not self.is_checker_in_another_yard(color):
+        #     cells_list = list(filter(self.filter_six_in_line(color, first_dice, second_dice), cells_list))
 
         print('Выберите позицию куда хотите походить')
 
         position_to_number = int(input())
-
-
 
     def computer_step(self, color):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
