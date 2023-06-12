@@ -88,8 +88,8 @@ class Game:
             if color == 'white':
 
                 if not self.is_movement_over(color):
-                    # self.head_reset = True
-                    # self.human_step(color)
+                    self.human_head_reset = True
+                    self.human_step(color)
                     self.who_steps = 'computer'
                     continue
                 else:
@@ -112,15 +112,17 @@ class Game:
         self.field.show_field()
         print("ВСЁ!")
 
-    def checker_filter(self, first_dice, second_dice):
+    def checker_filter(self, first_dice=None, second_dice=None):
         def inner_func(checker):
             first_current_place = second_current_place = None
             event_1 = event_2 = False
 
-            if checker.position + first_dice <= 24:
-                first_current_place = self.get_exact_element(checker.color, checker.position + first_dice)
-            if checker.position + second_dice <= 24:
-                second_current_place = self.get_exact_element(checker.color, checker.position + second_dice)
+            if first_dice is not None:
+                if checker.position + first_dice <= 24:
+                    first_current_place = self.get_exact_element(checker.color, checker.position + first_dice)
+            if second_dice is not None:
+                if checker.position + second_dice <= 24:
+                    second_current_place = self.get_exact_element(checker.color, checker.position + second_dice)
 
             if first_current_place is not None:
                 event_1 = first_current_place == 0 or (
@@ -133,42 +135,60 @@ class Game:
 
         return inner_func
 
-    def cell_filter(self, color):
-        def inner_func(cell):
-            current_place = self.get_exact_element(color, cell)
-            return current_place == 0 or isinstance(current_place, MyStack) and current_place.color == color
-
-        return inner_func
-
-    # def filter_six_in_line(self, color, dice_1, dice_2):
-    #     def inner_func(cell):
-    #         for dice in (dice_1, dice_2):
-    #             if cell == 0:
-    #                 checker_position = cell - dice
-    #                 if isinstance(checker_position, MyStack) and checker_position.color == color:
-    #                     self.remove_checker_from_old_position(checker_position.top)
-    #                     checker_position.top.position += dice
-    #                     self.move_checker_to_new_position(checker_position.top)
-    #
-    #                     result_is_six_checkers_in_line = self.is_six_checkers_in_line(checker_position.top.color)
-    #
-    #                     self.remove_checker_from_old_position(checker_position.top)
-    #                     self.move_checker_to_new_position(checker_position.top, reverse_flag=True)
-    #
-    #                     if not result_is_six_checkers_in_line:
-    #                         return False
-    #
-    #         return True
-    #
-    #     return inner_func
-
     def filter_from_head(self, checker):
         if self.is_checker_from_head(checker):
             return self.human_head_reset
         return True
 
-    def human_step(self, color):
-        first_dice, second_dice = self.throw_dices()
+    @staticmethod
+    def evaluate_dict(some_dict):
+        for list_value in some_dict.values():
+            if list_value:
+                return True
+        return False
+
+    def virtual_step(self, color, first_dice, second_dice):
+        checker_step_map = self.get_checker_step_map(color, first_dice=first_dice, second_dice=second_dice)
+        if len(checker_step_map) == 1:
+            return checker_step_map
+
+        checker_step_map_copy = {key: checker_step_map[key].copy() for key in checker_step_map}
+        bad_checkers_map = dict()
+
+        for checker in checker_step_map:
+            checker_steps_list = checker_step_map[checker]
+            for dice in checker_steps_list:
+                possible_position = self.get_exact_element(color, checker.position + dice)
+                if possible_position == 0:
+                    if not self.is_checker_in_another_yard(color):
+                        # self.remove_checker_from_old_position(checker)
+                        # checker.position += dice
+                        # self.move_checker_to_new_position(checker)
+
+                        self.is_success_move(checker, dice)
+
+                        another_dice = first_dice if dice == second_dice else second_dice
+
+                        result = self.get_checker_step_map(color, another_dice)
+                        result = self.evaluate_dict(result)
+                        if not result:
+                            bad_checkers_map.setdefault(checker, list()).append(dice)
+
+                        self.remove_checker_from_old_position(checker)
+                        self.move_checker_to_new_position(checker, reverse_flag=True)
+
+        if bad_checkers_map != checker_step_map_copy:
+            for checker in bad_checkers_map:
+                checker_steps_list = bad_checkers_map[checker]
+                for dice in checker_steps_list:
+                    if checker in checker_step_map and dice in checker_step_map[checker]:
+                        checker_step_map[checker].remove(dice)
+
+        if self.evaluate_dict(checker_step_map):
+            return checker_step_map
+        return checker_step_map_copy
+
+    def get_checker_step_map(self, color, first_dice=None, second_dice=None):
         checkers_list = self.get_possible_checker_list(color)
         checkers_list = list(
             filter(
@@ -177,16 +197,20 @@ class Game:
                 )
             )
         )
-        checker_way_map = dict()
+        checker_step_map = dict()
 
         for checker in checkers_list:
-            for dice in (first_dice, second_dice):
+            for dice in (d for d in (first_dice, second_dice) if d is not None):
+                if checker.position + dice > 24:
+                    continue
                 possible_position = self.get_exact_element(color, checker.position + dice)
                 if possible_position == 0:
-                    if self.is_checker_in_another_yard(color):
-                        self.remove_checker_from_old_position(checker)
-                        checker.position += dice
-                        self.move_checker_to_new_position(checker)
+                    if not self.is_checker_in_another_yard(color):
+                        # self.remove_checker_from_old_position(checker)
+                        # checker.position += dice
+                        # self.move_checker_to_new_position(checker)
+
+                        self.is_success_move(checker, dice)
 
                         result_is_six_checkers_in_line = self.is_six_checkers_in_line(color)
 
@@ -195,40 +219,43 @@ class Game:
 
                         if not result_is_six_checkers_in_line:
                             continue
-                    checker_way_map.setdefault(checker, list()).append(dice)
-                else:
-                    checker_way_map.setdefault(checker, list()).append(dice)
+                    checker_step_map.setdefault(checker, list()).append(dice)
+                elif isinstance(possible_position, MyStack) and possible_position.color == checker.color:
+                    checker_step_map.setdefault(checker, list()).append(dice)
 
-        
+        return checker_step_map
 
+    def human_step(self, color):
+        first_dice, second_dice = self.throw_dices()
+        print('human: ', first_dice,second_dice)
 
         # надо написать функцию отображения поля с номерами ячеек
         # в данном случае надо оставить только ячейки, где есть шашки из нашего списка,
         # остальные пометить, например, крестами
 
-        if checkers_list:
-            print(checkers_list)
-        else:
-            print('Вариантов хода нет')
-            return
+        # if checkers_list:
+        #     print(checkers_list)
+        # else:
+        #     print('Вариантов хода нет')
+        #     return
 
-        print("Выберите шашку")
-
-        position_from_number = int(input())
-
-        current_checker = [checker for checker in checkers_list if checker.position == position_from_number][0]
+        # print("Выберите шашку")
+        #
+        # position_from_number = int(input())
+        possible_variants = self.virtual_step(color, first_dice, second_dice)
+        print(possible_variants)
+        possible_variants = {key: possible_variants[key] for key in possible_variants if possible_variants[key]}
+        if possible_variants:
+            checker = random.choice(list(possible_variants.keys()))
+            dice = random.choice(possible_variants[checker])
+            self.is_success_move(checker, dice)
+        # current_checker = [checker for checker in checkers_list if checker.position == position_from_number][0]
 
         # Возможные варианты хода для этой шашки
-        # cells_list = [current_checker.position + dice for dice in (first_dice, second_dice)]
-        #
-        # cells_list = list(filter(self.cell_filter(color), cells_list))
-
-        # if not self.is_checker_in_another_yard(color):
-        #     cells_list = list(filter(self.filter_six_in_line(color, first_dice, second_dice), cells_list))
 
         print('Выберите позицию куда хотите походить')
 
-        position_to_number = int(input())
+        # position_to_number = int(input())
 
     def computer_step(self, color):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
@@ -261,7 +288,8 @@ class Game:
             if double_flag:
                 self.throw_away(color, dice=self.first_dice)
 
-        print(self.first_dice, self.second_dice)
+        print('computer: ',self.first_dice, self.second_dice)
+        print()
         self.field.show_field()
         print(self.get_phase_of_game())
 
@@ -292,6 +320,12 @@ class Game:
         old_home[position_in_mylist].pop_element()
 
         if old_home[position_in_mylist].is_empty():
+
+            if old_home[position_in_mylist] is self.black_head:
+                self.black_head = None
+            if old_home[position_in_mylist] is self.white_head:
+                self.white_head = None
+
             old_home[position_in_mylist] = 0
 
     def move_checker_to_new_position(self, checker: Checker, reverse_flag=False):
@@ -307,11 +341,22 @@ class Game:
             new_home[position_in_mylist] = MyStack()
         # это значит что там уже стэк
         new_home[position_in_mylist].add_element(checker)
-        if new_home[position_in_mylist] is self.black_head or new_home[position_in_mylist] is self.white_head:
-            self.computer_head_reset = True
+        if self.black_head is not None:
+            if new_home[position_in_mylist] is self.black_head:
+                self.computer_head_reset = True
+        if self.white_head is not None:
+            if new_home[position_in_mylist] is self.white_head:
+                self.human_head_reset = True
 
     def is_checker_from_head(self, checker):
-        return checker is self.black_head.top or checker is self.white_head.top
+        if checker.color == 'black':
+            if self.black_head is not None:
+                return checker is self.black_head.top
+            return False
+        if checker.color == 'white':
+            if self.white_head is not None:
+                return checker is self.white_head.top
+            return False
 
     def get_possible_checker_list(self, color):
         return [checker
@@ -336,7 +381,8 @@ class Game:
         #     return 1
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 and (self.field.get_count_of_free_cells(
-                self.field.black_home) + self.get_position_color(7)) != 0 and self.black_head.count > 2 and (
+                self.field.black_home) + self.get_position_color(7)) != 0 and (
+                self.black_head is not None and self.black_head.count > 2) and (
                 self.field.get_occupied_of_structure(self.field.black_home, 'black') + self.get_position_color(7)) <= 4:
             return 1
 
@@ -346,7 +392,8 @@ class Game:
                   self.field.get_sum_of_structure(self.field.white_home,
                                                   'black') < self.field.get_occupied_of_structure(
                             self.field.white_home, 'black') + self.field.get_count_of_free_cells(
-                            self.field.white_home)) or \
+                            self.field.white_home) + self.field.get_occupied_of_structure(self.field.white_home,
+                                                                                          'white')) or \
                  self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4):
             return 2
 
@@ -360,7 +407,7 @@ class Game:
         #         self.field.get_sum_of_structure(self.field.black_home, 'black') + self.field.get_sum_of_structure(
         #     self.field.black_yard, 'black') > self.field.get_occupied_of_structure(self.field.black_yard, 'black')
         # ):
-        if self.field.get_count_of_free_cells(self.field.white_yard) == 6 and (
+        if self.field.get_occupied_of_structure(self.field.white_yard, 'black') == 0 and (
                 self.field.get_count_of_free_cells(self.field.black_yard) != 0 or (
                 self.field.get_sum_of_structure(self.field.black_home, 'black') + self.field.get_sum_of_structure(
             self.field.black_yard, 'black') > self.field.get_occupied_of_structure(self.field.black_yard, 'black'))
@@ -607,6 +654,8 @@ class Game:
         one_step_to_the_end_result = self.one_step_to_the_end(color, dice_1=self.first_dice, dice_2=self.second_dice)
         if one_step_to_the_end_result is not None:
             last_checker, dice_1, dice_2 = one_step_to_the_end_result
+            if dice_1 is None:
+                c=1
             if dice_2 is None:
                 current_place = self.get_exact_element(color, last_checker.position + dice_1)
                 if (isinstance(current_place, MyStack) and current_place.color == color) or current_place == 0:
@@ -721,9 +770,14 @@ class Game:
         return False
 
     def is_success_move(self, checker, dice):
-
-        if self.is_checker_from_head(checker):
-            self.computer_head_reset = False
+        if checker.color == 'black':
+            if self.black_head is not None:
+                if self.is_checker_from_head(checker):
+                    self.computer_head_reset = False
+        if checker.color == 'white':
+            if self.white_head is not None:
+                if self.is_checker_from_head(checker):
+                    self.human_head_reset = False
 
         # убираем шашку со старой позиции
         self.remove_checker_from_old_position(checker)
