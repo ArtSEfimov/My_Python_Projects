@@ -112,7 +112,7 @@ class Game:
         self.field.show_field()
         print("ВСЁ!")
 
-    def checker_filter(self, first_dice=None, second_dice=None):
+    def checker_filter(self, first_dice, second_dice):
         def inner_func(checker):
             first_current_place = second_current_place = None
             event_1 = event_2 = False
@@ -147,8 +147,11 @@ class Game:
                 return True
         return False
 
-    def virtual_step(self, color, first_dice, second_dice):
-        checker_step_dict = self.get_checker_step_dict(color, first_dice=first_dice, second_dice=second_dice)
+    def virtual_step(self, color, first_dice=None, second_dice=None):
+        checker_step_dict = self.get_checker_step_dict(color, first_dice, second_dice)
+        if second_dice is None:
+            return checker_step_dict
+
         update_checker_step_dict = dict()
 
         for checker in checker_step_dict:
@@ -173,7 +176,7 @@ class Game:
 
         return checker_step_dict
 
-    def get_checker_step_dict(self, color, first_dice=None, second_dice=None):
+    def get_checker_step_dict(self, color, first_dice, second_dice=None):
         checkers_list = self.get_possible_checker_list(color)
         checkers_list = list(
             filter(
@@ -225,13 +228,22 @@ class Game:
         # print("Выберите шашку")
         #
         # position_from_number = int(input())
+        another_dice = None
         possible_variants = self.virtual_step(color, first_dice, second_dice)
         print(possible_variants)
-        possible_variants = {key: possible_variants[key] for key in possible_variants if possible_variants[key]}
         if possible_variants:
             checker = random.choice(list(possible_variants.keys()))
             dice = random.choice(possible_variants[checker])
             self.is_success_move(checker, dice)
+            another_dice = first_dice if dice == second_dice else second_dice
+        if another_dice is not None:
+                possible_variants = self.virtual_step(color, dice)
+                if possible_variants:
+                    checker = random.choice(list(possible_variants.keys()))
+                    dice = random.choice(possible_variants[checker])
+                    self.is_success_move(checker, dice)
+
+
         # current_checker = [checker for checker in checkers_list if checker.position == position_from_number][0]
 
         # Возможные варианты хода для этой шашки
@@ -637,58 +649,37 @@ class Game:
         one_step_to_the_end_result = self.one_step_to_the_end(color, dice_1=self.first_dice, dice_2=self.second_dice)
         if one_step_to_the_end_result is not None:
             last_checker, dice_1, dice_2 = one_step_to_the_end_result
-            if dice_1 is None:
-                c = 1
             if dice_2 is None:
-                current_place = self.get_exact_element(color, last_checker.position + dice_1)
-                if (isinstance(current_place, MyStack) and current_place.color == color) or current_place == 0:
-                    self.is_success_move(last_checker, dice_1)
-                    return self.second_dice if dice_1 == self.first_dice else self.first_dice
+                self.is_success_move(last_checker, dice_1)
+                return self.second_dice if dice_1 == self.first_dice else self.first_dice
 
             min_dice = min(dice_1, dice_2)
             max_dice = max(dice_1, dice_2)
-            result_1 = result_2 = False
 
             if min_dice == max_dice:
-                dice = min_dice
-                current_place = self.get_exact_element(color, last_checker.position + dice)
-                if (isinstance(current_place, MyStack) and current_place.color == color) or current_place == 0:
-                    self.is_success_move(last_checker, dice)
-                    return dice
-
-            current_place_1 = self.get_exact_element(color, last_checker.position + min_dice)
-
-            if (isinstance(current_place_1, MyStack) and current_place_1.color == color) or current_place_1 == 0:
-                result_1 = True
                 self.is_success_move(last_checker, min_dice)
-                current_place_2 = self.get_exact_element(color, self.match_cells[max_dice])
-                if isinstance(current_place_2, MyStack) and current_place_2.color == color or self.match_cells[
-                    max_dice] < self.get_last_black_checker_position():
-                    return max_dice
-
-                self.remove_checker_from_old_position(last_checker)
-                self.move_checker_to_new_position(last_checker, reverse_flag=True)
-
-            current_place_2 = self.get_exact_element(color, last_checker.position + max_dice)
-
-            if (isinstance(current_place_2, MyStack) and current_place_2.color == color) or current_place_2 == 0:
-                result_2 = True
-                self.is_success_move(last_checker, max_dice)
-                current_place_1 = self.get_exact_element(color, self.match_cells[min_dice])
-                if isinstance(current_place_1, MyStack) and current_place_1.color == color or self.match_cells[
-                    min_dice] < self.get_last_black_checker_position():
-                    return min_dice
-
-                self.remove_checker_from_old_position(last_checker)
-                self.move_checker_to_new_position(last_checker, reverse_flag=True)
-
-            if result_2:
-                self.is_success_move(last_checker, max_dice)
                 return min_dice
 
-            if result_1:
-                self.is_success_move(last_checker, min_dice)
+            self.is_success_move(last_checker, min_dice)
+            current_place = self.get_exact_element(color, self.match_cells[max_dice])
+            if isinstance(current_place, MyStack) and current_place.color == color or self.match_cells[
+                max_dice] < self.get_last_black_checker_position():
                 return max_dice
+
+            self.remove_checker_from_old_position(last_checker)
+            self.move_checker_to_new_position(last_checker, reverse_flag=True)
+
+            self.is_success_move(last_checker, max_dice)
+            current_place = self.get_exact_element(color, self.match_cells[min_dice])
+            if isinstance(current_place, MyStack) and current_place.color == color or self.match_cells[
+                min_dice] < self.get_last_black_checker_position():
+                return min_dice
+
+            self.remove_checker_from_old_position(last_checker)
+            self.move_checker_to_new_position(last_checker, reverse_flag=True)
+
+            self.is_success_move(last_checker, max_dice)
+            return min_dice
 
         # ПРЯМОЙ порядок хода (ПЕРВЫЙ -> ВТОРОЙ)
 
@@ -784,12 +775,21 @@ class Game:
         if last_checker is None:
             return
 
-        if 19 <= last_checker.position + dice_1 <= 24 and 19 <= last_checker.position + dice_2 <= 24:
-            return last_checker, dice_1, dice_2
-        if 19 <= last_checker.position + dice_1 <= 24:
-            return last_checker, dice_1, None
-        if 19 <= last_checker.position + dice_2 <= 24:
-            return last_checker, dice_2, None
+        if 19 <= last_checker.position + dice_1 <= 24 or 19 <= last_checker.position + dice_2 <= 24:
+            current_place_1 = self.get_exact_element(color, last_checker.position + dice_1)
+            current_place_2 = self.get_exact_element(color, last_checker.position + dice_2)
+            if all(
+                    map(
+                        lambda current_place: isinstance(current_place,
+                                                         MyStack) and current_place.color == color or current_place == 0,
+                        (current_place_1, current_place_2)
+                    )
+            ):
+                return last_checker, dice_1, dice_2
+            if isinstance(current_place_1, MyStack) and current_place_1.color == color or current_place_1 == 0:
+                return last_checker, dice_1, None
+            if isinstance(current_place_2, MyStack) and current_place_2.color == color or current_place_2 == 0:
+                return last_checker, dice_2, None
         return
 
     @staticmethod
@@ -1330,6 +1330,6 @@ class Game:
                             break
 
 
-for _ in range(100):
+for _ in range(1000):
     g = Game()
     g.play_the_game()
