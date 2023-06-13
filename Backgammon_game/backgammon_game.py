@@ -148,47 +148,32 @@ class Game:
         return False
 
     def virtual_step(self, color, first_dice, second_dice):
-        checker_step_map = self.get_checker_step_map(color, first_dice=first_dice, second_dice=second_dice)
-        if len(checker_step_map) == 1:
-            return checker_step_map
+        checker_step_dict = self.get_checker_step_dict(color, first_dice=first_dice, second_dice=second_dice)
+        update_checker_step_dict = dict()
 
-        checker_step_map_copy = {key: checker_step_map[key].copy() for key in checker_step_map}
-        bad_checkers_map = dict()
-
-        for checker in checker_step_map:
-            checker_steps_list = checker_step_map[checker]
+        for checker in checker_step_dict:
+            checker_steps_list = checker_step_dict[checker]
             for dice in checker_steps_list:
-                possible_position = self.get_exact_element(color, checker.position + dice)
-                if possible_position == 0:
-                    if not self.is_checker_in_another_yard(color):
-                        # self.remove_checker_from_old_position(checker)
-                        # checker.position += dice
-                        # self.move_checker_to_new_position(checker)
 
-                        self.is_success_move(checker, dice)
+                self.is_success_move(checker, dice)
 
-                        another_dice = first_dice if dice == second_dice else second_dice
+                another_dice = first_dice if dice == second_dice else second_dice
 
-                        result = self.get_checker_step_map(color, another_dice)
-                        result = self.evaluate_dict(result)
-                        if not result:
-                            bad_checkers_map.setdefault(checker, list()).append(dice)
+                result = self.get_checker_step_dict(color, another_dice)
+                result = self.evaluate_dict(result)
 
-                        self.remove_checker_from_old_position(checker)
-                        self.move_checker_to_new_position(checker, reverse_flag=True)
+                if result:
+                    update_checker_step_dict.setdefault(checker, list()).append(dice)
 
-        if bad_checkers_map != checker_step_map_copy:
-            for checker in bad_checkers_map:
-                checker_steps_list = bad_checkers_map[checker]
-                for dice in checker_steps_list:
-                    if checker in checker_step_map and dice in checker_step_map[checker]:
-                        checker_step_map[checker].remove(dice)
+                self.remove_checker_from_old_position(checker)
+                self.move_checker_to_new_position(checker, reverse_flag=True)
 
-        if self.evaluate_dict(checker_step_map):
-            return checker_step_map
-        return checker_step_map_copy
+        if update_checker_step_dict:
+            return update_checker_step_dict
 
-    def get_checker_step_map(self, color, first_dice=None, second_dice=None):
+        return checker_step_dict
+
+    def get_checker_step_dict(self, color, first_dice=None, second_dice=None):
         checkers_list = self.get_possible_checker_list(color)
         checkers_list = list(
             filter(
@@ -197,7 +182,7 @@ class Game:
                 )
             )
         )
-        checker_step_map = dict()
+        checker_step_dict = dict()
 
         for checker in checkers_list:
             for dice in (d for d in (first_dice, second_dice) if d is not None):
@@ -206,9 +191,6 @@ class Game:
                 possible_position = self.get_exact_element(color, checker.position + dice)
                 if possible_position == 0:
                     if not self.is_checker_in_another_yard(color):
-                        # self.remove_checker_from_old_position(checker)
-                        # checker.position += dice
-                        # self.move_checker_to_new_position(checker)
 
                         self.is_success_move(checker, dice)
 
@@ -219,15 +201,16 @@ class Game:
 
                         if not result_is_six_checkers_in_line:
                             continue
-                    checker_step_map.setdefault(checker, list()).append(dice)
-                elif isinstance(possible_position, MyStack) and possible_position.color == checker.color:
-                    checker_step_map.setdefault(checker, list()).append(dice)
+                    checker_step_dict.setdefault(checker, list()).append(dice)
 
-        return checker_step_map
+                elif isinstance(possible_position, MyStack) and possible_position.color == checker.color:
+                    checker_step_dict.setdefault(checker, list()).append(dice)
+
+        return checker_step_dict
 
     def human_step(self, color):
         first_dice, second_dice = self.throw_dices()
-        print('human: ', first_dice,second_dice)
+        print('human: ', first_dice, second_dice)
 
         # надо написать функцию отображения поля с номерами ячеек
         # в данном случае надо оставить только ячейки, где есть шашки из нашего списка,
@@ -288,7 +271,7 @@ class Game:
             if double_flag:
                 self.throw_away(color, dice=self.first_dice)
 
-        print('computer: ',self.first_dice, self.second_dice)
+        print('computer: ', self.first_dice, self.second_dice)
         print()
         self.field.show_field()
         print(self.get_phase_of_game())
@@ -655,7 +638,7 @@ class Game:
         if one_step_to_the_end_result is not None:
             last_checker, dice_1, dice_2 = one_step_to_the_end_result
             if dice_1 is None:
-                c=1
+                c = 1
             if dice_2 is None:
                 current_place = self.get_exact_element(color, last_checker.position + dice_1)
                 if (isinstance(current_place, MyStack) and current_place.color == color) or current_place == 0:
