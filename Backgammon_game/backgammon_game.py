@@ -228,21 +228,23 @@ class Game:
         # print("Выберите шашку")
         #
         # position_from_number = int(input())
-        another_dice = None
-        possible_variants = self.virtual_step(color, first_dice, second_dice)
-        print(possible_variants)
-        if possible_variants:
-            checker = random.choice(list(possible_variants.keys()))
-            dice = random.choice(possible_variants[checker])
-            self.is_success_move(checker, dice)
-            another_dice = first_dice if dice == second_dice else second_dice
-        if another_dice is not None:
-                possible_variants = self.virtual_step(color, dice)
+        iterations_number = 2 if first_dice == second_dice else 1
+        for _ in range(iterations_number):
+
+            possible_variants = self.virtual_step(color, first_dice, second_dice)
+            print(possible_variants)
+            if possible_variants:
+                checker = random.choice(list(possible_variants.keys()))
+                dice = random.choice(possible_variants[checker])
+                self.is_success_move(checker, dice)
+                another_dice = first_dice if dice == second_dice else second_dice
+
+                possible_variants = self.virtual_step(color, another_dice)
+                print(possible_variants)
                 if possible_variants:
                     checker = random.choice(list(possible_variants.keys()))
                     dice = random.choice(possible_variants[checker])
                     self.is_success_move(checker, dice)
-
 
         # current_checker = [checker for checker in checkers_list if checker.position == position_from_number][0]
 
@@ -251,6 +253,26 @@ class Game:
         print('Выберите позицию куда хотите походить')
 
         # position_to_number = int(input())
+
+    def human_throw(self, color):
+        first_throw_dice, second_throw_dice = self.throw_dices()
+
+        possible_step_variants = self.virtual_step(color, first_throw_dice, second_throw_dice)
+        possible_throw_variants = list()
+
+        max_throw_dice = max(first_throw_dice, second_throw_dice)
+        min_throw_dice = min(first_throw_dice, second_throw_dice)
+
+        # сначала будет позиция выше (с максимальным значением dice), чтобы
+        position_above = self.get_exact_element(color, self.match_cells[max_throw_dice])
+        position_below = self.get_exact_element(color, self.match_cells[min_throw_dice])
+        if all(
+                map(
+                    lambda position: isinstance(position, MyStack) and position.color == color, (position_above, position_below)
+                )
+        ):
+            possible_throw_variants.append(position_above.top)
+            possible_throw_variants.append(position_below.top)
 
     def computer_step(self, color):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
@@ -1176,9 +1198,9 @@ class Game:
         structure_data = structure.data
         return structure_data[position_in_structure_data]
 
-    def try_simple_variant(self, color, match_cells, dice_1, dice_2):
+    def try_simple_variant(self, color, dice_1, dice_2):
         if dice_1 == dice_2:
-            current_place = self.get_exact_element(color, match_cells[dice_1])
+            current_place = self.get_exact_element(color, self.match_cells[dice_1])
 
             if isinstance(current_place, MyStack) and current_place.color == color:
                 if current_place.count >= 4:
@@ -1189,7 +1211,7 @@ class Game:
                 return False
 
             if dice_1 + dice_2 <= 6:
-                current_place = self.get_exact_element(color, match_cells[dice_1 + dice_2])
+                current_place = self.get_exact_element(color, self.match_cells[dice_1 + dice_2])
                 if isinstance(current_place, MyStack) and current_place.color == color:
                     if current_place.count >= 2:
                         for _ in range(2):
@@ -1198,8 +1220,8 @@ class Game:
 
             return False
 
-        position_1 = match_cells[dice_1]
-        position_2 = match_cells[dice_2]
+        position_1 = self.match_cells[dice_1]
+        position_2 = self.match_cells[dice_2]
 
         current_place_1 = self.get_exact_element(color, position_1)
         current_place_2 = self.get_exact_element(color, position_2)
@@ -1218,7 +1240,7 @@ class Game:
             return True
 
         if dice_1 + dice_2 <= 6:
-            current_place = self.get_exact_element(color, match_cells[dice_1 + dice_2])
+            current_place = self.get_exact_element(color, self.match_cells[dice_1 + dice_2])
             if isinstance(current_place, MyStack) and current_place.color == color:
                 self.remove_checker_from_old_position(current_place.top)
                 return True
@@ -1282,13 +1304,13 @@ class Game:
         if not self.valid_throw_dice(throw_dice_1, throw_dice_2):
             return
 
-        if self.try_simple_variant(color, self.match_cells, throw_dice_1, throw_dice_2):
+        if self.try_simple_variant(color, throw_dice_1, throw_dice_2):
             print('hello from simple!')
             return
 
-        iteration_number = 2 if throw_dice_1 == throw_dice_2 else 1
+        iterations_number = 2 if throw_dice_1 == throw_dice_2 else 1
 
-        for _ in range(iteration_number):
+        for _ in range(iterations_number):
             for current_dice in (max(throw_dice_1, throw_dice_2), min(throw_dice_1, throw_dice_2)):
                 above_flag = False
 
@@ -1330,6 +1352,6 @@ class Game:
                             break
 
 
-for _ in range(1000):
+for _ in range(10000):
     g = Game()
     g.play_the_game()
