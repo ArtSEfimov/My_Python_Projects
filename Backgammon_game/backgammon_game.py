@@ -98,7 +98,7 @@ class Game:
                 if self.human_end_moving_flag:
 
                     if self.field.get_sum_of_structure(self.field.black_yard, color) > 0:
-                        self.throw_away(color)
+                        # self.throw_away(color)
                         self.field.show_field()
                         self.who_steps = 'computer'
                         continue
@@ -263,17 +263,43 @@ class Game:
         max_throw_dice = max(first_throw_dice, second_throw_dice)
         min_throw_dice = min(first_throw_dice, second_throw_dice)
 
-        # сначала будет позиция выше (с максимальным значением dice), чтобы
         position_above = self.get_exact_element(color, self.match_cells[max_throw_dice])
         position_below = self.get_exact_element(color, self.match_cells[min_throw_dice])
-        if all(
-                map(
-                    lambda position: isinstance(position, MyStack) and position.color == color,
-                    (position_above, position_below)
-                )
-        ):
-            possible_throw_variants.append(position_above.top)
-            possible_throw_variants.append(position_below.top)
+        if isinstance(position_above, MyStack):
+            if position_above.color == color:
+                possible_throw_variants.append(position_above.top)
+        else:
+            above_flag = False
+            for current_position in range(max_throw_dice + 1, 7):
+                current_place = self.get_exact_element(color, self.match_cells[current_position])
+                if isinstance(current_place, MyStack) and current_place.color == color:
+                    above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
+                    break
+
+            if not above_flag:
+                for current_position in range(self.match_cells[max_throw_dice] + 1, 25):
+                    current_place = self.get_exact_element(color, current_position)
+                    if isinstance(current_place, MyStack) and current_place.color == color:
+                        possible_throw_variants.append(current_place.top)
+                        break
+
+        if isinstance(position_below, MyStack):
+            if position_below.color == color:
+                possible_throw_variants.append(position_below.top)
+        else:
+            above_flag = False
+            for current_position in range(min_throw_dice + 1, 7):
+                current_place = self.get_exact_element(color, self.match_cells[current_position])
+                if isinstance(current_place, MyStack) and current_place.color == color:
+                    above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
+                    break
+
+            if not above_flag:
+                for current_position in range(self.match_cells[min_throw_dice] + 1, 25):
+                    current_place = self.get_exact_element(color, current_position)
+                    if isinstance(current_place, MyStack) and current_place.color == color:
+                        possible_throw_variants.append(current_place.top)
+                        break
 
     def computer_step(self, color):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
@@ -1088,6 +1114,18 @@ class Game:
 
         return True  # НЕТ 6 в ряд, так ходить можно
 
+    def move_checker_for_six_in_line(self, checker, dice):
+        self.remove_checker_from_old_position(checker)
+        checker.position += dice
+        self.move_checker_to_new_position(checker)
+
+        result_is_six_checkers_in_line = self.is_six_checkers_in_line(checker.color)
+
+        self.remove_checker_from_old_position(checker)
+        self.move_checker_to_new_position(checker, reverse_flag=True)
+
+        return result_is_six_checkers_in_line
+
     def move(self, color, dice, recursion=False, checkers=None):
         if recursion:
             checkers_list = checkers
@@ -1221,23 +1259,12 @@ class Game:
                                          MyStack) and current_intermediate_place.color == color
                     event_2 = False
                     if current_intermediate_place == 0:
-                        if self.is_checker_in_another_yard(color):
+                        if self.is_checker_in_another_yard(color) or \
+                                self.move_checker_for_six_in_line(
+                                    current_place.top, dice_1):
                             event_2 = True
-                        else:
-                            self.remove_checker_from_old_position(current_place.top)
-                            current_place.top.position += dice_1
-                            self.move_checker_to_new_position(current_place.top)
-
-                            result_is_six_checkers_in_line = self.is_six_checkers_in_line(color)
-
-                            self.remove_checker_from_old_position(current_place.top)
-                            self.move_checker_to_new_position(current_place.top, reverse_flag=True)
-
-                            if result_is_six_checkers_in_line:
-                                event_2 = True
 
                     if event_1 or event_2:
-
                         if current_place.count >= 2:
                             for _ in range(2):
                                 self.remove_checker_from_old_position(current_place.top)
@@ -1270,58 +1297,26 @@ class Game:
                 current_intermediate_place_1 = self.get_exact_element(color, self.match_cells[dice_1])
                 current_intermediate_place_2 = self.get_exact_element(color, self.match_cells[dice_2])
 
-                event_any_in_my_color = any(
-                    map(
-                        lambda place: isinstance(place, MyStack) and place.color == color,
-                        (current_intermediate_place_1, current_intermediate_place_2)
-                    )
-                )
-                if event_any_in_my_color:
+                if any(
+                        map(
+                            lambda place: isinstance(place, MyStack) and place.color == color,
+                            (current_intermediate_place_1, current_intermediate_place_2)
+                        )
+                ):
                     self.remove_checker_from_old_position(current_place.top)
                     return True
-
-                event_1_by_dice_2 = False
-                event_2_by_dice_1 = False
-
+                dice_1, dice_2 = dice_2, dice_1
                 if current_intermediate_place_1 == 0:
-                    if self.is_checker_in_another_yard(color):
-                        event_1_by_dice_2 = True
-                    else:
+                    if self.is_checker_in_another_yard(color) or \
+                            self.move_checker_for_six_in_line(current_place.top, dice_1):
                         self.remove_checker_from_old_position(current_place.top)
-                        current_place.top.position += dice_2
-                        self.move_checker_to_new_position(current_place.top)
-
-                        result_is_six_checkers_in_line = self.is_six_checkers_in_line(color)
-
-                        self.remove_checker_from_old_position(current_place.top)
-                        self.move_checker_to_new_position(current_place.top, reverse_flag=True)
-
-                        if result_is_six_checkers_in_line:
-                            event_1_by_dice_2 = True
-
-                if event_1_by_dice_2:
-                    self.remove_checker_from_old_position(current_place.top)
-                    return True
+                        return True
 
                 if current_intermediate_place_2 == 0:
-                    if self.is_checker_in_another_yard(color):
-                        event_2_by_dice_1 = True
-                    else:
+                    if self.is_checker_in_another_yard(color) or \
+                            self.move_checker_for_six_in_line(current_place.top, dice_2):
                         self.remove_checker_from_old_position(current_place.top)
-                        current_place.top.position += dice_1
-                        self.move_checker_to_new_position(current_place.top)
-
-                        result_is_six_checkers_in_line = self.is_six_checkers_in_line(color)
-
-                        self.remove_checker_from_old_position(current_place.top)
-                        self.move_checker_to_new_position(current_place.top, reverse_flag=True)
-
-                        if result_is_six_checkers_in_line:
-                            event_2_by_dice_1 = True
-
-                if event_2_by_dice_1:
-                    self.remove_checker_from_old_position(current_place.top)
-                    return True
+                        return True
 
         return False
 
@@ -1357,11 +1352,13 @@ class Game:
                     if isinstance(new_place, MyStack):
                         if new_place.color == color:
                             self.is_success_move(current_place.top, dice)
+                            break
 
-                    else:
+                    elif self.is_checker_in_another_yard(color) or \
+                            self.move_checker_for_six_in_line(current_place.top, dice):
                         self.is_success_move(current_place.top, dice)
+                        break
 
-                    break
         else:
             for current_position in range(self.match_cells[dice] + 1, 25):
                 current_place = self.get_exact_element(color, current_position)
@@ -1416,23 +1413,11 @@ class Game:
                                 if new_place.color == color:
                                     self.is_success_move(current_place.top, current_dice)
                                     break
-                            else:
-                                if self.is_checker_in_another_yard(color):
-                                    self.is_success_move(current_place.top, current_dice)
-                                    break
-                                else:
-                                    self.remove_checker_from_old_position(current_place.top)
-                                    current_place.top.position += current_dice
-                                    self.move_checker_to_new_position(current_place.top)
+                            elif self.is_checker_in_another_yard(color) or \
+                                    self.move_checker_for_six_in_line(current_place.top, current_dice):
+                                self.is_success_move(current_place.top, current_dice)
+                                break
 
-                                    result_is_six_checkers_in_line = self.is_six_checkers_in_line(color)
-
-                                    self.remove_checker_from_old_position(current_place.top)
-                                    self.move_checker_to_new_position(current_place.top, reverse_flag=True)
-
-                                    if result_is_six_checkers_in_line:
-                                        self.is_success_move(current_place.top, current_dice)
-                                        break
                 else:
                     for current_position in range(self.match_cells[current_dice] + 1, 25):
                         current_place = self.get_exact_element(color, current_position)
@@ -1443,6 +1428,6 @@ class Game:
                             break
 
 
-for _ in range(1000):
+for _ in range(1_000_000):
     g = Game()
     g.play_the_game()
