@@ -89,7 +89,10 @@ class Game:
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
-                    self.human_step(color)
+                    human_step_result = self.human_step(color)
+                    if human_step_result is not None:
+                        for dice in human_step_result:
+                            self.human_emergency_throw(color, dice)
                     self.who_steps = 'computer'
                     continue
                 else:
@@ -98,7 +101,7 @@ class Game:
                 if self.human_end_moving_flag:
 
                     if self.field.get_sum_of_structure(self.field.black_yard, color) > 0:
-                        # self.throw_away(color)
+                        self.human_throw(color)
                         self.field.show_field()
                         self.who_steps = 'computer'
                         continue
@@ -229,7 +232,7 @@ class Game:
         #
         # position_from_number = int(input())
         iterations_number = 2 if first_dice == second_dice else 1
-        for _ in range(iterations_number):
+        for iteration in range(iterations_number):
 
             possible_variants = self.virtual_step(color, first_dice, second_dice)
             print(possible_variants)
@@ -238,6 +241,11 @@ class Game:
                 dice = random.choice(possible_variants[checker])
                 self.is_success_move(checker, dice)
                 another_dice = first_dice if dice == second_dice else second_dice
+
+                if self.field.get_sum_of_structure(self.field.black_yard, color) == 15:
+                    if iterations_number == 2 and iteration == 0:
+                        return another_dice, another_dice, another_dice
+                    return another_dice,
 
                 possible_variants = self.virtual_step(color, another_dice)
                 print(possible_variants)
@@ -254,52 +262,64 @@ class Game:
 
         # position_to_number = int(input())
 
+    def human_emergency_throw(self, color, dice):
+        possible_step_variants = self.virtual_step(color, dice)
+        possible_throw_variants = list()
+        current_position = self.get_exact_element(color, self.match_cells[dice])
+        if isinstance(current_position, MyStack):
+            if current_position.color == color:
+                possible_throw_variants.append(current_position.top)
+        else:
+            above_flag = False
+            for current_position in range(dice + 1, 7):
+                current_place = self.get_exact_element(color, self.match_cells[current_position])
+                if isinstance(current_place, MyStack) and current_place.color == color:
+                    above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
+                    break
+
+            if not above_flag:
+                for current_position in range(self.match_cells[dice] + 1, 25):
+                    current_place = self.get_exact_element(color, current_position)
+                    if isinstance(current_place, MyStack) and current_place.color == color:
+                        possible_throw_variants.append(current_place.top)
+                        break
+
     def human_throw(self, color):
         first_throw_dice, second_throw_dice = self.throw_dices()
 
-        possible_step_variants = self.virtual_step(color, first_throw_dice, second_throw_dice)
-        possible_throw_variants = list()
+        iterations_number = 2 if first_throw_dice == second_throw_dice else 1
 
-        max_throw_dice = max(first_throw_dice, second_throw_dice)
-        min_throw_dice = min(first_throw_dice, second_throw_dice)
+        for _ in range(iterations_number):
 
-        position_above = self.get_exact_element(color, self.match_cells[max_throw_dice])
-        position_below = self.get_exact_element(color, self.match_cells[min_throw_dice])
-        if isinstance(position_above, MyStack):
-            if position_above.color == color:
-                possible_throw_variants.append(position_above.top)
-        else:
-            above_flag = False
-            for current_position in range(max_throw_dice + 1, 7):
-                current_place = self.get_exact_element(color, self.match_cells[current_position])
-                if isinstance(current_place, MyStack) and current_place.color == color:
-                    above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
-                    break
+            possible_step_variants = self.virtual_step(color, first_throw_dice, second_throw_dice)
+            possible_throw_variants = list()
 
-            if not above_flag:
-                for current_position in range(self.match_cells[max_throw_dice] + 1, 25):
-                    current_place = self.get_exact_element(color, current_position)
-                    if isinstance(current_place, MyStack) and current_place.color == color:
-                        possible_throw_variants.append(current_place.top)
-                        break
+            for current_dice in (first_throw_dice, second_throw_dice):
+                current_position = self.get_exact_element(color, self.match_cells[current_dice])
+                if isinstance(current_position, MyStack):
+                    if current_position.color == color:
+                        possible_throw_variants.append(current_position.top)
+                else:
+                    above_flag = False
+                    for current_position in range(current_dice + 1, 7):
+                        current_place = self.get_exact_element(color, self.match_cells[current_position])
+                        if isinstance(current_place, MyStack) and current_place.color == color:
+                            above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
+                            break
 
-        if isinstance(position_below, MyStack):
-            if position_below.color == color:
-                possible_throw_variants.append(position_below.top)
-        else:
-            above_flag = False
-            for current_position in range(min_throw_dice + 1, 7):
-                current_place = self.get_exact_element(color, self.match_cells[current_position])
-                if isinstance(current_place, MyStack) and current_place.color == color:
-                    above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
-                    break
+                    if not above_flag:
+                        for current_position in range(self.match_cells[current_dice] + 1, 25):
+                            current_place = self.get_exact_element(color, current_position)
+                            if isinstance(current_place, MyStack) and current_place.color == color:
+                                possible_throw_variants.append(current_place.top)
+                                break
 
-            if not above_flag:
-                for current_position in range(self.match_cells[min_throw_dice] + 1, 25):
-                    current_place = self.get_exact_element(color, current_position)
-                    if isinstance(current_place, MyStack) and current_place.color == color:
-                        possible_throw_variants.append(current_place.top)
-                        break
+        if possible_throw_variants:
+            # raise StopIteration
+            # user_checker = [c for c in possible_throw_variants if c.position == input()]
+            random_checker = random.choice(possible_throw_variants)
+            self.remove_checker_from_old_position(random_checker)
+
 
     def computer_step(self, color):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
@@ -1428,6 +1448,6 @@ class Game:
                             break
 
 
-for _ in range(1_000_000):
+for _ in range(10):
     g = Game()
     g.play_the_game()
