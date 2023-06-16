@@ -222,25 +222,44 @@ class Game:
         # в данном случае надо оставить только ячейки, где есть шашки из нашего списка,
         # остальные пометить, например, крестами
 
-        # if checkers_list:
-        #     print(checkers_list)
-        # else:
-        #     print('Вариантов хода нет')
-        #     return
-
-        # print("Выберите шашку")
-        #
-        # position_from_number = int(input())
         iterations_number = 2 if first_dice == second_dice else 1
         for iteration in range(iterations_number):
 
             possible_variants = self.virtual_step(color, first_dice, second_dice)
             print(possible_variants)
             if possible_variants:
-                checker = random.choice(list(possible_variants.keys()))
-                dice = random.choice(possible_variants[checker])
-                self.is_success_move(checker, dice)
-                another_dice = first_dice if dice == second_dice else second_dice
+                while True:
+                    current_checker_number = int(input('Выберите номер шашки: '))
+                    current_checker = [checker
+                                       for checker in possible_variants.keys()
+                                       if checker.position == current_checker_number]
+                    if current_checker:
+                        current_checker = current_checker[0]
+                        break
+                    else:
+                        print('Шашки с таким номером нет')
+                        continue
+
+                print(possible_variants[current_checker])
+
+                if len(possible_variants[current_checker]) == 1 or first_dice == second_dice:
+                    current_dice = possible_variants[current_checker][0]
+                else:
+                    while True:
+                        current_dice_number = int(input('Выберите номер ячейки: '))
+                        if current_dice_number not in possible_variants[current_checker]:
+                            print('Такой ход невозможен')
+                            continue
+                        else:
+                            break
+
+                    current_dice = [position
+                                    for position in possible_variants[current_checker]
+                                    if position == current_dice_number][0]
+
+                self.is_success_move(current_checker, current_dice)
+
+                another_dice = first_dice if current_dice == second_dice else second_dice
 
                 if self.field.get_sum_of_structure(self.field.black_yard, color) == 15:
                     if iterations_number == 2 and iteration == 0:
@@ -249,18 +268,28 @@ class Game:
 
                 possible_variants = self.virtual_step(color, another_dice)
                 print(possible_variants)
+
                 if possible_variants:
-                    checker = random.choice(list(possible_variants.keys()))
-                    dice = random.choice(possible_variants[checker])
-                    self.is_success_move(checker, dice)
 
-        # current_checker = [checker for checker in checkers_list if checker.position == position_from_number][0]
+                    while True:
+                        current_checker_number = int(input('Выберите номер шашки: '))
 
-        # Возможные варианты хода для этой шашки
+                        current_checker = [checker
+                                           for checker in possible_variants.keys()
+                                           if checker.position == current_checker_number]
 
-        print('Выберите позицию куда хотите походить')
+                        if current_checker:
+                            current_checker = current_checker[0]
+                            break
+                        else:
+                            print('Шашки с таким номером нет')
+                            continue
 
-        # position_to_number = int(input())
+                    current_dice = possible_variants[current_checker][0]
+                    self.is_success_move(current_checker, current_dice)
+            else:
+                print('Вариантов хода нет')
+                return
 
     def human_emergency_throw(self, color, dice):
         possible_step_variants = self.virtual_step(color, dice)
@@ -319,7 +348,6 @@ class Game:
             # user_checker = [c for c in possible_throw_variants if c.position == input()]
             random_checker = random.choice(possible_throw_variants)
             self.remove_checker_from_old_position(random_checker)
-
 
     def computer_step(self, color):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
@@ -1448,6 +1476,6 @@ class Game:
                             break
 
 
-for _ in range(10):
+for _ in range(1):
     g = Game()
     g.play_the_game()
