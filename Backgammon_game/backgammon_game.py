@@ -214,22 +214,39 @@ class Game:
 
         return checker_step_dict
 
+    @staticmethod
+    def show_possible_variants(possible_variants_dict: dict):
+        for checker, dices in possible_variants_dict.items():
+            print(f'{checker.position}: ', end='')
+            if dices[0] == dices[-1]:
+                print(dices[0])
+            else:
+                print(*dices)
+
     def human_step(self, color):
         first_dice, second_dice = self.throw_dices()
+        # first_dice, second_dice = [int(x) for x in input().split()]
         print('human: ', first_dice, second_dice)
 
         # надо написать функцию отображения поля с номерами ячеек
         # в данном случае надо оставить только ячейки, где есть шашки из нашего списка,
         # остальные пометить, например, крестами
 
-        iterations_number = 2 if first_dice == second_dice else 1
+        double_flag = first_dice == second_dice
+        iterations_number = 2 if double_flag else 1
+
         for iteration in range(iterations_number):
 
             possible_variants = self.virtual_step(color, first_dice, second_dice)
-            print(possible_variants)
+            self.show_possible_variants(possible_variants)
+
             if possible_variants:
                 while True:
-                    current_checker_number = int(input('Выберите номер шашки: '))
+                    try:
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                    except ValueError:
+                        print("Ты ввел херню, введи число")
+                        continue
                     current_checker = [checker
                                        for checker in possible_variants.keys()
                                        if checker.position == current_checker_number]
@@ -240,24 +257,35 @@ class Game:
                         print('Шашки с таким номером нет')
                         continue
 
-                print(possible_variants[current_checker])
+                print(
+                    *[
+                        current_checker.position + dice
+                        for dice in possible_variants[current_checker]
+                    ]
+                )
 
                 if len(possible_variants[current_checker]) == 1 or first_dice == second_dice:
                     current_dice = possible_variants[current_checker][0]
                 else:
                     while True:
-                        current_dice_number = int(input('Выберите номер ячейки: '))
-                        if current_dice_number not in possible_variants[current_checker]:
+                        try:
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                        except ValueError:
+                            print("Ты ввел херню, введи число")
+                            continue
+                        current_dice = current_dice_number - current_checker.position
+                        if current_dice not in possible_variants[current_checker]:
                             print('Такой ход невозможен')
                             continue
                         else:
                             break
 
-                    current_dice = [position
-                                    for position in possible_variants[current_checker]
-                                    if position == current_dice_number][0]
-
                 self.is_success_move(current_checker, current_dice)
+                self.field.show_field()
+
+                if self.human_first_step_flag and first_dice in (3, 4, 6):
+                    self.human_first_step_flag = False
+                    self.human_head_reset = True
 
                 another_dice = first_dice if current_dice == second_dice else second_dice
 
@@ -267,12 +295,16 @@ class Game:
                     return another_dice,
 
                 possible_variants = self.virtual_step(color, another_dice)
-                print(possible_variants)
+                self.show_possible_variants(possible_variants)
 
                 if possible_variants:
 
                     while True:
-                        current_checker_number = int(input('Выберите номер шашки: '))
+                        try:
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                        except ValueError:
+                            print("Ты ввел херню, введи число")
+                            continue
 
                         current_checker = [checker
                                            for checker in possible_variants.keys()
@@ -286,7 +318,10 @@ class Game:
                             continue
 
                     current_dice = possible_variants[current_checker][0]
+
                     self.is_success_move(current_checker, current_dice)
+                    self.field.show_field()
+
             else:
                 print('Вариантов хода нет')
                 return
@@ -472,14 +507,14 @@ class Game:
         #          self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4):
         #     return 1
 
-        if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 and (self.field.get_count_of_free_cells(
-                self.field.black_home) + self.get_position_color(7)) != 0 and (
-                self.black_head is not None and self.black_head.count > 2) and (
-                self.field.get_occupied_of_structure(self.field.black_home, 'black') + self.get_position_color(7)) <= 4:
+        if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 and \
+                self.field.get_count_of_free_cells(self.field.black_home) + self.get_position_color(7) != 0 and \
+                self.black_head is not None and self.black_head.count > 2 and \
+                self.field.get_occupied_of_structure(self.field.black_home, 'black') + self.get_position_color(7) <= 4:
             return 1
 
-        if (self.field.get_sum_of_structure(self.field.black_home, 'black') + self.field.get_sum_of_structure(
-                self.field.black_yard, 'black') > 0) and \
+        if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
+                self.field.get_sum_of_structure(self.field.black_yard, 'black') > 0 and \
                 ((self.field.get_count_of_free_cells(self.field.white_home) != 0 and \
                   self.field.get_sum_of_structure(self.field.white_home,
                                                   'black') < self.field.get_occupied_of_structure(
@@ -489,28 +524,20 @@ class Game:
                  self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4):
             return 2
 
-        # если:
-        # в ЧЕРНОМ ДОМЕ есть еще шашки
-        # ИЛИ в ЧЕРНОМ САДУ меньше или равно 4 занятых ЧЕРНЫМИ клеток И там есть свободные клетки
-        # ??? И ЧЕРНЫХ шашек в ЧЕРНОМ САДУ и ЧЕРНОМ ДОМЕ больше чем занятых клеток в ЧЕРНОМ САДУ
-        # if self.field.get_sum_of_structure(self.field.black_home, 'black') != 0 or self.field.get_occupied_of_structure(
-        #         self.field.black_yard, 'black') <= 4 and \
-        #         self.field.get_count_of_free_cells(self.field.black_yard) != 0 and (
-        #         self.field.get_sum_of_structure(self.field.black_home, 'black') + self.field.get_sum_of_structure(
-        #     self.field.black_yard, 'black') > self.field.get_occupied_of_structure(self.field.black_yard, 'black')
-        # ):
-        if self.field.get_occupied_of_structure(self.field.white_yard, 'black') == 0 and (
-                self.field.get_count_of_free_cells(self.field.black_yard) != 0 or (
-                self.field.get_sum_of_structure(self.field.black_home, 'black') + self.field.get_sum_of_structure(
-            self.field.black_yard, 'black') > self.field.get_occupied_of_structure(self.field.black_yard, 'black'))
-        ):
+        if self.field.get_occupied_of_structure(self.field.white_yard, 'black') == 0 and \
+                (
+                        self.field.get_count_of_free_cells(self.field.black_yard) != 0 or \
+                        self.field.get_sum_of_structure(self.field.black_home, 'black') + \
+                        self.field.get_sum_of_structure(self.field.black_yard, 'black') > \
+                        self.field.get_occupied_of_structure(self.field.black_yard, 'black')
+                ):
             return 3
 
         # if self.get_emptiness_from_last_checker('black') > 1:
         # if self.field.get_count_of_free_cells(self.field.black_yard) != 0
         if (
-                self.field.get_sum_of_structure(self.field.black_home, 'black') + self.field.get_sum_of_structure(
-            self.field.black_yard, 'black') != 0
+                self.field.get_sum_of_structure(self.field.black_home, 'black') + \
+                self.field.get_sum_of_structure(self.field.black_yard, 'black') != 0
         ):
             return 4
 
@@ -759,8 +786,8 @@ class Game:
 
             self.is_success_move(last_checker, min_dice)
             current_place = self.get_exact_element(color, self.match_cells[max_dice])
-            if isinstance(current_place, MyStack) and current_place.color == color or self.match_cells[
-                max_dice] < self.get_last_black_checker_position():
+            if isinstance(current_place, MyStack) and current_place.color == color or \
+                    self.match_cells[max_dice] < self.get_last_black_checker_position():
                 return max_dice
 
             self.remove_checker_from_old_position(last_checker)
@@ -1017,16 +1044,20 @@ class Game:
 
         match_positions = {None: None,
                            1: 13, 2: 14, 3: 15, 4: 16, 5: 17, 6: 18,
-                           7: 19, 8: 20, 9: 21, 10: 22, 11: 23, 12: 24
+                           7: 19, 8: 20, 9: 21, 10: 22, 11: 23, 12: 24,
+                           13: 1, 14: 2, 15: 3, 16: 4, 17: 5, 18: 6,
+                           19: 7, 20: 8, 21: 9, 22: 10, 23: 11, 24: 12
                            }
         if any(
                 map(
                     lambda x: 1 <= x.position <= 12, self.white_checkers
                 )
         ):
-            last_white_checker_position = \
-                sorted((checker for checker in self.white_checkers if 1 <= checker.position <= 12),
-                       key=lambda x: x.position)[0].position
+            last_white_checker_position = sorted(
+                (checker
+                 for checker in self.white_checkers
+                 if 1 <= checker.position <= 12),
+                key=lambda x: x.position)[0].position
 
         return match_positions[last_white_checker_position]
 
@@ -1114,6 +1145,18 @@ class Game:
 
         return 0
 
+    def liberation_and_hold(self, old_position=False, new_position=False):
+
+        phase_of_game = self.get_phase_of_game()
+
+        if old_position:
+            return -phase_of_game
+
+        if new_position:
+            return phase_of_game
+
+        return 0
+
     def is_checker_in_another_yard(self, line_color):
         """Функция должна проверять, есть ли во дворе шашка противника"""
 
@@ -1127,7 +1170,7 @@ class Game:
 
         return False
 
-    def is_six_checkers_in_line(self, my_color):
+    def is_six_checkers_in_line(self, my_color, position_flag=False):
         """Функция должна проверять, что до того, как в зоне выброса появится шашка противника, мы не можем выстроить
         6 и более шашек в своем доме и дворе"""
 
@@ -1156,11 +1199,19 @@ class Game:
                 continue
 
             if count == 6:
+                if position_flag:
+                    return pointer - 5
                 return False  # 6 в ряд, так ходить нельзя
 
             pointer += 1
 
         return True  # НЕТ 6 в ряд, так ходить можно
+
+    def compare_white_and_black_positions(self, color):
+        last_white_checker_position = self.get_last_white_checker_position()
+        last_black_checker_position_in_line = self.is_six_checkers_in_line(color, position_flag=True)
+        return last_white_checker_position is not None \
+            and last_black_checker_position_in_line > last_white_checker_position
 
     def move_checker_for_six_in_line(self, checker, dice):
         self.remove_checker_from_old_position(checker)
@@ -1198,18 +1249,8 @@ class Game:
                     continue
 
                 if not self.is_checker_in_another_yard(color):
-                    new_temporary_place = self.get_exact_element(color, checker_value.position + dice)
-                    if new_temporary_place == 0:
-                        self.remove_checker_from_old_position(checker_value)
-                        checker_value.position += dice
-                        self.move_checker_to_new_position(checker_value)
-
-                        result_is_six_checkers_in_line = self.is_six_checkers_in_line(color)
-
-                        self.remove_checker_from_old_position(checker_value)
-                        self.move_checker_to_new_position(checker_value, reverse_flag=True)
-
-                        if not result_is_six_checkers_in_line:
+                    if self.get_exact_element(color, checker_value.position + dice) == 0:
+                        if not self.move_checker_for_six_in_line(checker_value, dice):
                             continue
 
                 old_position, position = self.get_position(color, checker_value.position)
@@ -1243,6 +1284,12 @@ class Game:
                         if recursion:
                             count -= self.punishment(self.get_phase_of_game(), checker_value.position)
 
+                        if self.is_checker_in_another_yard(color):
+                            # здесь надо наоборот смотреть разрушение 6 шашек в линию
+                            if self.move_checker_for_six_in_line(checker_value, dice):
+                                if self.compare_white_and_black_positions(color):
+                                    count += self.liberation_and_hold(old_position=True, new_position=False)
+
                 if isinstance(new_position, MyStack):
                     count -= self.get_minus_ratio(new_position.count)
 
@@ -1251,6 +1298,12 @@ class Game:
 
                     if recursion:
                         count += self.encouragement(self.get_phase_of_game(), cell_value)
+
+                    if self.is_checker_in_another_yard(color):
+                        # здесь надо смотреть создание 6 шашек в линию
+                        if not self.move_checker_for_six_in_line(checker_value, dice):
+                            if self.compare_white_and_black_positions(color):
+                                count += self.liberation_and_hold(old_position=False, new_position=True)
 
                 if main_mark is None or main_mark < count:
                     marks = None

@@ -34,9 +34,9 @@ class Checker:
     def __repr__(self):
         return f'{self.position}'
 
-    def __str__(self):
-        # return 'b' if self.color == 'black' else 'w'
-        return f'position={self.position} backup_position={self.__backup_position} is_up={self.is_up} is_single={self.is_single}'
+    # def __str__(self):
+    #     # return 'b' if self.color == 'black' else 'w'
+    #     return f'position={self.position} backup_position={self.__backup_position} is_up={self.is_up} is_single={self.is_single}'
 
 
 class Field:
