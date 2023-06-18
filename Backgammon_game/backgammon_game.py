@@ -59,6 +59,13 @@ class Game:
         while True:
             color = 'black' if self.who_steps == 'computer' else 'white'
 
+            if self.computer_first_step_flag:
+                if self.black_head.count < 15:
+                    self.computer_first_step_flag = False
+            if self.human_first_step_flag:
+                if self.white_head.count < 15:
+                    self.human_first_step_flag = False
+
             # computer part
             if color == 'black':
 
@@ -283,7 +290,7 @@ class Game:
                 self.is_success_move(current_checker, current_dice)
                 self.field.show_field()
 
-                if self.human_first_step_flag and first_dice in (3, 4, 6):
+                if double_flag and self.human_first_step_flag and first_dice in (3, 4, 6):
                     self.human_first_step_flag = False
                     self.human_head_reset = True
 
@@ -490,55 +497,42 @@ class Game:
                 for checker in (self.white_checkers if color == 'white' else self.black_checkers)
                 if checker.is_up]
 
-    def get_position_color(self, position_number, color='black'):
+    def get_position_color(self, position_number, color='black', reverse=False):
         value, position = self.get_position(color, position_number)
         value = value.data[position]
         if isinstance(value, MyStack):
             if value.color == color:
-                return 1
+                return 0 if reverse else 1
 
-        return 0
+        return 1 if reverse else 0
 
     def get_phase_of_game(self):
-        # if (self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 \
-        #         and self.field.get_occupied_of_structure(self.field.black_home, 'black') \
-        #         + self.get_position_color(7) <= 4) or \
-        #         (self.black_head.count > 2 and
-        #          self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4):
-        #     return 1
 
-        if self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 and \
-                self.field.get_count_of_free_cells(self.field.black_home) + self.get_position_color(7) != 0 and \
-                self.black_head is not None and self.black_head.count > 2 and \
-                self.field.get_occupied_of_structure(self.field.black_home, 'black') + self.get_position_color(7) <= 4:
+        if (self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 or
+            self.black_head is not None and self.black_head.count > 2) and \
+                self.field.get_count_of_free_cells(self.field.black_home) + \
+                self.get_position_color(7, reverse=True) > 0 and \
+                self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
+                self.get_position_color(7) <= 4:
             return 1
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
                 self.field.get_sum_of_structure(self.field.black_yard, 'black') > 0 and \
-                ((self.field.get_count_of_free_cells(self.field.white_home) != 0 and \
-                  self.field.get_sum_of_structure(self.field.white_home,
-                                                  'black') < self.field.get_occupied_of_structure(
-                            self.field.white_home, 'black') + self.field.get_count_of_free_cells(
-                            self.field.white_home) + self.field.get_occupied_of_structure(self.field.white_home,
-                                                                                          'white')) or \
-                 self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4):
+                self.field.get_count_of_free_cells(self.field.white_home) > 0 and \
+                self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4:
             return 2
 
-        if self.field.get_occupied_of_structure(self.field.white_yard, 'black') == 0 and \
-                (
-                        self.field.get_count_of_free_cells(self.field.black_yard) != 0 or \
-                        self.field.get_sum_of_structure(self.field.black_home, 'black') + \
-                        self.field.get_sum_of_structure(self.field.black_yard, 'black') > \
-                        self.field.get_occupied_of_structure(self.field.black_yard, 'black')
-                ):
+        # self.field.get_occupied_of_structure(self.field.white_yard, 'black') == 0 and
+        if self.field.get_count_of_free_cells(self.field.black_yard) != 0 or \
+                self.field.get_sum_of_structure(self.field.black_home, 'black') + \
+                self.field.get_sum_of_structure(self.field.black_yard, 'black') > \
+                self.field.get_occupied_of_structure(self.field.black_yard, 'black'):
             return 3
 
         # if self.get_emptiness_from_last_checker('black') > 1:
         # if self.field.get_count_of_free_cells(self.field.black_yard) != 0
-        if (
-                self.field.get_sum_of_structure(self.field.black_home, 'black') + \
-                self.field.get_sum_of_structure(self.field.black_yard, 'black') != 0
-        ):
+        if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
+                self.field.get_sum_of_structure(self.field.black_yard, 'black') != 0:
             return 4
 
         if self.field.get_sum_of_structure(self.field.white_yard, 'black') <= 15:
@@ -653,7 +647,8 @@ class Game:
 
         if current_phase == 3:
             return {
-                2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
+                # 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
+                2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
                 # 8: 12, 9: 13, 10: 14, 11: 15, 12: 16,
                 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
 
@@ -1107,9 +1102,12 @@ class Game:
         if phase_of_game == 1:
             if old_position is not None and 1 <= old_position <= 3:
                 return -8
+            if new_position is not None and 2 <= new_position <= 4:
+                return 4
+
             if old_position is not None and 4 <= old_position <= 6:
                 return -4
-            if new_position is not None and 2 <= new_position <= 7:
+            if new_position is not None and 5 <= new_position <= 7:
                 return 2
 
             if old_position is not None and 13 <= old_position <= 18:
@@ -1128,6 +1126,10 @@ class Game:
                 return 2
 
         if phase_of_game == 3:
+            if old_position is not None and 1 <= old_position <= 6:
+                return -4
+            if new_position is not None and 1 <= new_position <= 6:
+                return 1
             if old_position is not None and 7 <= old_position <= 12:
                 return -8
             if new_position is not None and 7 <= new_position <= 12:
