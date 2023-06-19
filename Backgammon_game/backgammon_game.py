@@ -625,8 +625,11 @@ class Game:
 
         if current_phase == 1:
             return {
+                # 2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
+                # 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+
                 2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
-                8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
 
                 # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
                 13: 21, 14: 20, 15: 19, 16: 18, 17: 17, 18: 16,
@@ -762,6 +765,46 @@ class Game:
         return sorted((checker for checker in self.black_checkers if 19 <= checker.position <= 24),
                       key=lambda x: x.position)[0].position
 
+    def checking_double_move(self):
+        first_dice = second_dice = third_dice = fourth_dice = self.first_dice
+        possible_variants = [
+            (first_dice, second_dice, third_dice, fourth_dice),
+            (first_dice, second_dice + third_dice + fourth_dice),
+            (first_dice + second_dice, third_dice + fourth_dice),
+            (sum((first_dice, second_dice, third_dice, fourth_dice)))
+        ]
+
+        steps_results = dict()
+        common_count = None
+        for tuple_dice in possible_variants:
+            checkers_for_return = list()
+            tmp_count = 0
+            for dice in tuple_dice:
+                result, checker, count = self.move('black', dice)
+                if result:
+                    tmp_count += count
+                    checkers_for_return.append(checker)
+            if common_count is None:
+                common_count = tmp_count
+            else:
+                common_count = tmp_count if tmp_count > common_count else common_count
+            checkers_for_return.reverse()
+            # возвращаем шашки на места
+
+
+
+        # Здесь не будет обратного порядка хода, потому что это не имеет смысла
+        # Ни лучше, ни хуже уже не будет
+
+        # if self.first_dice == self.second_dice:
+        #     if result_11:
+        #         self.is_success_move(checker_11, self.first_dice)
+        #     if result_12:
+        #         self.is_success_move(checker_12, self.second_dice)
+        #     return True
+
+
+
     def checking_move(self):
         color = 'black'
 
@@ -775,10 +818,6 @@ class Game:
             min_dice = min(dice_1, dice_2)
             max_dice = max(dice_1, dice_2)
 
-            if min_dice == max_dice:
-                self.is_success_move(last_checker, min_dice)
-                return min_dice
-
             self.is_success_move(last_checker, min_dice)
             current_place = self.get_exact_element(color, self.match_cells[max_dice])
             if isinstance(current_place, MyStack) and current_place.color == color or \
@@ -790,8 +829,8 @@ class Game:
 
             self.is_success_move(last_checker, max_dice)
             current_place = self.get_exact_element(color, self.match_cells[min_dice])
-            if isinstance(current_place, MyStack) and current_place.color == color or self.match_cells[
-                min_dice] < self.get_last_black_checker_position():
+            if isinstance(current_place, MyStack) and current_place.color == color or \
+                    self.match_cells[min_dice] < self.get_last_black_checker_position():
                 return min_dice
 
             self.remove_checker_from_old_position(last_checker)
@@ -816,15 +855,6 @@ class Game:
         if result_11:
             self.remove_checker_from_old_position(checker_11)
             self.move_checker_to_new_position(checker_11, reverse_flag=True)
-
-        # Здесь не будет обратного порядка хода, потому что это не имеет смысла
-        # Ни лучше, ни хуже уже не будет
-        if self.first_dice == self.second_dice:
-            if result_11:
-                self.is_success_move(checker_11, self.first_dice)
-            if result_12:
-                self.is_success_move(checker_12, self.second_dice)
-            return True
 
         # ОБРАТНЫЙ порядок хода (ВТОРОЙ -> ПЕРВЫЙ)
 
@@ -1227,6 +1257,43 @@ class Game:
 
         return result_is_six_checkers_in_line
 
+    def is_on_the_way(self, color, lost_checker):
+        color_count = 0
+        empty_count = 0
+        for dice in range(1, 7):
+            position_expression = lost_checker.position + dice
+            if position_expression > 24:
+                continue
+            current_position = self.get_exact_element(color, position_expression)
+            if isinstance(current_position, MyStack):
+                if current_position.color == color:
+                    color_count += 1
+                if color_count >= 3:
+                    return True  # всё норм
+            else:
+                empty_count += 1
+
+            if empty_count > 3:
+                return True
+
+        if empty_count + color_count > 3:
+            return True
+
+        return False
+
+    def checker_is_bridge(self, current_checker):
+        current_color = current_checker.color
+        lost_checkers = [checker
+                         for checker in self.black_checkers
+                         if checker.position < current_checker.position]
+
+        if lost_checkers:
+            for lost_checker in lost_checkers:
+                if not self.is_on_the_way(current_color, lost_checker):
+                    return -8
+
+        return 0
+
     def move(self, color, dice, recursion=False, checkers=None):
         if recursion:
             checkers_list = checkers
@@ -1291,6 +1358,8 @@ class Game:
                             if self.move_checker_for_six_in_line(checker_value, dice):
                                 if self.compare_white_and_black_positions(color):
                                     count += self.liberation_and_hold(old_position=True, new_position=False)
+
+                        count += self.checker_is_bridge(checker_value)
 
                 if isinstance(new_position, MyStack):
                     count -= self.get_minus_ratio(new_position.count)
