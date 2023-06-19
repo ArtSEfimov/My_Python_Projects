@@ -393,7 +393,8 @@ class Game:
 
     def computer_step(self, color):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
-
+        print(f'computer: {self.first_dice}, {self.second_dice}')
+        print()
         # self.first_dice, self.second_dice = [int(i) for i in input().split()]
 
         double_flag = self.first_dice == self.second_dice
@@ -402,7 +403,7 @@ class Game:
 
         if type(step_result) == bool:
             if step_result:
-                print(step_result)
+                # print(step_result)
                 if double_flag:
                     if self.computer_first_step_flag and self.first_dice in (3, 4, 6):
                         self.computer_first_step_flag = False
@@ -422,10 +423,11 @@ class Game:
             if double_flag:
                 self.throw_away(color, dice=self.first_dice)
 
-        print('computer: ', self.first_dice, self.second_dice)
-        print()
+        # print('computer: ', self.first_dice, self.second_dice)
+        # print()
         self.field.show_field()
-        print(self.get_phase_of_game())
+        print('phase ',self.get_phase_of_game())
+        print()
 
     # функция для описания четвертей поля в зависимиости от цвета шашки
     def get_quarters(self, color):
@@ -501,8 +503,10 @@ class Game:
         value, position = self.get_position(color, position_number)
         value = value.data[position]
         if isinstance(value, MyStack):
+            if reverse:
+                return 0
             if value.color == color:
-                return 0 if reverse else 1
+                return 1
 
         return 1 if reverse else 0
 
@@ -553,12 +557,14 @@ class Game:
 
         if current_phase == 1:
             return {
-                1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-
-                7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                # 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
+                7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                # 7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
                 # 7: 9, 8: 10, 9: 11, 10: 12, 11: 13, 12: 14, # trying
 
-                13: -5, 14: -4, 15: -3, 16: -2, 17: -1, 18: 0,
+                # 13: -5, 14: -4, 15: -3, 16: -2, 17: -1, 18: 0,
+                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
@@ -580,11 +586,9 @@ class Game:
 
         if current_phase == 3:
             return {
-                # 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-                # 7: 1, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
 
-                1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
-
+                # 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
+                1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
                 # 8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
                 # 8: 6, 9: 5, 10: 4, 11: 3, 12: 2, # original
                 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
@@ -625,14 +629,11 @@ class Game:
 
         if current_phase == 1:
             return {
-                # 2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
-                # 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
+                8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
 
-                2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
-                8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-
-                # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
-                13: 21, 14: 20, 15: 19, 16: 18, 17: 17, 18: 16,
+                13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                # 13: 21, 14: 20, 15: 19, 16: 18, 17: 17, 18: 16,
 
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -846,7 +847,7 @@ class Game:
 
         count_12 = (count_1, count_2)
 
-        print(count_12)
+        # print(count_12)
 
         if result_12:
             self.remove_checker_from_old_position(checker_12)
@@ -863,7 +864,7 @@ class Game:
 
         count_21 = (count_2, count_1)  # порядок хода такой: второй, первый
 
-        print(count_21)
+        # print(count_21)
 
         if result_22:
             self.remove_checker_from_old_position(checker_22)
@@ -1130,20 +1131,25 @@ class Game:
         phase_of_game = self.get_phase_of_game()
 
         if phase_of_game == 1:
-            if old_position is not None and 1 <= old_position <= 3:
+            # if old_position is not None and 1 <= old_position <= 3:
+            #     return -8
+            # if new_position is not None and 2 <= new_position <= 4:
+            #     return 4
+
+            if old_position is not None and 2 <= old_position <= 7:
                 return -8
-            if new_position is not None and 2 <= new_position <= 4:
+            if new_position is not None and 2 <= new_position <= 7:
                 return 4
 
-            if old_position is not None and 4 <= old_position <= 6:
-                return -4
-            if new_position is not None and 5 <= new_position <= 7:
-                return 2
+            # if old_position is not None and 4 <= old_position <= 6:
+            #     return -4
+            # if new_position is not None and 5 <= new_position <= 7:
+            #     return 2
 
             if old_position is not None and 13 <= old_position <= 18:
                 return -4
             if new_position is not None and 13 <= new_position <= 18:
-                return 1
+                return 2
 
         if phase_of_game == 2:
             if old_position is not None and 1 <= old_position <= 6:
@@ -1552,7 +1558,6 @@ class Game:
             return
 
         if self.try_simple_variant(color, throw_dice_1, throw_dice_2):
-            print('hello from simple!')
             return
 
         iterations_number = 2 if throw_dice_1 == throw_dice_2 else 1
