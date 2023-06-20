@@ -584,7 +584,8 @@ class Game:
             return {
 
                 # 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
-                1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
+                1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
+                7: 0,
                 # 8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
                 # 8: 6, 9: 5, 10: 4, 11: 3, 12: 2, # original
                 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
@@ -642,8 +643,8 @@ class Game:
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
 
-                13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
-                # 13: 21, 14: 20, 15: 19, 16: 18, 17: 17, 18: 16,  # trying
+                # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14, ORIGINAL 20/06/2023
+                13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
 
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -651,7 +652,7 @@ class Game:
         if current_phase == 3:
             return {
                 # 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-                2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
+                2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
                 7: 1,
                 # 8: 12, 9: 13, 10: 14, 11: 15, 12: 16,
                 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
@@ -926,8 +927,9 @@ class Game:
             current_place_2 = self.get_exact_element(color, last_checker.position + dice_2)
             if all(
                     map(
-                        lambda current_place: isinstance(current_place,
-                                                         MyStack) and current_place.color == color or current_place == 0,
+                        lambda current_place: isinstance(current_place, MyStack)
+                                              and current_place.color == color
+                                              or current_place == 0,
                         (current_place_1, current_place_2)
                     )
             ):
@@ -1252,20 +1254,19 @@ class Game:
 
         return result_is_six_checkers_in_line
 
-    def is_on_the_way(self, bridge_checker, lost_checker):
-        color = bridge_checker.color
-        bridge_position = bridge_checker.position
+    def is_on_the_way(self, lost_checker):
 
         color_count = 0
         empty_count = 0
+
         for dice in range(1, 7):
             position_expression = lost_checker.position + dice
             if position_expression > 24:
                 continue
 
-            current_position = self.get_exact_element(color, position_expression)
+            current_position = self.get_exact_element(lost_checker.color, position_expression)
             if isinstance(current_position, MyStack):
-                if current_position.color == color:
+                if current_position.color == lost_checker.color:
                     color_count += 1
                 if color_count >= 3:
                     return True  # всё норм
@@ -1281,15 +1282,14 @@ class Game:
         return False
 
     def checker_is_bridge(self, current_checker):
-        current_color = current_checker.color
         lost_checkers = [checker
                          for checker in self.black_checkers
-                         if checker.position < current_checker.position and \
-                         checker.position + 6 >= current_checker.position]
+                         if checker.position < current_checker.position <= checker.position + 6]
 
         if lost_checkers:
             for lost_checker in lost_checkers:
-                if not self.is_on_the_way(current_checker, lost_checker):
+                if not self.is_on_the_way(lost_checker):
+                    print(f'\nшашка {current_checker} помогает выбраться из жопы\n')
                     return -8
 
         return 0
@@ -1362,6 +1362,11 @@ class Game:
                                 count += self.liberation_and_hold(old_position=True, new_position=False)
 
                     count += self.checker_is_bridge(checker_value)
+
+                # if not self.is_on_the_way(checker_value):
+                #     print(f'\nшашка {checker_value} в жопе\n')
+                #     count += 8
+
 
                 # NEW_POSITION
                 if isinstance(new_position, MyStack):
