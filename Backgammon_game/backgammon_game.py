@@ -93,8 +93,8 @@ class Game:
 
             # human part
             if color == 'white':
-                # self.who_steps = 'computer'
-                # continue
+                self.who_steps = 'computer'
+                continue
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
@@ -394,10 +394,10 @@ class Game:
             self.remove_checker_from_old_position(random_checker)
 
     def computer_step(self, color):  # black checkers
-        self.first_dice, self.second_dice = self.throw_dices()
+        # self.first_dice, self.second_dice = self.throw_dices()
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
-        # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
+        self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
 
         double_flag = self.first_dice == self.second_dice
 
@@ -528,15 +528,13 @@ class Game:
                 self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4:
             return 2
 
-        # self.field.get_occupied_of_structure(self.field.white_yard, 'black') == 0 and
         if self.field.get_count_of_free_cells(self.field.black_yard) > \
                 (0 if self.is_checker_in_another_yard('black') else 1) and \
                 self.field.get_sum_of_structure(self.field.black_home, 'black') > 0:
             return 3
 
-        # if self.get_emptiness_from_last_checker('black') > 1:
-        # if self.field.get_count_of_free_cells(self.field.black_yard) != 0
-        if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
+        if self.field.get_sum_of_structure(self.field.black_home, 'black') > 0 and \
+                self.field.get_sum_of_structure(self.field.black_home, 'black') + \
                 self.field.get_sum_of_structure(self.field.black_yard, 'black') > 0:
             return 4
 
@@ -596,20 +594,19 @@ class Game:
 
         if current_phase == 4:
             # return {
-            #     # 1: 25, 2: 22, 3: 19, 4: 16, 5: 13, 6: 10, # original
-            #     1: 13, 2: 12, 3: 11, 4: 10, 5: 9, 6: 8,
-            #     7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-            #     13: 5, 14: 4, 15: 3, 16: 2, 17: 1, 18: 0,
-            #     19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0
+            #     1: 19, 2: 18, 3: 17, 4: 16, 5: 15, 6: 14,
+            #     7: 13, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
+            #     13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
+            #     # 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+            #     # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
+            #
+            #     19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             # }
             return {
-                1: 19, 2: 18, 3: 17, 4: 16, 5: 15, 6: 14,
-                7: 13, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
-                13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
-                # 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
-
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                1: 23, 2: 22, 3: 21, 4: 20, 5: 19, 6: 18,
+                7: 17, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,
+                13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
             }
 
         if current_phase == 5:
@@ -764,44 +761,67 @@ class Game:
 
     def get_last_black_checker_position(self):
 
-        return sorted((checker for checker in self.black_checkers if 19 <= checker.position <= 24),
-                      key=lambda x: x.position)[0].position
+        return sorted(
+            (checker
+             for checker in self.black_checkers
+             if 19 <= checker.position <= 24),
+            key=lambda x: x.position)[0].position
 
     def checking_double_move(self):
         first_dice = second_dice = third_dice = fourth_dice = self.first_dice
+
+        main_variant = first_dice, second_dice, third_dice, fourth_dice
+        possible_variants = None
+
+        common_count = 0
+        steps_results = dict()
+
+        for dice in main_variant:
+            result, checker, count = self.move('black', dice)
+            if not result:
+                return False
+            common_count += count
+            steps_results.setdefault(checker,list()).append(dice)
+
+        return_list = [checker
+                        for checker in steps_results.keys()]
+        return_list.reverse()
+
+        for checker in return_list:
+            self.remove_checker_from_old_position(checker)
+            self.move_checker_to_new_position(checker, reverse_flag=True)
+
         possible_variants = [
-            (first_dice, second_dice, third_dice, fourth_dice),
             (first_dice, second_dice + third_dice + fourth_dice),
+            (first_dice + second_dice + third_dice, fourth_dice),
             (first_dice + second_dice, third_dice + fourth_dice),
             (sum((first_dice, second_dice, third_dice, fourth_dice)))
         ]
 
-        steps_results = dict()
-        common_count = None
         for tuple_dice in possible_variants:
-            checkers_for_return = list()
+
             tmp_count = 0
+            tmp_steps_results = dict()
+
             for dice in tuple_dice:
                 result, checker, count = self.move('black', dice)
-                if result:
-                    tmp_count += count
-                    checkers_for_return.append(checker)
-            if common_count is None:
+                if not result:
+                    break
+                tmp_steps_results.setdefault(checker,list()).append(dice)
+
+            return_list = [checker
+                           for checker in tmp_steps_results.keys()]
+            return_list.reverse()
+
+            for checker in return_list:
+                self.remove_checker_from_old_position(checker)
+                self.move_checker_to_new_position(checker, reverse_flag=True)
+
+            if tmp_count > common_count:
                 common_count = tmp_count
-            else:
-                common_count = tmp_count if tmp_count > common_count else common_count
-            checkers_for_return.reverse()
-            # возвращаем шашки на места
+                steps_results = tmp_steps_results.copy()
 
-        # Здесь не будет обратного порядка хода, потому что это не имеет смысла
-        # Ни лучше, ни хуже уже не будет
-
-        # if self.first_dice == self.second_dice:
-        #     if result_11:
-        #         self.is_success_move(checker_11, self.first_dice)
-        #     if result_12:
-        #         self.is_success_move(checker_12, self.second_dice)
-        #     return True
+        # переместить нужные шашки по их dicам
 
     def checking_move(self):
         color = 'black'
@@ -1366,7 +1386,6 @@ class Game:
                 # if not self.is_on_the_way(checker_value):
                 #     print(f'\nшашка {checker_value} в жопе\n')
                 #     count += 8
-
 
                 # NEW_POSITION
                 if isinstance(new_position, MyStack):
