@@ -93,8 +93,8 @@ class Game:
 
             # human part
             if color == 'white':
-                self.who_steps = 'computer'
-                continue
+                # self.who_steps = 'computer'
+                # continue
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
@@ -252,7 +252,7 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))
+                        current_checker_number = random.randint(1, 24)# = int(input('Выберите номер шашки: '))
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -278,7 +278,7 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            current_dice_number = random.randint(1,24)# = int(input('Выберите номер ячейки: '))
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -310,7 +310,7 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))
+                            current_checker_number = random.randint(1,24)# = int(input('Выберите номер шашки: '))
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -394,10 +394,10 @@ class Game:
             self.remove_checker_from_old_position(random_checker)
 
     def computer_step(self, color):  # black checkers
-        # self.first_dice, self.second_dice = self.throw_dices()
+        self.first_dice, self.second_dice = self.throw_dices()
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
-        self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
+        # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
 
         double_flag = self.first_dice == self.second_dice
 
@@ -774,22 +774,18 @@ class Game:
         possible_variants = None
 
         common_count = 0
-        steps_results = dict()
+        checkers_and_dices = list()
 
         for dice in main_variant:
             result, checker, count = self.move('black', dice)
             if not result:
+                if checkers_and_dices:
+                    self.return_to_the_homeland(checkers_and_dices)
                 return False
             common_count += count
-            steps_results.setdefault(checker,list()).append(dice)
+            checkers_and_dices.append((checker, dice))
 
-        return_list = [checker
-                        for checker in steps_results.keys()]
-        return_list.reverse()
-
-        for checker in return_list:
-            self.remove_checker_from_old_position(checker)
-            self.move_checker_to_new_position(checker, reverse_flag=True)
+        self.return_to_the_homeland(checkers_and_dices)
 
         possible_variants = [
             (first_dice, second_dice + third_dice + fourth_dice),
@@ -801,27 +797,33 @@ class Game:
         for tuple_dice in possible_variants:
 
             tmp_count = 0
-            tmp_steps_results = dict()
+            tmp_steps_results = list()
 
             for dice in tuple_dice:
                 result, checker, count = self.move('black', dice)
                 if not result:
                     break
-                tmp_steps_results.setdefault(checker,list()).append(dice)
+                tmp_steps_results.append((checker, dice))
 
-            return_list = [checker
-                           for checker in tmp_steps_results.keys()]
-            return_list.reverse()
-
-            for checker in return_list:
-                self.remove_checker_from_old_position(checker)
-                self.move_checker_to_new_position(checker, reverse_flag=True)
+            self.return_to_the_homeland(checkers_and_dices)
 
             if tmp_count > common_count:
                 common_count = tmp_count
-                steps_results = tmp_steps_results.copy()
+                checkers_and_dices = tmp_steps_results.copy()
 
-        # переместить нужные шашки по их dicам
+        for checker, dice in checkers_and_dices:
+            self.is_success_move(checker, dice)
+
+        return True
+
+    def return_to_the_homeland(self, formed_list):
+        return_list = [note[0]
+                       for note in formed_list]
+        return_list.reverse()
+
+        for checker in return_list:
+            self.remove_checker_from_old_position(checker)
+            self.move_checker_to_new_position(checker, reverse_flag=True)
 
     def checking_move(self):
         color = 'black'
@@ -1383,10 +1385,6 @@ class Game:
 
                     count += self.checker_is_bridge(checker_value)
 
-                # if not self.is_on_the_way(checker_value):
-                #     print(f'\nшашка {checker_value} в жопе\n')
-                #     count += 8
-
                 # NEW_POSITION
                 if isinstance(new_position, MyStack):
                     count -= self.get_minus_ratio(new_position.count)
@@ -1626,6 +1624,6 @@ class Game:
                             break
 
 
-for _ in range(1):
+for _ in range(100):
     g = Game()
     g.play_the_game()

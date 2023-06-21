@@ -1,5 +1,4 @@
-a={1:['1'], 2:['2']}
-b = a.copy()
+a=(1,2)
+b=a
+b += 1,
 print(a,b)
-b.clear()
-print(a)
