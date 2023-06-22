@@ -252,7 +252,7 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = random.randint(1, 24)# = int(input('Выберите номер шашки: '))
+                        current_checker_number = random.randint(1, 24)  # = int(input('Выберите номер шашки: '))
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -278,7 +278,7 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = random.randint(1,24)# = int(input('Выберите номер ячейки: '))
+                            current_dice_number = random.randint(1, 24)  # = int(input('Выберите номер ячейки: '))
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -310,7 +310,7 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = random.randint(1,24)# = int(input('Выберите номер шашки: '))
+                            current_checker_number = random.randint(1, 24)  # = int(input('Выберите номер шашки: '))
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -400,6 +400,20 @@ class Game:
         # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
 
         double_flag = self.first_dice == self.second_dice
+        if double_flag:
+            step_result = self.checking_double_move(
+                fist_step_3_4_6=self.computer_first_step_flag and self.first_dice in (3, 4, 6)
+            )
+            if type(step_result) == bool:
+                if step_result:
+                    print(step_result)
+                    return
+            else:
+                for dice in step_result:
+                    self.emergency_throw_away(color, dice)
+                    if self.field.get_sum_of_structure(self.field.white_yard, 'black') == 0:
+                        return
+                return
 
         step_result = self.checking_move()
 
@@ -410,6 +424,7 @@ class Game:
                     if self.computer_first_step_flag and self.first_dice in (3, 4, 6):
                         self.computer_first_step_flag = False
                         self.computer_head_reset = True
+
                     step_result = self.checking_move()
                     if type(step_result) == bool:
                         if step_result:
@@ -425,8 +440,8 @@ class Game:
             if double_flag:
                 self.throw_away(color, dice=self.first_dice)
 
-        # print('computer: ', self.first_dice, self.second_dice)
-        # print()
+        print('computer: ', self.first_dice, self.second_dice)
+        print()
         self.field.show_field()
         print('phase ', self.get_phase_of_game())
         print()
@@ -767,31 +782,45 @@ class Game:
              if 19 <= checker.position <= 24),
             key=lambda x: x.position)[0].position
 
-    def checking_double_move(self):
+    def checking_double_move(self, fist_step_3_4_6):
         first_dice = second_dice = third_dice = fourth_dice = self.first_dice
 
         main_variant = first_dice, second_dice, third_dice, fourth_dice
-        possible_variants = None
 
         common_count = 0
         checkers_and_dices = list()
 
-        for dice in main_variant:
+        for index, dice in enumerate(main_variant):
             result, checker, count = self.move('black', dice)
+
             if not result:
                 if checkers_and_dices:
                     self.return_to_the_homeland(checkers_and_dices)
+                    if fist_step_3_4_6:
+                        self.computer_first_step_flag = True
                 return False
+
+            if fist_step_3_4_6 and index == 0:
+                self.computer_first_step_flag = False
+                self.computer_head_reset = True
+
+            if self.is_movement_over('black'):
+                return_value = main_variant[index + 1:]
+                return return_value if return_value else True
+
             common_count += count
             checkers_and_dices.append((checker, dice))
 
         self.return_to_the_homeland(checkers_and_dices)
 
+        if fist_step_3_4_6:
+            self.computer_first_step_flag = True
+
         possible_variants = [
             (first_dice, second_dice + third_dice + fourth_dice),
             (first_dice + second_dice + third_dice, fourth_dice),
             (first_dice + second_dice, third_dice + fourth_dice),
-            (sum((first_dice, second_dice, third_dice, fourth_dice)))
+            (sum((first_dice, second_dice, third_dice, fourth_dice)),)
         ]
 
         for tuple_dice in possible_variants:
@@ -799,17 +828,31 @@ class Game:
             tmp_count = 0
             tmp_steps_results = list()
 
-            for dice in tuple_dice:
+            for index, dice in enumerate(tuple_dice):
                 result, checker, count = self.move('black', dice)
+
                 if not result:
                     break
+
+                if fist_step_3_4_6 and index == 0:
+                    self.computer_first_step_flag = False
+                    self.computer_head_reset = True
+
+                if self.is_movement_over('black'):
+                    return_value = tuple_dice[index + 1:]
+                    return return_value if return_value else True
+
+                tmp_count += count
                 tmp_steps_results.append((checker, dice))
 
-            self.return_to_the_homeland(checkers_and_dices)
+            self.return_to_the_homeland(tmp_steps_results)
 
             if tmp_count > common_count:
                 common_count = tmp_count
                 checkers_and_dices = tmp_steps_results.copy()
+
+            if fist_step_3_4_6:
+                self.computer_first_step_flag = True
 
         for checker, dice in checkers_and_dices:
             self.is_success_move(checker, dice)
@@ -1624,6 +1667,6 @@ class Game:
                             break
 
 
-for _ in range(100):
+for _ in range(100_000):
     g = Game()
     g.play_the_game()
