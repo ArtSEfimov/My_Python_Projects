@@ -252,7 +252,7 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = random.randint(1, 24)  # = int(input('Выберите номер шашки: '))
+                        current_checker_number = int(input('Выберите номер шашки: '))  # = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -278,7 +278,7 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = random.randint(1, 24)  # = int(input('Выберите номер ячейки: '))
+                            current_dice_number = int(input('Выберите номер ячейки: '))  # = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -310,7 +310,7 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = random.randint(1, 24)  # = int(input('Выберите номер шашки: '))
+                            current_checker_number = int(input('Выберите номер шашки: '))  # random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -407,6 +407,8 @@ class Game:
             if type(step_result) == bool:
                 if step_result:
                     print(step_result)
+                    print()
+                    self.field.show_field()
                     return
             else:
                 for dice in step_result:
@@ -511,10 +513,23 @@ class Game:
                 return checker is self.white_head.top
             return False
 
-    def get_possible_checker_list(self, color):
+    def is_free_space(self, checker, between):
+        intermediate_position = self.get_exact_element(checker.color, checker.position + between)
+        if isinstance(intermediate_position, MyStack) and intermediate_position.color == checker.color:
+            return True
+        if intermediate_position == 0:
+            return True
+        return False
+
+    def get_possible_checker_list(self, color, between=None):
+        if between is None:
+            return [checker
+                    for checker in (self.white_checkers if color == 'white' else self.black_checkers)
+                    if checker.is_up]
+
         return [checker
                 for checker in (self.white_checkers if color == 'white' else self.black_checkers)
-                if checker.is_up]
+                if checker.is_up and self.is_free_space(checker, between)]
 
     def get_position_color(self, position_number, color='black', reverse=False):
         value, position = self.get_position(color, position_number)
@@ -817,10 +832,21 @@ class Game:
             self.computer_first_step_flag = True
 
         possible_variants = [
-            (first_dice, second_dice + third_dice + fourth_dice),
-            (first_dice + second_dice + third_dice, fourth_dice),
-            (first_dice + second_dice, third_dice + fourth_dice),
-            (sum((first_dice, second_dice, third_dice, fourth_dice)),)
+            (
+                first_dice, (second_dice, third_dice, fourth_dice)
+            ),
+
+            (
+                (first_dice, second_dice, third_dice), fourth_dice
+            ),
+
+            (
+                (first_dice, second_dice), (third_dice, fourth_dice)
+            ),
+
+            (
+                (first_dice, second_dice, third_dice, fourth_dice)
+            )
         ]
 
         for tuple_dice in possible_variants:
@@ -829,7 +855,12 @@ class Game:
             tmp_steps_results = list()
 
             for index, dice in enumerate(tuple_dice):
-                result, checker, count = self.move('black', dice)
+                if isinstance(dice, tuple):
+                    length = len(dice)
+                    dice = sum(dice)
+                    result, checker, count = self.move('black', dice, between=dice // length)
+                else:
+                    result, checker, count = self.move('black', dice, )
 
                 if not result:
                     break
@@ -1341,8 +1372,8 @@ class Game:
             if empty_count > 3:
                 return True
 
-        if empty_count + color_count > 3:
-            return True
+            if empty_count + color_count > 3:
+                return True
 
         return False
 
@@ -1359,11 +1390,14 @@ class Game:
 
         return 0
 
-    def move(self, color, dice, recursion=False, checkers=None):
+    def move(self, color, dice, recursion=False, checkers=None, between=None):
         if recursion:
             checkers_list = checkers
         else:
-            checkers_list = self.get_possible_checker_list(color)
+            if between is None:
+                checkers_list = self.get_possible_checker_list(color)
+            else:
+                checkers_list = self.get_possible_checker_list(color, between)
 
         checker_weight = self.get_from(color)
         cell_weight = self.get_to(color)
