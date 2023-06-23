@@ -93,8 +93,8 @@ class Game:
 
             # human part
             if color == 'white':
-                # self.who_steps = 'computer'
-                # continue
+                self.who_steps = 'computer'
+                continue
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
@@ -252,7 +252,7 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))  # = random.randint(1, 24)
+                        current_checker_number    = random.randint(1, 24) #= int(input('Выберите номер шашки: '))
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -278,7 +278,7 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))  # = random.randint(1, 24)
+                            current_dice_number  = random.randint(1, 24) #= int(input('Выберите номер ячейки: '))
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -310,7 +310,7 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))  # random.randint(1, 24)
+                            current_checker_number  = random.randint(1, 24) #= int(input('Выберите номер шашки: '))
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -394,10 +394,10 @@ class Game:
             self.remove_checker_from_old_position(random_checker)
 
     def computer_step(self, color):  # black checkers
-        self.first_dice, self.second_dice = self.throw_dices()
+        # self.first_dice, self.second_dice = self.throw_dices()
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
-        # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
+        self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
 
         double_flag = self.first_dice == self.second_dice
         if double_flag:
@@ -514,6 +514,8 @@ class Game:
             return False
 
     def is_free_space(self, checker, between):
+        if checker.position + between > 24:
+            return False
         intermediate_position = self.get_exact_element(checker.color, checker.position + between)
         if isinstance(intermediate_position, MyStack) and intermediate_position.color == checker.color:
             return True
@@ -544,12 +546,12 @@ class Game:
 
     def get_phase_of_game(self):
 
-        if (self.field.get_sum_of_structure(self.field.black_home, 'black') >= 6 or
-            self.black_head is not None and self.black_head.count > 2) and \
+        if self.field.get_sum_of_structure(self.field.black_home, 'black') > 6 and \
+                self.black_head is not None and self.black_head.count > 1 and \
                 self.field.get_count_of_free_cells(self.field.black_home) + \
                 self.get_position_color(7, reverse=True) > 0 and \
                 self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
-                self.get_position_color(7) <= 4:
+                self.get_position_color(7) < 5:
             return 1
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
@@ -609,14 +611,20 @@ class Game:
             }
 
         if current_phase == 3:
+            # return {
+            #
+            #     1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
+            #     7: 5,
+            #     8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
+            #
+            #     13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+            #     19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+            # }
             return {
 
-                # 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
-                1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
-                7: 0,
-                # 8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
-                # 8: 6, 9: 5, 10: 4, 11: 3, 12: 2, # original
-                8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
+                7: 5,
+                8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
 
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -677,21 +685,18 @@ class Game:
             }
 
         if current_phase == 3:
+            # return {
+            #     2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
+            #     7: 1,
+            #     8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
+            #     13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+            #     19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+            # }
             return {
-                # 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-                2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-                7: 1,
-                # 8: 12, 9: 13, 10: 14, 11: 15, 12: 16,
-                8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
-
-                # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8, # original
-
-                # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,  # trying_3
-
-                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,  # trying_1
-
-                # 13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,  # trying_2
-
+                2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                7: 7,
+                8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
@@ -1005,7 +1010,7 @@ class Game:
         # размещаем ее на новой позиции
         self.move_checker_to_new_position(checker)
 
-    def one_step_to_the_end(self, color, dice_1, dice_2):
+    def one_step_to_the_end(self, color, dice_1, dice_2): # ЗДЕСЬ НУЖНА ПРОВЕРКА НА 6 В РЯД
         count = 0
         last_checker = None
         for current_checker in (self.black_checkers if color == 'black' else self.white_checkers):
@@ -1309,12 +1314,12 @@ class Game:
         my_first_checker_position = sorted_my_checkers[0].position
 
         pointer = my_first_checker_position
+        if pointer == 19:
+            c=1
         count = 0
 
         while pointer <= 24:
-            current_structure, position_in_structure_data = self.get_position(my_color, pointer)
-            current_structure_data = current_structure.data
-            current_element = current_structure_data[position_in_structure_data]
+            current_element = self.get_exact_element(my_color, pointer)
 
             if isinstance(current_element, MyStack) and current_element.color == my_color:
                 count += 1
@@ -1647,8 +1652,8 @@ class Game:
         if dice is not None:
             throw_dice_1 = throw_dice_2 = dice
         else:
-            throw_dice_1, throw_dice_2 = self.throw_dices()
-            # throw_dice_1, throw_dice_2 = [int(i) for i in input().split()]
+            # throw_dice_1, throw_dice_2 = self.throw_dices()
+            throw_dice_1, throw_dice_2 = [int(i) for i in input('Для выброса ').split()]
 
         if not self.valid_throw_dice(throw_dice_1, throw_dice_2):
             return
