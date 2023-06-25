@@ -805,13 +805,24 @@ class Game:
 
         return None, None, None, None
 
-    def get_last_black_checker_position(self):
+    def get_last_black_checker_position(self, lower_border=19, upper_border=24):
 
-        return sorted(
-            (checker
-             for checker in self.black_checkers
-             if 19 <= checker.position <= 24),
-            key=lambda x: x.position)[0].position
+        last_black_checker_position = None
+
+        if any(
+                map(
+                    lambda checker: lower_border <= checker.position <= upper_border, self.black_checkers
+                )
+        ):
+            last_black_checker_position = sorted(
+                (
+                    checker
+                    for checker in self.black_checkers
+                    if lower_border <= checker.position <= upper_border
+                ), key=lambda checker: checker.position
+            )[0].position
+
+        return last_black_checker_position
 
     def checking_double_move(self, fist_step_3_4_6):
         first_dice = second_dice = third_dice = fourth_dice = self.first_dice
@@ -930,6 +941,7 @@ class Game:
 
             self.is_success_move(last_checker, min_dice)
             current_place = self.get_exact_element(color, self.match_cells[max_dice])
+
             if isinstance(current_place, MyStack) and current_place.color == color or \
                     self.match_cells[max_dice] < self.get_last_black_checker_position():
                 return max_dice
@@ -939,6 +951,7 @@ class Game:
 
             self.is_success_move(last_checker, max_dice)
             current_place = self.get_exact_element(color, self.match_cells[min_dice])
+
             if isinstance(current_place, MyStack) and current_place.color == color or \
                     self.match_cells[min_dice] < self.get_last_black_checker_position():
                 return min_dice
@@ -1182,7 +1195,7 @@ class Game:
 
         return 0
 
-    def get_last_white_checker_position(self):
+    def get_last_white_checker_position(self, lower_border=1, upper_border=12):
 
         last_white_checker_position = None
 
@@ -1194,14 +1207,14 @@ class Game:
                            }
         if any(
                 map(
-                    lambda x: 1 <= x.position <= 12, self.white_checkers
+                    lambda checker: lower_border <= checker.position <= upper_border, self.white_checkers
                 )
         ):
             last_white_checker_position = sorted(
                 (checker
                  for checker in self.white_checkers
-                 if 1 <= checker.position <= 12),
-                key=lambda x: x.position)[0].position
+                 if lower_border <= checker.position <= upper_border),
+                key=lambda checker: checker.position)[0].position
 
         return match_positions[last_white_checker_position]
 
@@ -1210,14 +1223,21 @@ class Game:
         шашек. Можем двигать черные шашки только если их позиция меньше последней белой
         Применительно только к шашкам, являющимся единственными в ячейке"""
 
-        punishment = {13: -11, 14: -10, 15: -9, 16: -8, 17: -7, 18: -6,
-                      19: -5, 20: -4, 21: -3, 22: -2, 23: -1, 24: 0}
+        punishment = {
+            13: -11, 14: -10, 15: -9, 16: -8, 17: -7, 18: -6,
+            19: -5, 20: -4, 21: -3, 22: -2, 23: -1, 24: 0
+        }
 
-        encouragement = {19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0}
+        encouragement = {
+            13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+            19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
+        }
 
         last_white_checker_position = self.get_last_white_checker_position()
 
-        if last_white_checker_position is not None and old_position in punishment and old_position > last_white_checker_position:
+        if last_white_checker_position is not None and \
+                old_position in punishment and \
+                old_position > last_white_checker_position:
             return punishment[old_position]
 
         if old_position in encouragement:
@@ -1399,7 +1419,11 @@ class Game:
             if empty_count + color_count > 3:
                 return 0 if extraction_ratio else True
 
-        return 8 if extraction_ratio else False
+        ratios_dict = {
+            0: 32, 1: 16, 2: 8, 3: 4
+        }
+
+        return ratios_dict[color_count] if extraction_ratio else False
 
     def checker_is_bridge(self, current_checker):
         lost_checkers = [checker
@@ -1470,8 +1494,6 @@ class Game:
                             count += self.get_head_ratio(old_position.count)
 
                 elif old_position.count == 1:
-                    if self.get_phase_of_game() in (4, 5):
-                        count += self.manage_the_last_quarter(checker_value.position)
 
                     count += self.punishment_and_encouragement(old_position=checker_value.position)
 
@@ -1487,9 +1509,15 @@ class Game:
                     if checker_value.position < 19:
                         count += self.checker_is_bridge(checker_value)
 
-                if checker_value.position < 19 and self.get_phase_of_game() in (4, 5):
-                    if self.is_evacuation_necessary(checker_value):
-                        count += self.extraction(checker_value, extraction_ratio=True)
+                if self.get_phase_of_game() in (4, 5):
+                    count += self.manage_the_last_quarter(checker_value.position)
+
+                    if checker_value.position < 19:
+                        if self.is_evacuation_necessary(checker_value):
+                            print('ДО', count)
+                            print(f'шашка {checker_value} в жопе, надо вытаскивать')
+                            count += self.extraction(checker_value, extraction_ratio=True)
+                            print(f'ПОСЛЕ', count)
 
                 # NEW_POSITION
                 if isinstance(new_position, MyStack):
@@ -1536,7 +1564,8 @@ class Game:
         return False, None, None  # ход не удался
 
     def is_evacuation_necessary(self, current_checker):
-        return current_checker is self.get_last_black_checker_position()
+
+        return current_checker.position == self.get_last_black_checker_position(lower_border=1, upper_border=18)
 
     def get_exact_element(self, color, position_value):
         structure, position_in_structure_data = self.get_position(color, position_value)
