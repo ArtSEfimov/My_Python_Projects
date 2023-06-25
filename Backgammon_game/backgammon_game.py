@@ -93,8 +93,8 @@ class Game:
 
             # human part
             if color == 'white':
-                self.who_steps = 'computer'
-                continue
+                # self.who_steps = 'computer'
+                # continue
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
@@ -252,7 +252,7 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = random.randint(1, 24)  # = int(input('Выберите номер шашки: '))
+                        current_checker_number = int(input('Выберите номер шашки: '))  # = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -278,7 +278,7 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = random.randint(1, 24)  # = int(input('Выберите номер ячейки: '))
+                            current_dice_number = int(input('Выберите номер ячейки: '))  # = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -310,7 +310,7 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = random.randint(1, 24)  # = int(input('Выберите номер шашки: '))
+                            current_checker_number = int(input('Выберите номер шашки: '))  # = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -394,10 +394,10 @@ class Game:
             self.remove_checker_from_old_position(random_checker)
 
     def computer_step(self, color):  # black checkers
-        # self.first_dice, self.second_dice = self.throw_dices()
+        self.first_dice, self.second_dice = self.throw_dices()
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
-        self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
+        # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
 
         double_flag = self.first_dice == self.second_dice
         if double_flag:
@@ -602,8 +602,8 @@ class Game:
                 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
                 # 7: 9, 8: 10, 9: 11, 10: 12, 11: 13, 12: 14, # trying
 
-                13: -1, 14: -2, 15: -3, 16: -4, 17: -5, 18: -6,
-                # 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+                # 13: -1, 14: -2, 15: -3, 16: -4, 17: -5, 18: -6,
+                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
@@ -614,7 +614,8 @@ class Game:
 
                 # 13: -7, 14: -6, 15: -5, 16: -4, 17: -3, 18: -2,
 
-                13: -1, 14: -2, 15: -3, 16: -4, 17: -5, 18: -6,
+                # 13: -1, 14: -2, 15: -3, 16: -4, 17: -5, 18: -6,
+                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
@@ -672,10 +673,13 @@ class Game:
                 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
                 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
 
-                13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
-                # 13: 21, 14: 20, 15: 19, 16: 18, 17: 17, 18: 16,
+                # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
+                # 13: 15, 14: 14, 15: 13, 16: 12, 17: 11, 18: 10,
 
-                19: -5, 20: -4, 21: -3, 22: -2, 23: -1, 24: 0
+                13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,
+
+                # 19: -5, 20: -4, 21: -3, 22: -2, 23: -1, 24: 0
+                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
 
         if current_phase == 2:
@@ -686,7 +690,6 @@ class Game:
                 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
 
-                # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14, ORIGINAL 20/06/2023
                 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
 
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -1371,32 +1374,32 @@ class Game:
 
         return result_is_six_checkers_in_line
 
-    def is_on_the_way(self, lost_checker):
+    def extraction(self, lost_checker, extraction_ratio=False):
 
         color_count = 0
         empty_count = 0
 
         for dice in range(1, 7):
-            position_expression = lost_checker.position + dice
-            if position_expression > 24:
-                continue
 
+            position_expression = lost_checker.position + dice
             current_position = self.get_exact_element(lost_checker.color, position_expression)
+
             if isinstance(current_position, MyStack):
                 if current_position.color == lost_checker.color:
                     color_count += 1
-                if color_count >= 3:
-                    return True  # всё норм
+
+                if color_count > 3:
+                    return 0 if extraction_ratio else True  # всё норм
             else:
                 empty_count += 1
 
             if empty_count > 3:
-                return True
+                return 0 if extraction_ratio else True
 
             if empty_count + color_count > 3:
-                return True
+                return 0 if extraction_ratio else True
 
-        return False
+        return 8 if extraction_ratio else False
 
     def checker_is_bridge(self, current_checker):
         lost_checkers = [checker
@@ -1405,7 +1408,7 @@ class Game:
 
         if lost_checkers:
             for lost_checker in lost_checkers:
-                if not self.is_on_the_way(lost_checker):
+                if not self.extraction(lost_checker):
                     print(f'\nшашка {current_checker} помогает выбраться из жопы\n')
                     return -8
 
@@ -1484,6 +1487,10 @@ class Game:
                     if checker_value.position < 19:
                         count += self.checker_is_bridge(checker_value)
 
+                if checker_value.position < 19 and self.get_phase_of_game() in (4, 5):
+                    if self.is_evacuation_necessary(checker_value):
+                        count += self.extraction(checker_value, extraction_ratio=True)
+
                 # NEW_POSITION
                 if isinstance(new_position, MyStack):
                     count -= self.get_minus_ratio(new_position.count)
@@ -1528,6 +1535,9 @@ class Game:
 
         return False, None, None  # ход не удался
 
+    def is_evacuation_necessary(self, current_checker):
+        return current_checker is self.get_last_black_checker_position()
+
     def get_exact_element(self, color, position_value):
         structure, position_in_structure_data = self.get_position(color, position_value)
         structure_data = structure.data
@@ -1547,23 +1557,25 @@ class Game:
 
             if dice_1 + dice_2 <= 6:
 
-                current_place = self.get_exact_element(color, self.match_cells[dice_1 + dice_2])
-                if isinstance(current_place, MyStack) and current_place.color == color:
+                my_list, position_in_my_list = self.get_position(color, self.match_cells[dice_1 + dice_2])
+                my_list = my_list.data
+
+                if isinstance(my_list[position_in_my_list], MyStack) and my_list[position_in_my_list].color == color:
 
                     current_intermediate_place = self.get_exact_element(color, self.match_cells[dice_1])
-                    event_1 = isinstance(current_intermediate_place,
-                                         MyStack) and current_intermediate_place.color == color
+                    event_1 = isinstance(current_intermediate_place, MyStack) and \
+                              current_intermediate_place.color == color
                     event_2 = False
+
                     if current_intermediate_place == 0:
                         if self.is_checker_in_another_yard(color) or \
-                                self.move_checker_for_six_in_line(
-                                    current_place.top, dice_1):
+                                self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice_1):
                             event_2 = True
 
                     if event_1 or event_2:
                         if current_place.count >= 2:
                             for _ in range(2):
-                                self.remove_checker_from_old_position(current_place.top)
+                                self.remove_checker_from_old_position(my_list[position_in_my_list].top)
                             return True
 
             return False
@@ -1588,8 +1600,12 @@ class Game:
             return True
 
         if dice_1 + dice_2 <= 6:
-            current_place = self.get_exact_element(color, self.match_cells[dice_1 + dice_2])
-            if isinstance(current_place, MyStack) and current_place.color == color:
+
+            my_list, position_in_my_list = self.get_position(color, self.match_cells[dice_1 + dice_2])
+            my_list = my_list.data
+
+            if isinstance(my_list[position_in_my_list], MyStack) and my_list[position_in_my_list].color == color:
+
                 current_intermediate_place_1 = self.get_exact_element(color, self.match_cells[dice_1])
                 current_intermediate_place_2 = self.get_exact_element(color, self.match_cells[dice_2])
 
@@ -1599,19 +1615,21 @@ class Game:
                             (current_intermediate_place_1, current_intermediate_place_2)
                         )
                 ):
-                    self.remove_checker_from_old_position(current_place.top)
+                    self.remove_checker_from_old_position(my_list[position_in_my_list].top)
                     return True
+
                 dice_1, dice_2 = dice_2, dice_1
+
                 if current_intermediate_place_1 == 0:
                     if self.is_checker_in_another_yard(color) or \
-                            self.move_checker_for_six_in_line(current_place.top, dice_1):
-                        self.remove_checker_from_old_position(current_place.top)
+                            self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice_1):
+                        self.remove_checker_from_old_position(my_list[position_in_my_list].top)
                         return True
 
                 if current_intermediate_place_2 == 0:
                     if self.is_checker_in_another_yard(color) or \
-                            self.move_checker_for_six_in_line(current_place.top, dice_2):
-                        self.remove_checker_from_old_position(current_place.top)
+                            self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice_2):
+                        self.remove_checker_from_old_position(my_list[position_in_my_list].top)
                         return True
 
         return False
@@ -1642,17 +1660,20 @@ class Game:
 
         if above_flag:
             for current_position in range(self.match_cells[dice] - 1, 18, -1):
-                current_place = self.get_exact_element(color, current_position)
-                if isinstance(current_place, MyStack) and current_place.color == color:
+
+                my_list, position_in_my_list = self.get_position(color, current_position)
+                my_list = my_list.data
+
+                if isinstance(my_list[position_in_my_list], MyStack) and my_list[position_in_my_list].color == color:
                     new_place = self.get_exact_element(color, current_position + dice)
                     if isinstance(new_place, MyStack):
                         if new_place.color == color:
-                            self.is_success_move(current_place.top, dice)
+                            self.is_success_move(my_list[position_in_my_list].top, dice)
                             break
 
                     elif self.is_checker_in_another_yard(color) or \
-                            self.move_checker_for_six_in_line(current_place.top, dice):
-                        self.is_success_move(current_place.top, dice)
+                            self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice):
+                        self.is_success_move(my_list[position_in_my_list].top, dice)
                         break
 
         else:
@@ -1669,8 +1690,8 @@ class Game:
         if dice is not None:
             throw_dice_1 = throw_dice_2 = dice
         else:
-            # throw_dice_1, throw_dice_2 = self.throw_dices()
-            throw_dice_1, throw_dice_2 = [int(i) for i in input('Для выброса ').split()]
+            throw_dice_1, throw_dice_2 = self.throw_dices()
+            # throw_dice_1, throw_dice_2 = [int(i) for i in input('Для выброса ').split()]
 
         if not self.valid_throw_dice(throw_dice_1, throw_dice_2):
             return
@@ -1701,14 +1722,16 @@ class Game:
 
                 if above_flag:
                     for current_position in range(self.match_cells[current_dice] - 1, 18, -1):
+
                         my_list, position_in_my_list = self.get_position(color, current_position)
                         my_list = my_list.data
+
                         if isinstance(my_list[position_in_my_list], MyStack) and \
                                 my_list[position_in_my_list].color == color:
                             new_place = self.get_exact_element(color, current_position + current_dice)
                             if isinstance(new_place, MyStack):
                                 if new_place.color == color:
-                                    self.is_success_move(current_place.top, current_dice)
+                                    self.is_success_move(my_list[position_in_my_list].top, current_dice)
                                     break
                             elif self.is_checker_in_another_yard(color) or \
                                     self.move_checker_for_six_in_line(my_list[position_in_my_list].top, current_dice):
