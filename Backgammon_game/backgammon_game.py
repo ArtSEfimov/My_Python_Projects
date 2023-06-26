@@ -93,8 +93,8 @@ class Game:
 
             # human part
             if color == 'white':
-                # self.who_steps = 'computer'
-                # continue
+                self.who_steps = 'computer'
+                continue
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
@@ -252,7 +252,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))  # = random.randint(1, 24)
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                        # current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -278,7 +279,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))  # = random.randint(1, 24)
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            # current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -310,7 +312,8 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))  # = random.randint(1, 24)
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                            # current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -394,10 +397,10 @@ class Game:
             self.remove_checker_from_old_position(random_checker)
 
     def computer_step(self, color):  # black checkers
-        self.first_dice, self.second_dice = self.throw_dices()
+        # self.first_dice, self.second_dice = self.throw_dices()
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
-        # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
+        self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
 
         double_flag = self.first_dice == self.second_dice
         if double_flag:
@@ -597,12 +600,10 @@ class Game:
         if current_phase == 1:
             return {
                 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                # 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
-                # 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
-                7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                # 7: 9, 8: 10, 9: 11, 10: 12, 11: 13, 12: 14, # trying
 
-                # 13: -1, 14: -2, 15: -3, 16: -4, 17: -5, 18: -6,
+                # 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
+
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -687,8 +688,10 @@ class Game:
                 # 2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
                 # 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
 
-                2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-                8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                7: 1,
+                # 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
 
                 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
 
@@ -1418,7 +1421,8 @@ class Game:
 
             if empty_count + color_count > 3:
                 return 0 if extraction_ratio else True
-
+        if extraction_ratio:
+            c=1
         ratios_dict = {
             0: 32, 1: 16, 2: 8, 3: 4
         }
@@ -1602,7 +1606,7 @@ class Game:
                             event_2 = True
 
                     if event_1 or event_2:
-                        if current_place.count >= 2:
+                        if my_list[position_in_my_list].count >= 2:
                             for _ in range(2):
                                 self.remove_checker_from_old_position(my_list[position_in_my_list].top)
                             return True
