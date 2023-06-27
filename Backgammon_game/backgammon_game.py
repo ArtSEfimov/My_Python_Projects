@@ -93,8 +93,8 @@ class Game:
 
             # human part
             if color == 'white':
-                # self.who_steps = 'computer'
-                # continue
+                self.who_steps = 'computer'
+                continue
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
@@ -397,10 +397,10 @@ class Game:
             self.remove_checker_from_old_position(random_checker)
 
     def computer_step(self, color):  # black checkers
-        self.first_dice, self.second_dice = self.throw_dices()
+        # self.first_dice, self.second_dice = self.throw_dices()
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
-        # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
+        self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
 
         double_flag = self.first_dice == self.second_dice
         if double_flag:
@@ -600,7 +600,8 @@ class Game:
         if current_phase == 1:
             return {
                 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                # 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -668,11 +669,12 @@ class Game:
 
         if current_phase == 1:
             return {
-                2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
-                8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
+                2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                7: 7,
+                8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
 
-                # 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
-                13: 15, 14: 14, 15: 13, 16: 12, 17: 11, 18: 10,
+                13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                # 13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,
 
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
