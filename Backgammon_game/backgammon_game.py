@@ -599,9 +599,11 @@ class Game:
 
         if current_phase == 1:
             return {
-                # 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
+                1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                # 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
+                # 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
                 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                # 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -664,15 +666,16 @@ class Game:
             }
 
     def get_to(self, color):
-
+        # надо разделить шашки, которые ходят со своего дома или УЖЕ находятся во дворе
+        # и надо смотреть куда ход (надо меньше ходить по дому и больше во двор)
         current_phase = self.get_phase_of_game()
 
         if current_phase == 1:
             return {
-                # 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-                2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
-                7: 7,
-                8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
+                # 1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
+                # 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
+                7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
                 13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -1100,7 +1103,7 @@ class Game:
     def punishment(current_phase, old_position):  # штраф за оставление позиции
         if current_phase == 1:
             ratios = {
-                1: 3, 2: 3, 3: 3, 4: 3, 5: 2, 6: 2, 7: 2,
+                1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2,
                 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
                 13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -1140,7 +1143,7 @@ class Game:
     def encouragement(current_phase, new_position):  # поощрение за занятие пустой позиции
         if current_phase == 1:
             ratios = {
-                2: 3, 3: 3, 4: 3, 5: 2, 6: 2, 7: 2,
+                2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2,
                 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
                 13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -1259,11 +1262,11 @@ class Game:
         phase_of_game = self.get_phase_of_game()
 
         if phase_of_game == 1:
-            if old_position is not None and 2 <= old_position <= 7:
-                return -8
-            if new_position is not None and 2 <= new_position <= 7:
-                return 4
-
+        #     if old_position is not None and 2 <= old_position <= 7:
+        #         return -8
+        #     if new_position is not None and 2 <= new_position <= 7:
+        #         return 4
+        #
             if old_position is not None and 13 <= old_position <= 18:
                 return -4
             if new_position is not None and 13 <= new_position <= 18:
