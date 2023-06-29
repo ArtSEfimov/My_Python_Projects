@@ -615,9 +615,10 @@ class Game:
         if current_phase == 2:
             return {
                 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                7: 7, 8: 6, 9: 5, 10: 4, 11: 5, 12: 6,
+                7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+
             }
 
         if current_phase == 3:
@@ -698,7 +699,7 @@ class Game:
                     {
                         2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                         8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
+                        13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     }
             }
@@ -1492,8 +1493,8 @@ class Game:
                     choose_from = 0 if 1 <= checker_value.position <= 6 else 1
                     count = cell_weight[choose_to][cell_value] + checker_weight[choose_from][checker_value.position]
                 elif self.get_phase_of_game() == 2:
-                    pass
-                    # надо делать
+                    choose_to = 0 if checker_value.position == 1 else 1
+                    count = cell_weight[choose_to][cell_value] + checker_weight[checker_value.position]
                 else:
                     count = cell_weight[cell_value] + checker_weight[checker_value.position]
 
