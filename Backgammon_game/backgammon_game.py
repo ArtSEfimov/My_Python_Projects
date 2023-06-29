@@ -599,7 +599,7 @@ class Game:
 
         if current_phase == 1:
             return {
-                0:  # шашка с дома (1 <= position <= 6)
+                0:  # шашка из дома (1 <= position <= 6)
                     {
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6
                     },
@@ -615,11 +615,7 @@ class Game:
         if current_phase == 2:
             return {
                 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-
-                # 13: -7, 14: -6, 15: -5, 16: -4, 17: -3, 18: -2,
-
-                # 13: -1, 14: -2, 15: -3, 16: -4, 17: -5, 18: -6,
+                7: 7, 8: 6, 9: 5, 10: 4, 11: 5, 12: 6,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -678,8 +674,7 @@ class Game:
             return {
                 0:  # шашка с головы
                     {
-                        2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-                        7: 1,
+                        2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
                         8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
                     },
                 1:
@@ -694,10 +689,18 @@ class Game:
 
         if current_phase == 2:
             return {
-                2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
-                8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                0:  # шашка с головы
+                    {
+                        2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
+                        8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                    },
+                1:
+                    {
+                        2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
+                        8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                        13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
+                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    }
             }
 
         if current_phase == 3:
@@ -1115,39 +1118,47 @@ class Game:
     def punishment(current_phase, old_position):  # штраф за оставление позиции
         if current_phase == 1:
             ratios = {
-                1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2,
-                8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                1: 4, 2: 4, 3: 4,
+                4: 2, 5: 2, 6: 2,
+
+                7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+
                 13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
+
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
             return ratios[old_position]
 
         if current_phase == 2:
             ratios = {
-                1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
-                8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
-                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+                1: 2, 2: 2, 3: 2,
+                4: 1, 5: 1, 6: 1,
+
+                7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+
+                13: 4, 14: 4, 15: 4, 16: 4, 17: 4, 18: 4,
+
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
             return ratios[old_position]
 
-        if current_phase == 3:
-            ratios = {
-                1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
-                7: 2, 8: 2, 9: 2, 10: 2, 11: 2, 12: 2,
-                13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-            }
-            return ratios[old_position]
-
-        if current_phase == 4:
-            ratios = {
-                1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
-                8: 2, 9: 2, 10: 2, 11: 2, 12: 2,
-                13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-            }
-            return ratios[old_position]
+        # if current_phase == 3:
+        #     ratios = {
+        #         1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
+        #         7: 2, 8: 2, 9: 2, 10: 2, 11: 2, 12: 2,
+        #         13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
+        #         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+        #     }
+        #     return ratios[old_position]
+        #
+        # if current_phase == 4:
+        #     ratios = {
+        #         1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
+        #         8: 2, 9: 2, 10: 2, 11: 2, 12: 2,
+        #         13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3,
+        #         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+        #     }
+        #     return ratios[old_position]
 
         return 0
 
@@ -1155,7 +1166,8 @@ class Game:
     def encouragement(current_phase, new_position):  # поощрение за занятие пустой позиции
         if current_phase == 1:
             ratios = {
-                2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2,
+                2: 4, 3: 4, 4: 4,
+                5: 2, 6: 2, 7: 2,
                 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
                 13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -1164,39 +1176,40 @@ class Game:
 
         if current_phase == 2:
             ratios = {
-                2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2,
-                8: 1, 9: 1, 10: 1, 11: 1, 12: 1,
-                13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3,
+                2: 2, 3: 2, 4: 2,
+                5: 1, 6: 1, 7: 1,
+                8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                13: 4, 14: 4, 15: 4, 16: 4, 17: 4, 18: 4,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
             return ratios[new_position]
 
-        if current_phase == 3:
-            ratios = {
-                2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
-                8: 3, 9: 3, 10: 3, 11: 3, 12: 3,
-                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-            }
-            return ratios[new_position]
-
-        if current_phase == 4:
-            ratios = {
-                2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
-                8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
-                13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
-                19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1
-            }
-            return ratios[new_position]
-
-        if current_phase == 5:
-            ratios = {
-                2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
-                8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
-                13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
-                19: 2, 20: 2, 21: 2, 22: 2, 23: 2, 24: 2
-            }
-            return ratios[new_position]
+        # if current_phase == 3:
+        #     ratios = {
+        #         2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1,
+        #         8: 3, 9: 3, 10: 3, 11: 3, 12: 3,
+        #         13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+        #         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+        #     }
+        #     return ratios[new_position]
+        #
+        # if current_phase == 4:
+        #     ratios = {
+        #         2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
+        #         8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+        #         13: 2, 14: 2, 15: 2, 16: 2, 17: 2, 18: 2,
+        #         19: 1, 20: 1, 21: 1, 22: 1, 23: 1, 24: 1
+        #     }
+        #     return ratios[new_position]
+        #
+        # if current_phase == 5:
+        #     ratios = {
+        #         2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
+        #         8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+        #         13: 1, 14: 1, 15: 1, 16: 1, 17: 1, 18: 1,
+        #         19: 2, 20: 2, 21: 2, 22: 2, 23: 2, 24: 2
+        #     }
+        #     return ratios[new_position]
 
         return 0
 
@@ -1274,48 +1287,39 @@ class Game:
         phase_of_game = self.get_phase_of_game()
 
         if phase_of_game == 1:
-            # if old_position is not None and 2 <= old_position <= 7:
-            #     return -8
-            # if new_position is not None and 2 <= new_position <= 7:
-            #     return 4
 
+            if new_position is not None and 13 <= new_position <= 18:
+                return 4
             if old_position is not None and 13 <= old_position <= 18:
                 return -4
-            if new_position is not None and 13 <= new_position <= 18:
-                return 2
 
         if phase_of_game == 2:
+
             if old_position is not None and 1 <= old_position <= 6:
-                return -4
+                return -2
             if new_position is not None and 2 <= new_position <= 7:
                 return 2
 
             if old_position is not None and 13 <= old_position <= 18:
-                return -8
-            if new_position is not None and 13 <= new_position <= 18:
-                return 4
-
-        if phase_of_game == 3:
-            if old_position is not None and 1 <= old_position <= 6:
-                return -8
-            if new_position is not None and 2 <= new_position <= 6:
-                return 2
-
-            if old_position is not None and 7 <= old_position <= 12:
-                return -8
-            if new_position is not None and 7 <= new_position <= 12:
-                return 4
-
-            if old_position is not None and 13 <= old_position <= 18:
                 return -4
             if new_position is not None and 13 <= new_position <= 18:
-                return 1
-
-        # if phase_of_game == 4:
-        #     if old_position is not None and 13 <= old_position <= 18:
+                return 4
+        #
+        # if phase_of_game == 3:
+        #     if old_position is not None and 1 <= old_position <= 6:
         #         return -8
-        #     if new_position is not None and 13 <= new_position <= 18:
+        #     if new_position is not None and 2 <= new_position <= 6:
         #         return 2
+        #
+        #     if old_position is not None and 7 <= old_position <= 12:
+        #         return -8
+        #     if new_position is not None and 7 <= new_position <= 12:
+        #         return 4
+        #
+        #     if old_position is not None and 13 <= old_position <= 18:
+        #         return -4
+        #     if new_position is not None and 13 <= new_position <= 18:
+        #         return 1
 
         return 0
 
@@ -1487,6 +1491,9 @@ class Game:
                     choose_to = 0 if checker_value.position == 1 else 1
                     choose_from = 0 if 1 <= checker_value.position <= 6 else 1
                     count = cell_weight[choose_to][cell_value] + checker_weight[choose_from][checker_value.position]
+                elif self.get_phase_of_game() == 2:
+                    pass
+                    # надо делать
                 else:
                     count = cell_weight[cell_value] + checker_weight[checker_value.position]
 
