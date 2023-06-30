@@ -599,25 +599,36 @@ class Game:
 
         if current_phase == 1:
             return {
-                0:  # шашка из дома (1 <= position <= 6)
+                0:
                     {
-                        1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6
+                        7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
+                        13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
+
                 1:
                     {
                         1: 1,
                         2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
-                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0}
+                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    }
             }
 
         if current_phase == 2:
             return {
-                1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                0:
+                    {
+                        1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                        7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                        13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    },
+                1:
+                    {
+                        7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12
+                    }
 
             }
 
@@ -682,10 +693,16 @@ class Game:
                     {
                         2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,
+                        13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
+                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    },
+                # добавим вариант коэффициентов для шашек, которые уже в чужом доме,
+                # чтобы туда попадать было легко, а там двигаться менее легко
+                2:  # шашка из чужого дома
+                    {
+                        13: 1, 14: 2, 15: 3, 16: 4, 17: 5, 18: 6,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     }
-
             }
 
         if current_phase == 2:
@@ -699,7 +716,12 @@ class Game:
                     {
                         2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                         8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,
+                        13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
+                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    },
+                2:  # шашка из чужого дома
+                    {
+                        13: 1, 14: 2, 15: 3, 16: 4, 17: 5, 18: 6,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     }
             }
@@ -1297,9 +1319,9 @@ class Game:
         if phase_of_game == 2:
 
             if old_position is not None and 1 <= old_position <= 6:
-                return -2
+                return -4
             if new_position is not None and 2 <= new_position <= 7:
-                return 2
+                return 4
 
             if old_position is not None and 13 <= old_position <= 18:
                 return -4
@@ -1489,12 +1511,23 @@ class Game:
                     continue
 
                 if self.get_phase_of_game() == 1:
-                    choose_to = 0 if checker_value.position == 1 else 1
-                    choose_from = 0 if 1 <= checker_value.position <= 6 else 1
+                    if checker_value.position == 1:
+                        choose_to = 0
+                    elif checker_value.position > 12:
+                        choose_to = 2
+                    else:
+                        choose_to = 1
+                    choose_from = 0 if checker_value.position + dice > 12 else 1
                     count = cell_weight[choose_to][cell_value] + checker_weight[choose_from][checker_value.position]
                 elif self.get_phase_of_game() == 2:
-                    choose_to = 0 if checker_value.position == 1 else 1
-                    count = cell_weight[choose_to][cell_value] + checker_weight[checker_value.position]
+                    if checker_value.position == 1:
+                        choose_to = 0
+                    elif checker_value.position > 12:
+                        choose_to = 2
+                    else:
+                        choose_to = 1
+                    choose_from = 1 if 7 <= checker_value.position <= 12 < checker_value.position + dice else 0
+                    count = cell_weight[choose_to][cell_value] + checker_weight[choose_from][checker_value.position]
                 else:
                     count = cell_weight[cell_value] + checker_weight[checker_value.position]
 
