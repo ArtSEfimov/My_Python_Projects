@@ -93,8 +93,8 @@ class Game:
 
             # human part
             if color == 'white':
-                self.who_steps = 'computer'
-                continue
+                # self.who_steps = 'computer'
+                # continue
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
@@ -397,10 +397,10 @@ class Game:
             self.remove_checker_from_old_position(random_checker)
 
     def computer_step(self, color):  # black checkers
-        # self.first_dice, self.second_dice = self.throw_dices()
+        self.first_dice, self.second_dice = self.throw_dices()
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
-        self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
+        # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
 
         double_flag = self.first_dice == self.second_dice
         if double_flag:
@@ -603,7 +603,7 @@ class Game:
                     {
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -611,7 +611,7 @@ class Game:
                     {
                         1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     }
 
@@ -624,7 +624,7 @@ class Game:
                     {
                         1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
                         7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -632,7 +632,7 @@ class Game:
                     {
                         1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -726,8 +726,7 @@ class Game:
 
         if current_phase == 3:
             return {
-                2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                7: 7,
+                2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -738,7 +737,7 @@ class Game:
                 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
                 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                19: 11, 20: 10, 21: 9, 22: 8, 23: 7, 24: 6
             }
 
         if current_phase == 5:
@@ -1215,8 +1214,7 @@ class Game:
 
     def manage_the_last_quarter(self, old_position):
         """Если на позициях с 13 по 24 есть белые шашки, смотрим на расположение последней из них относительно черных
-        шашек. Можем двигать черные шашки только если их позиция меньше последней белой
-        Применительно только к шашкам, являющимся единственными в ячейке"""
+        шашек. Можем двигать черные шашки только если их позиция меньше последней белой"""
 
         punishment = {
             13: -11, 14: -10, 15: -9, 16: -8, 17: -7, 18: -6,
@@ -1233,15 +1231,18 @@ class Game:
         if last_white_checker_position is not None and \
                 old_position in punishment and \
                 old_position > last_white_checker_position:
+            print(f'НАКАЗАНИЕ\nСработала ф-ия управления последней четверти\nПозиция {old_position}')
             return punishment[old_position]
 
         if old_position in encouragement:
+            print(f'ПООЩРЕНИЕ\nСработала ф-ия управления последней четверти\nПозиция {old_position}')
             return encouragement[old_position]
 
         return 0
 
     def distance_assessment(self, new_position):
-        """Оценка расстояния от ближайшей сзади фишки. Применяется только в фазах 3, 4, 5."""
+        """Оценка расстояния от ближайшей сзади фишки. Применяется только в фазах 3, 4, 5.
+        Наверно, чтобы новая шашка не убегала далеко и был какой-то мост"""
 
         previous_checker = None
 
@@ -1252,12 +1253,13 @@ class Game:
             elif checker.position < new_position:
                 previous_checker = checker
 
-        if previous_checker:
+        if previous_checker is not None:
+            print('Сработала ф-ия оценки расстояния')
             return new_position - previous_checker.position
 
         return 0
 
-    def punishment_and_encouragement(self, old_position=None, new_position=None):
+    def punishment_and_encouragement(self, position):
         """Штрафы за освобождение позиций и поощрения за занятия позиций в зависимости от фазы и от позиции.
         Использование при переходе на позицию, где еще нет стека и освобождении позиций с одной шашкой"""
 
@@ -1265,43 +1267,24 @@ class Game:
 
         if phase_of_game == 1:
 
-            if old_position is not None and 1 <= old_position <= 6:
-                return -4
-            if new_position is not None and 2 <= new_position <= 7:
+            if 1 <= position <= 6 or 13 <= position <= 18:
                 return 4
-
-            if new_position is not None and 13 <= new_position <= 18:
-                return 4
-            if old_position is not None and 13 <= old_position <= 18:
-                return -4
 
         if phase_of_game == 2:
 
-            if old_position is not None and 1 <= old_position <= 6:
-                return -8
-            if new_position is not None and 2 <= new_position <= 7:
+            if 2 <= position <= 6:
                 return 8
 
-            if old_position is not None and 13 <= old_position <= 18:
-                return -4
-            if new_position is not None and 13 <= new_position <= 18:
+            if 13 <= position <= 18:
                 return 4
 
         if phase_of_game == 3:
-            if old_position is not None and 1 <= old_position <= 6:
-                return -8
-            if new_position is not None and 2 <= new_position <= 6:
+
+            if 2 <= position <= 6 or 13 <= position <= 18:
                 return 8
 
-            if old_position is not None and 7 <= old_position <= 12:
-                return -4
-            if new_position is not None and 7 <= new_position <= 12:
+            if 7 <= position <= 12:
                 return 4
-
-            if old_position is not None and 13 <= old_position <= 18:
-                return -8
-            if new_position is not None and 13 <= new_position <= 18:
-                return 8
 
         return 0
 
@@ -1516,7 +1499,7 @@ class Game:
 
                 elif old_position.count == 1:
 
-                    count += self.punishment_and_encouragement(old_position=checker_value.position)
+                    count -= self.punishment_and_encouragement(checker_value.position)
 
                     if recursion:
                         count -= self.punishment(self.get_phase_of_game(), checker_value.position)
@@ -1545,7 +1528,7 @@ class Game:
                     count -= self.get_minus_ratio(new_position.count)
 
                 else:
-                    count += self.punishment_and_encouragement(new_position=cell_value)
+                    count += self.punishment_and_encouragement(cell_value)
 
                     if recursion:
                         count += self.encouragement(self.get_phase_of_game(), cell_value)
