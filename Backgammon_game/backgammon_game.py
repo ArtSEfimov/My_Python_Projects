@@ -252,8 +252,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))
-                        # current_checker_number = random.randint(1, 24)
+                        # current_checker_number = int(input('Выберите номер шашки: '))
+                        current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -279,8 +279,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))
-                            # current_dice_number = random.randint(1, 24)
+                            # current_dice_number = int(input('Выберите номер ячейки: '))
+                            current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -312,8 +312,8 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))
-                            # current_checker_number = random.randint(1, 24)
+                            # current_checker_number = int(input('Выберите номер шашки: '))
+                            current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -603,7 +603,8 @@ class Game:
                     {
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        # 13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -611,7 +612,8 @@ class Game:
                     {
                         1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        # 13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     }
 
@@ -623,8 +625,9 @@ class Game:
                 0:
                     {
                         1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-                        7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        7: 13, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
+                        # 13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -632,7 +635,8 @@ class Game:
                     {
                         1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        # 13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -647,8 +651,7 @@ class Game:
             return {
 
                 1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
-                7: 5,
-                8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
+                7: 5, 8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
                 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -1212,7 +1215,7 @@ class Game:
 
         return match_positions[last_white_checker_position]
 
-    def manage_the_last_quarter(self, old_position):
+    def manage_the_last_quarter(self, old_position, punishment_flag=False):
         """Если на позициях с 13 по 24 есть белые шашки, смотрим на расположение последней из них относительно черных
         шашек. Можем двигать черные шашки только если их позиция меньше последней белой"""
 
@@ -1228,15 +1231,14 @@ class Game:
 
         last_white_checker_position = self.get_last_white_checker_position()
 
-        if last_white_checker_position is not None and \
-                old_position in punishment and \
-                old_position > last_white_checker_position:
-            print(f'НАКАЗАНИЕ\nСработала ф-ия управления последней четверти\nПозиция {old_position}')
-            return punishment[old_position]
-
-        if old_position in encouragement:
-            print(f'ПООЩРЕНИЕ\nСработала ф-ия управления последней четверти\nПозиция {old_position}')
-            return encouragement[old_position]
+        if last_white_checker_position is None or last_white_checker_position > old_position:
+            if old_position in encouragement:
+                print(f'ПООЩРЕНИЕ\nСработала ф-ия управления последней четверти\nПозиция {old_position}')
+                return encouragement[old_position]
+        if last_white_checker_position is not None:
+            if punishment_flag and old_position in punishment and old_position > last_white_checker_position:
+                print(f'НАКАЗАНИЕ\nСработала ф-ия управления последней четверти\nПозиция {old_position}')
+                return punishment[old_position]
 
         return 0
 
@@ -1514,7 +1516,8 @@ class Game:
                         count += self.checker_is_bridge(checker_value)
 
                 if self.get_phase_of_game() in (4, 5):
-                    count += self.manage_the_last_quarter(checker_value.position)
+                    count += self.manage_the_last_quarter(checker_value.position,
+                                                          punishment_flag=old_position.count == 1)
 
                     if checker_value.position < 19:
                         if self.is_evacuation_necessary(checker_value):
