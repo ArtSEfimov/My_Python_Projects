@@ -93,8 +93,8 @@ class Game:
 
             # human part
             if color == 'white':
-                # self.who_steps = 'computer'
-                # continue
+                self.who_steps = 'computer'
+                continue
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
@@ -397,10 +397,10 @@ class Game:
             self.remove_checker_from_old_position(random_checker)
 
     def computer_step(self, color):  # black checkers
-        self.first_dice, self.second_dice = self.throw_dices()
+        # self.first_dice, self.second_dice = self.throw_dices()
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
-        # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
+        self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
 
         double_flag = self.first_dice == self.second_dice
         if double_flag:
@@ -603,17 +603,16 @@ class Game:
                     {
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                        # 13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
-                        13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
+                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
                 1:  # чтобы закинуть в чужой дом
                     {
-                        1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
+                        # 1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
+                        1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        # 13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
-                        13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
+                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     }
 
@@ -626,8 +625,7 @@ class Game:
                     {
                         1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
                         7: 13, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
-                        # 13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
-                        13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
+                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -635,8 +633,7 @@ class Game:
                     {
                         1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        # 13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
-                        13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
+                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -1283,6 +1280,14 @@ class Game:
         if phase_of_game == 3:
 
             if 2 <= position <= 6 or 13 <= position <= 18:
+                return 8
+
+            if 7 <= position <= 12:
+                return 4
+
+        if phase_of_game == 4:
+
+            if 2 <= position <= 6:
                 return 8
 
             if 7 <= position <= 12:
