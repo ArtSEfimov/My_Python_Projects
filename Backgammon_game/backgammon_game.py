@@ -252,8 +252,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        # current_checker_number = int(input('Выберите номер шашки: '))
-                        current_checker_number = random.randint(1, 24)
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                        # current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -279,8 +279,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            # current_dice_number = int(input('Выберите номер ячейки: '))
-                            current_dice_number = random.randint(1, 24)
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            # current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -312,8 +312,8 @@ class Game:
 
                     while True:
                         try:
-                            # current_checker_number = int(input('Выберите номер шашки: '))
-                            current_checker_number = random.randint(1, 24)
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                            # current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -609,8 +609,8 @@ class Game:
 
                 1:  # чтобы закинуть в чужой дом
                     {
-                        # 1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
-                        1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                        1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
+                        # 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
                         13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -1251,7 +1251,7 @@ class Game:
         return 0
 
     def distance_assessment(self, new_position):
-        """Оценка расстояния от ближайшей сзади фишки. Применяется только в фазах 3, 4, 5.
+        """Оценка расстояния от ближайшей сзади фишки. Применяется только в фазах 4, 5.
         Наверно, чтобы новая шашка не убегала далеко и был какой-то мост"""
 
         previous_checker = None
@@ -1299,14 +1299,11 @@ class Game:
         if phase_of_game == 4:
 
             if 2 <= position <= 18:
-                return 16
+                return 8
 
         if phase_of_game == 5:
 
-            if 7 <= position <= 12:
-                return 8
-
-            if 13 <= position <= 18:
+            if 7 <= position <= 18:
                 return 4
 
         return 0
@@ -1415,7 +1412,7 @@ class Game:
 
             if empty_count + color_count > 3:
                 return 0 if extraction_ratio else True
-
+        c=1
         ratios_dict = {
             0: 32, 1: 16, 2: 8, 3: 4
         }
@@ -1515,7 +1512,7 @@ class Game:
                 else:
                     count = cell_weight[cell_value] + checker_weight[checker_value.position]
 
-                if self.get_phase_of_game() > 2:
+                if self.get_phase_of_game() > 3:
                     count -= self.distance_assessment(cell_value)
 
                 # OLD_POSITION
