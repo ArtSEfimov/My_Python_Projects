@@ -1223,6 +1223,26 @@ class Game:
 
         return match_positions[last_white_checker_position]
 
+    def take_free_place(self, current_checker, dice):
+        """
+        Функция помогает занять свободное место в зоне выброса в пятой фазе игры.
+        Работает только с шашками, которые НЕ являются последними на своих позициях.
+        :param current_checker:
+        :param dice:
+        :return:
+        """
+        position_expression = current_checker.position + dice
+
+        if position_expression < 19 or position_expression > 24:
+            return 0
+
+        current_position = self.get_exact_element(current_checker.color, position_expression)
+
+        if current_position == 0:
+            return 4
+
+        return 0
+
     def manage_the_last_quarter(self, old_position, punishment_flag=False):
         """Если на позициях с 13 по 24 есть белые шашки, смотрим на расположение последней из них относительно черных
         шашек. Можем двигать черные шашки только если их позиция меньше последней белой"""
@@ -1256,29 +1276,7 @@ class Game:
         то надо этой возможностью пользоваться.
         Работает для шашек, которые не являются последними на своих местах"""
 
-        color_count = 0
-        empty_count = 0
-
-        for dice in range(1, 7):
-            position_expression = current_checker.position + dice
-            current_position = self.get_exact_element(current_checker.color, position_expression)
-
-            if isinstance(current_position, MyStack):
-                if current_position.color == current_checker.color:
-                    color_count += 1
-
-                if color_count > 2:
-                    return 0  # всё норм, варианты есть
-            else:
-                empty_count += 1
-
-            if empty_count > 2:
-                return 0  # всё норм, варианты есть
-
-            if empty_count + color_count > 2:
-                return 0  # всё норм, варианты есть
-
-        return 8
+        return 0 if self.extraction(current_checker) else 8
 
     def punishment_and_encouragement(self, position):
         """Штрафы за освобождение позиций и поощрения за занятия позиций в зависимости от фазы и от позиции.
@@ -1423,8 +1421,7 @@ class Game:
 
             if empty_count + color_count > 2:
                 return 0 if extraction_ratio else True
-        if extraction_ratio:
-            c = 1
+
         ratios_dict = {
             0: 32, 1: 16, 2: 8, 3: 4
         }
@@ -1534,7 +1531,11 @@ class Game:
                         if 19 <= checker_value.position <= 24:
                             count += self.get_head_ratio(old_position.count)
 
-                    count += self.forward_distance_assessment(checker_value)
+                    if checker_value.position < 19:
+                        count += self.forward_distance_assessment(checker_value)
+
+                    if self.get_phase_of_game() == 5:
+                        count += self.take_free_place(checker_value, dice)
 
                 elif old_position.count == 1:
 
