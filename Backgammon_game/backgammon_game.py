@@ -252,8 +252,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))
-                        # current_checker_number = random.randint(1, 24)
+                        # current_checker_number = int(input('Выберите номер шашки: '))
+                        current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -279,8 +279,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))
-                            # current_dice_number = random.randint(1, 24)
+                            # current_dice_number = int(input('Выберите номер ячейки: '))
+                            current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -312,8 +312,8 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))
-                            # current_checker_number = random.randint(1, 24)
+                            # current_checker_number = int(input('Выберите номер шашки: '))
+                            current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -1250,24 +1250,35 @@ class Game:
 
         return 0
 
-    def distance_assessment(self, new_position):
-        """Оценка расстояния от ближайшей сзади фишки. Применяется только в фазах 4, 5.
-        Наверно, чтобы новая шашка не убегала далеко и был какой-то мост"""
+    def forward_distance_assessment(self, current_checker):
+        """Оценка количества возможных ходов
+        Если есть редкая (2 и менее вариантов из 6) возможность походить,
+        то надо этой возможностью пользоваться.
+        Работает для шашек, которые не являются последними на своих местах"""
 
-        previous_checker = None
+        color_count = 0
+        empty_count = 0
 
-        sorted_checker_list = sorted(self.black_checkers, key=lambda x: x.position)
-        for checker in sorted_checker_list:
-            if checker.position > new_position:
-                break
-            elif checker.position < new_position:
-                previous_checker = checker
+        for dice in range(1, 7):
+            position_expression = current_checker.position + dice
+            current_position = self.get_exact_element(current_checker.color, position_expression)
 
-        if previous_checker is not None:
-            print('Сработала ф-ия оценки расстояния')
-            return new_position - previous_checker.position
+            if isinstance(current_position, MyStack):
+                if current_position.color == current_checker.color:
+                    color_count += 1
 
-        return 0
+                if color_count > 2:
+                    return 0  # всё норм, варианты есть
+            else:
+                empty_count += 1
+
+            if empty_count > 2:
+                return 0  # всё норм, варианты есть
+
+            if empty_count + color_count > 2:
+                return 0  # всё норм, варианты есть
+
+        return 8
 
     def punishment_and_encouragement(self, position):
         """Штрафы за освобождение позиций и поощрения за занятия позиций в зависимости от фазы и от позиции.
@@ -1402,17 +1413,18 @@ class Game:
                 if current_position.color == lost_checker.color:
                     color_count += 1
 
-                if color_count > 3:
+                if color_count > 2:
                     return 0 if extraction_ratio else True  # всё норм
             else:
                 empty_count += 1
 
-            if empty_count > 3:
+            if empty_count > 2:
                 return 0 if extraction_ratio else True
 
-            if empty_count + color_count > 3:
+            if empty_count + color_count > 2:
                 return 0 if extraction_ratio else True
-        c=1
+        if extraction_ratio:
+            c = 1
         ratios_dict = {
             0: 32, 1: 16, 2: 8, 3: 4
         }
@@ -1512,9 +1524,6 @@ class Game:
                 else:
                     count = cell_weight[cell_value] + checker_weight[checker_value.position]
 
-                if self.get_phase_of_game() > 3:
-                    count -= self.distance_assessment(cell_value)
-
                 # OLD_POSITION
                 if old_position.count > 1:
                     if checker_value.position != 1:
@@ -1524,6 +1533,8 @@ class Game:
                         count += self.get_head_ratio(old_position.count)
                         if 19 <= checker_value.position <= 24:
                             count += self.get_head_ratio(old_position.count)
+
+                    count += self.forward_distance_assessment(checker_value)
 
                 elif old_position.count == 1:
 
