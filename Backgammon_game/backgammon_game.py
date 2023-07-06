@@ -1240,8 +1240,7 @@ class Game:
     def manage_the_last_quarter(self, old_position, punishment_flag=False):
         """Если на позициях с 13 по 24 есть белые шашки, смотрим на расположение последней из них относительно черных
         шашек. Можем двигать черные шашки только если их позиция меньше последней белой"""
-        if old_position > 12:
-            c=1
+
         punishment = {
             13: -11, 14: -10, 15: -9, 16: -8, 17: -7, 18: -6,
             19: -5, 20: -4, 21: -3, 22: -2, 23: -1, 24: 0
@@ -1554,15 +1553,18 @@ class Game:
                         count -= self.punishment(self.get_phase_of_game(), checker_value.position)
 
                     if self.is_checker_in_another_yard(color):
-                        print(old_position.count)
                         # здесь надо наоборот смотреть разрушение 6 шашек в линию
                         if self.move_checker_for_six_in_line(checker_value, dice):
+
+                            old_position, position = self.get_position(color, checker_value.position)
+                            old_position = old_position.data[position]
+
                             if self.compare_white_and_black_positions(color):
                                 c = 1
                                 print(f'{checker_value} сработала ф-ия liberation_and_hold, ДО {count}')
                                 count -= 8
                                 print(f'сработала ф-ия liberation_and_hold, ПОСЛЕ {count}')
-                        print(old_position.count)
+
                     if checker_value.position < 19:
                         count -= self.checker_is_bridge(checker_value)
 
@@ -1571,8 +1573,6 @@ class Game:
                             count -= self.rooting(checker_value)
 
                 if self.get_phase_of_game() in (4, 5):
-                    if old_position.count == 1:
-                        c=1
                     count += self.manage_the_last_quarter(checker_value.position,
                                                           punishment_flag=old_position.count == 1)
 
