@@ -252,8 +252,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        # current_checker_number = int(input('Выберите номер шашки: '))
-                        current_checker_number = random.randint(1, 24)
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                        # current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -279,8 +279,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            # current_dice_number = int(input('Выберите номер ячейки: '))
-                            current_dice_number = random.randint(1, 24)
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            # current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -312,8 +312,8 @@ class Game:
 
                     while True:
                         try:
-                            # current_checker_number = int(input('Выберите номер шашки: '))
-                            current_checker_number = random.randint(1, 24)
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                            # current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -603,16 +603,15 @@ class Game:
                     {
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
                 1:  # чтобы закинуть в чужой дом
                     {
-                        1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
-                        # 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                        1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     }
 
@@ -625,7 +624,7 @@ class Game:
                     {
                         1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
                         7: 13, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
-                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -633,7 +632,7 @@ class Game:
                     {
                         1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        13: 9, 14: 8, 15: 7, 16: 6, 17: 5, 18: 4,
+                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -649,7 +648,7 @@ class Game:
 
                 0:
                     {
-                        1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
+                        1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 5, 8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -689,8 +688,8 @@ class Game:
 
                 0:
                     {
-                        2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                        7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                        2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
+                        8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
                         13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
@@ -1225,7 +1224,7 @@ class Game:
 
     def take_free_place(self, current_checker, dice):
         """
-        Функция помогает занять свободное место в зоне выброса в пятой фазе игры.
+        Функция помогает занимать свободные места.
         Работает только с шашками, которые НЕ являются последними на своих позициях.
         :param current_checker:
         :param dice:
@@ -1233,12 +1232,7 @@ class Game:
         """
         position_expression = current_checker.position + dice
 
-        if position_expression < 19 or position_expression > 24:
-            return 0
-
-        current_position = self.get_exact_element(current_checker.color, position_expression)
-
-        if current_position == 0:
+        if self.get_exact_element(current_checker.color, position_expression) == 0:
             return 4
 
         return 0
@@ -1278,7 +1272,7 @@ class Game:
 
         return 0 if self.extraction(current_checker) else 8
 
-    def punishment_and_encouragement(self, position):
+    def punishment_and_encouragement(self, position, seventh_position_flag=False):
         """Штрафы за освобождение позиций и поощрения за занятия позиций в зависимости от фазы и от позиции.
         Использование при переходе на позицию, где еще нет стека и освобождении позиций с одной шашкой"""
 
@@ -1534,8 +1528,7 @@ class Game:
                     if checker_value.position < 19:
                         count += self.forward_distance_assessment(checker_value)
 
-                    if self.get_phase_of_game() == 5:
-                        count += self.take_free_place(checker_value, dice)
+                    count += self.take_free_place(checker_value, dice)
 
                 elif old_position.count == 1:
 
