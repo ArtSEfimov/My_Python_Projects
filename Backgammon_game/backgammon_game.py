@@ -252,8 +252,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))
-                        # current_checker_number = random.randint(1, 24)
+                        # current_checker_number = int(input('Выберите номер шашки: '))
+                        current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -279,8 +279,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))
-                            # current_dice_number = random.randint(1, 24)
+                            # current_dice_number = int(input('Выберите номер ячейки: '))
+                            current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -312,8 +312,8 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))
-                            # current_checker_number = random.randint(1, 24)
+                            # current_checker_number = int(input('Выберите номер шашки: '))
+                            current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -1240,7 +1240,8 @@ class Game:
     def manage_the_last_quarter(self, old_position, punishment_flag=False):
         """Если на позициях с 13 по 24 есть белые шашки, смотрим на расположение последней из них относительно черных
         шашек. Можем двигать черные шашки только если их позиция меньше последней белой"""
-
+        if old_position > 12:
+            c=1
         punishment = {
             13: -11, 14: -10, 15: -9, 16: -8, 17: -7, 18: -6,
             19: -5, 20: -4, 21: -3, 22: -2, 23: -1, 24: 0
@@ -1308,18 +1309,6 @@ class Game:
 
             if 7 <= position <= 18:
                 return 4
-
-        return 0
-
-    def liberation_and_hold(self, old_position=False, new_position=False):
-
-        phase_of_game = self.get_phase_of_game()
-
-        if old_position:
-            return -phase_of_game
-
-        if new_position:
-            return phase_of_game
 
         return 0
 
@@ -1391,6 +1380,32 @@ class Game:
 
         return result_is_six_checkers_in_line
 
+    def rooting(self, current_checker):
+        """
+        Если в 4, 5-й фазах для последней в слоте шашки есть более 2-х вариантов хода,
+        то пусть сидит на месте (-8 очков)
+        :param current_checker:
+        :return:
+        """
+
+        color_count = 0
+
+        for dice in range(1, 7):
+
+            position_expression = current_checker.position + dice
+            current_position = self.get_exact_element(current_checker.color, position_expression)
+
+            if isinstance(current_position, MyStack):
+                if current_position.color == current_checker.color:
+                    color_count += 1
+
+        ratios_dict = {
+            0: 0, 1: 0, 2: 0,
+            3: 4, 4: 8, 5: 16, 6: 32
+        }
+
+        return ratios_dict[color_count]
+
     def extraction(self, lost_checker, extraction_ratio=False):
 
         color_count = 0
@@ -1417,7 +1432,7 @@ class Game:
                 return 0 if extraction_ratio else True
 
         ratios_dict = {
-            0: 32, 1: 16, 2: 8, 3: 4
+            0: 32, 1: 16, 2: 8
         }
 
         return ratios_dict[color_count] if extraction_ratio else False
@@ -1431,7 +1446,8 @@ class Game:
             for lost_checker in lost_checkers:
                 if not self.extraction(lost_checker):
                     print(f'\nшашка {current_checker} помогает выбраться из жопы\n')
-                    return -8
+
+                    return 32
 
         return 0
 
@@ -1538,15 +1554,25 @@ class Game:
                         count -= self.punishment(self.get_phase_of_game(), checker_value.position)
 
                     if self.is_checker_in_another_yard(color):
+                        print(old_position.count)
                         # здесь надо наоборот смотреть разрушение 6 шашек в линию
                         if self.move_checker_for_six_in_line(checker_value, dice):
                             if self.compare_white_and_black_positions(color):
-                                count += self.liberation_and_hold(old_position=True, new_position=False)
-
+                                c = 1
+                                print(f'{checker_value} сработала ф-ия liberation_and_hold, ДО {count}')
+                                count -= 8
+                                print(f'сработала ф-ия liberation_and_hold, ПОСЛЕ {count}')
+                        print(old_position.count)
                     if checker_value.position < 19:
-                        count += self.checker_is_bridge(checker_value)
+                        count -= self.checker_is_bridge(checker_value)
+
+                    if self.get_phase_of_game() in (4, 5):
+                        if checker_value.position < 19:
+                            count -= self.rooting(checker_value)
 
                 if self.get_phase_of_game() in (4, 5):
+                    if old_position.count == 1:
+                        c=1
                     count += self.manage_the_last_quarter(checker_value.position,
                                                           punishment_flag=old_position.count == 1)
 
@@ -1571,7 +1597,10 @@ class Game:
                         # здесь надо смотреть создание 6 шашек в линию
                         if not self.move_checker_for_six_in_line(checker_value, dice):
                             if self.compare_white_and_black_positions(color):
-                                count += self.liberation_and_hold(old_position=False, new_position=True)
+                                c = 1
+                                print(f'{checker_value} сработала ф-ия liberation_and_hold, ДО {count}')
+                                count += 8
+                                print(f'сработала ф-ия liberation_and_hold, ПОСЛЕ {count}')
 
                 if main_mark is None or main_mark < count:
                     marks = None
