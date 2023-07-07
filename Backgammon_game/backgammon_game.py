@@ -252,8 +252,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        # current_checker_number = int(input('Выберите номер шашки: '))
-                        current_checker_number = random.randint(1, 24)
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                        # current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -279,8 +279,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            # current_dice_number = int(input('Выберите номер ячейки: '))
-                            current_dice_number = random.randint(1, 24)
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            # current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -312,8 +312,8 @@ class Game:
 
                     while True:
                         try:
-                            # current_checker_number = int(input('Выберите номер шашки: '))
-                            current_checker_number = random.randint(1, 24)
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                            # current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -571,7 +571,10 @@ class Game:
                 self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4:
             return 2
 
-        if self.field.get_count_of_free_cells(self.field.black_yard) > \
+        if self.field.get_sum_of_structure(self.field.black_home, 'black') > \
+                self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
+                self.field.get_count_of_free_cells(self.field.black_home) and \
+                self.field.get_count_of_free_cells(self.field.black_yard) > \
                 (0 if self.is_checker_in_another_yard('black') else 1) and \
                 self.field.get_sum_of_structure(self.field.black_home, 'black') > 0:
             return 3
@@ -613,6 +616,14 @@ class Game:
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
                         13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    },
+
+                2:  # если шашка со второго этажа
+                    {
+                        1: 23, 2: 22, 3: 21, 4: 20, 5: 19, 6: 18,
+                        7: 17, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,
+                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     }
 
             }
@@ -640,7 +651,7 @@ class Game:
                     {
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6
                     }
-
+                ЗДЕСЬ ТОЖЕ НАДО СДЕЛАТЬ ОТДЕЛЬНУЮ ШКАЛУ ДЛЯ ШАШЕК СО ВТОРОГО ЭТАЖА
             }
 
         if current_phase == 3:
@@ -654,6 +665,7 @@ class Game:
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
+                ИЛИ СО ВТОРОГО ЭТАЖА НАДО СДЕЛАТЬ
                 1:  # шашка с головы
                     {
                         1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
@@ -1270,7 +1282,8 @@ class Game:
         то надо этой возможностью пользоваться.
         Работает для шашек, которые не являются последними на своих местах"""
 
-        return 0 if self.extraction(current_checker) else 8
+        print(f'сработала ф-ия forward_distance_assessment для {current_checker}')
+        return self.extraction(current_checker, extraction_ratio=True)
 
     def punishment_and_encouragement(self, position, seventh_position_flag=False):
         """Штрафы за освобождение позиций и поощрения за занятия позиций в зависимости от фазы и от позиции.
@@ -1402,7 +1415,7 @@ class Game:
             0: 0, 1: 0, 2: 0,
             3: 4, 4: 8, 5: 16, 6: 32
         }
-
+        print(f'Сработала ф-ия rooting, ВЫЧИТАЕМ {ratios_dict[color_count]}')
         return ratios_dict[color_count]
 
     def extraction(self, lost_checker, extraction_ratio=False):
@@ -1431,7 +1444,8 @@ class Game:
                 return 0 if extraction_ratio else True
 
         ratios_dict = {
-            0: 32, 1: 16, 2: 8
+            0: 32, 1: 16, 2: 8,
+            3: 0, 4: 0, 5: 0, 6: 0
         }
 
         return ratios_dict[color_count] if extraction_ratio else False
@@ -1541,7 +1555,9 @@ class Game:
                             count += self.get_head_ratio(old_position.count)
 
                     if checker_value.position < 19:
+                        print(f'COUNT ДО = {count}')
                         count += self.forward_distance_assessment(checker_value)
+                        print(f'COUNT ПОСЛЕ = {count}')
 
                     count += self.take_free_place(checker_value, dice)
 
