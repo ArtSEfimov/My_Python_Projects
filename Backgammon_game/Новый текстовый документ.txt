@@ -1,0 +1,6 @@
+увеличил коэфф.:
+take_free_place (x2)
+extraction (x2)
+rooting (x2)
+
+checker_is_bridge (x2)

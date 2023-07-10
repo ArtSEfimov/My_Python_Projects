@@ -93,8 +93,8 @@ class Game:
 
             # human part
             if color == 'white':
-                self.who_steps = 'computer'
-                continue
+                # self.who_steps = 'computer'
+                # continue
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
@@ -397,10 +397,10 @@ class Game:
             self.remove_checker_from_old_position(random_checker)
 
     def computer_step(self, color):  # black checkers
-        # self.first_dice, self.second_dice = self.throw_dices()
+        self.first_dice, self.second_dice = self.throw_dices()
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
-        self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
+        # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
 
         double_flag = self.first_dice == self.second_dice
         if double_flag:
@@ -566,10 +566,11 @@ class Game:
             return 1
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
-                self.field.get_sum_of_structure(self.field.black_yard, 'black') > 0 and \
+                self.field.get_sum_of_structure(self.field.black_yard, 'black') > 6 and \
                 self.field.get_count_of_free_cells(self.field.white_home) > 0 and \
                 self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4:
-            return 2
+            return 2 # сделал так, чтобы сумма моих шашек дома + во дворе были > 6, тогда можно получить фазу 2,
+            # если шашек меньше, фазу 2 пропускаем
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') > \
                 self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
@@ -1311,7 +1312,7 @@ class Game:
         position_expression = current_checker.position + dice
 
         if self.get_exact_element(current_checker.color, position_expression) == 0:
-            return 4
+            return 8  # было 4
 
         return 0
 
@@ -1490,7 +1491,7 @@ class Game:
             return 0
 
         ratios_dict = {
-            1: 4, 2: 8, 3: 16,
+            1: 8, 2: 16, 3: 32,
             4: 0
         }
 
@@ -1544,7 +1545,7 @@ class Game:
                 return 0 if extraction_ratio else True
 
         ratios_dict = {  # ноль здесь нужен, чтобы если нет своих шашек чтобы выбраться, может есть пустые
-            0: 16, 1: 8, 2: 4,
+            0: 32, 1: 16, 2: 8,# увеличил каждый коэфф на 4
             3: 0, 4: 0, 5: 0, 6: 0
         }
 
@@ -1560,7 +1561,7 @@ class Game:
                 if not self.extraction(lost_checker):
                     print(f'\nшашка {current_checker} помогает выбраться из жопы\n')
 
-                    return 32
+                    return 64
 
         return 0
 
@@ -1734,7 +1735,9 @@ class Game:
                                 print(f'сработала ф-ия liberation_and_hold, ПОСЛЕ {count}')
 
                     if checker_value.position < 19:
+                        print(f'сработала ф-ия checker_is_bridge, COUNT ДО = {count}')
                         count -= self.checker_is_bridge(checker_value)
+                        print(f'сработала ф-ия checker_is_bridge, COUNT ПОСЛЕ = {count}')
 
                     if self.get_phase_of_game() in (4, 5):
                         if checker_value.position < 19:
