@@ -569,7 +569,7 @@ class Game:
                 self.field.get_sum_of_structure(self.field.black_yard, 'black') > 6 and \
                 self.field.get_count_of_free_cells(self.field.white_home) > 0 and \
                 self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4:
-            return 2 # сделал так, чтобы сумма моих шашек дома + во дворе были > 6, тогда можно получить фазу 2,
+            return 2  # сделал так, чтобы сумма моих шашек дома + во дворе были > 6, тогда можно получить фазу 2,
             # если шашек меньше, фазу 2 пропускаем
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') > \
@@ -630,7 +630,7 @@ class Game:
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
 
                         # 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2, # слишком лихо улетают шашки в чужой дом
+                        7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,  # слишком лихо улетают шашки в чужой дом
                         # (даже если они последние)
 
                         # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
@@ -763,18 +763,18 @@ class Game:
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
-                1:  # шашка с головы
-                    {
-                        2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
-                        8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                # 1:  # шашка с головы # УБРАЛ, ПОТОМУ ЧТО СЛИШКОМ БРОСАЕТ ШАШКУ НА БЛИЗКУЮ ПОЗИЦИЮ ДАЖЕ КОГДА НЕ НАДО
+                #     {
+                #         2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
+                #         8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                #
+                #         # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
+                #         13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
+                #
+                #         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                #     },
 
-                        # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
-                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
-
-                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                    },
-
-                2:  # шашка из чужого дома и первого этажа
+                1:  # шашка из чужого дома и первого этажа
                     {
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -794,20 +794,20 @@ class Game:
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
-                1:  # шашка с головы
-                    {
-                        2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
+                # 1:  # шашка с головы  # УБРАЛ, ПОТОМУ ЧТО СЛИШКОМ БРОСАЕТ ШАШКУ НА БЛИЗКУЮ ПОЗИЦИЮ ДАЖЕ КОГДА НЕ НАДО
+                #     {
+                #         # 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
+                #         2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
+                #         # 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                #         # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
+                #
+                #         8: 8, 9: 9, 10: 10, 11: 11, 12: 12,  # сделано для красоты
+                #         13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
+                #
+                #         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                #     },
 
-                        # 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
-
-                        8: 7, 9: 8, 10: 9, 11: 10, 12: 11,  # сделано для красоты
-                        13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,  # сделано для красоты
-
-                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                    },
-
-                2:  # шашка из чужого дома и первого этажа
+                1:  # шашка из чужого дома и первого этажа
                     {
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -1554,7 +1554,7 @@ class Game:
                 return 0 if extraction_ratio else True
 
         ratios_dict = {  # ноль здесь нужен, чтобы если нет своих шашек чтобы выбраться, может есть пустые
-            0: 32, 1: 16, 2: 8,# увеличил каждый коэфф на 4
+            0: 32, 1: 16, 2: 8,  # увеличил каждый коэфф на 4
             3: 0, 4: 0, 5: 0, 6: 0
         }
 
@@ -1580,21 +1580,21 @@ class Game:
 
         if current_phase_of_game == 1:
 
-            if checker_value.position == 1:
-                return 1
+            # if checker_value.position == 1:
+            #     return 1
 
             if 12 < checker_value.position < 19 and old_position.count == 1:
-                return 2
+                return 1
 
             return 0
 
         if current_phase_of_game == 2:
 
-            if checker_value.position == 1:
-                return 1
+            # if checker_value.position == 1:
+            #     return 1
 
             if 12 < checker_value.position < 19 and old_position.count == 1:
-                return 2
+                return 1
 
             return 0
 
@@ -1744,15 +1744,15 @@ class Game:
                                 print(f'сработала ф-ия liberation_and_hold, ПОСЛЕ {count}')
 
                     if checker_value.position < 19:
-                        print(f'сработала ф-ия checker_is_bridge, COUNT ДО = {count}')
+                        print(f'сработала ф-ия checker_is_bridge для {checker_value}, COUNT ДО = {count}')
                         count -= self.checker_is_bridge(checker_value)
-                        print(f'сработала ф-ия checker_is_bridge, COUNT ПОСЛЕ = {count}')
+                        print(f'сработала ф-ия checker_is_bridge для {checker_value}, COUNT ПОСЛЕ = {count}')
 
                     if self.get_phase_of_game() in (4, 5):
                         if checker_value.position < 19:
-                            print(f'функция rooting COUNT ДО = {count}')
+                            print(f'функция rooting для {checker_value} COUNT ДО = {count}')
                             count -= self.rooting(checker_value)
-                            print(f'функция rooting COUNT ПОСЛЕ = {count}')
+                            print(f'функция rooting для {checker_value} COUNT ПОСЛЕ = {count}')
 
                 if self.get_phase_of_game() in (4, 5):
                     count += self.manage_the_last_quarter(checker_value.position,
@@ -1795,8 +1795,7 @@ class Game:
                     else:
                         marks[main_mark] += (checker_value,)
 
-                print(f'\nchecker_value = {checker_value}')
-                print(f'COUNT = {count}')
+                print(f'\nchecker_value = {checker_value}', f'COUNT = {count}')
 
         if marks is not None:
             if recursion:
