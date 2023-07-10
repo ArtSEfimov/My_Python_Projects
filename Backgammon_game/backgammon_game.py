@@ -616,7 +616,7 @@ class Game:
 
                 1:  # чтобы закинуть в чужой дом (если шашка со второго и выше этажа)
                     {
-                        1: 1, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
+                        1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
 
                         # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
@@ -628,7 +628,10 @@ class Game:
                 2:  # чтобы закинуть в чужой дом (первый этаж)
                     {
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                        7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+
+                        # 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                        7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2, # слишком лихо улетают шашки в чужой дом
+                        # (даже если они последние)
 
                         # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,  # сделано для красоты
@@ -638,11 +641,11 @@ class Game:
 
                 3:  # если шашка со второго и выше этажа
                     {
-                        1: 1, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
+                        1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
                         7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
 
                         # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-                        13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,  # сделано для красоты
+                        13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,  # сделано для красоты
 
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
@@ -1076,6 +1079,9 @@ class Game:
 
         result_11, checker_11, count_1 = self.move('black', self.first_dice)
         result_12, checker_12, count_2 = self.move('black', self.second_dice)
+        # print('\n','ПРЯМОЙ порядок хода (ПЕРВЫЙ -> ВТОРОЙ)')
+        # print(f'\nchecker = {checker_11}, count = {count_1}')
+        # print(f'\nchecker = {checker_12}, count = {count_2}')
 
         count_12 = (count_1, count_2)
 
@@ -1093,6 +1099,9 @@ class Game:
 
         result_21, checker_21, count_2 = self.move('black', self.second_dice)
         result_22, checker_22, count_1 = self.move('black', self.first_dice)
+        # print('\n', 'ПРЯМОЙ порядок хода (ВТОРОЙ -> ПЕРВЫЙ)')
+        # print(f'\nchecker = {checker_21}, count = {count_2}')
+        # print(f'\nchecker = {checker_22}, count = {count_1}')
 
         count_21 = (count_2, count_1)  # порядок хода такой: второй, первый
 
@@ -1638,7 +1647,7 @@ class Game:
 
         if current_phase_of_game == 3:
 
-            if checker_value.position == 1:
+            if old_position.count > 1:
                 return 1
 
             return 0
@@ -1785,6 +1794,9 @@ class Game:
                         marks[main_mark] = (main_checker, checker_value)
                     else:
                         marks[main_mark] += (checker_value,)
+
+                print(f'\nchecker_value = {checker_value}')
+                print(f'COUNT = {count}')
 
         if marks is not None:
             if recursion:
