@@ -580,8 +580,8 @@ class Game:
                 self.field.get_sum_of_structure(self.field.black_home, 'black') > 0:
             return 3
 
-        if self.field.get_sum_of_structure(self.field.black_home, 'black') > 0 and \
-                self.field.get_sum_of_structure(self.field.black_yard, 'black') > 0:
+        if self.field.get_sum_of_structure(self.field.black_home,
+                                           'black') > 0:  # and self.field.get_sum_of_structure(self.field.black_yard, 'black') > 0:
             return 4
 
         if self.field.get_sum_of_structure(self.field.white_yard, 'black') <= 15:
@@ -607,62 +607,69 @@ class Game:
                     {
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                        # 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
 
-                        13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,  # сделано для красоты
-                        # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-
-                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                    },
-
-                1:  # чтобы закинуть в чужой дом (если шашка со второго и выше этажа)
-                    {
-                        1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-                        7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-
-                        # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,  # сделано для красоты
+                        # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
 
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
-                2:  # чтобы закинуть в чужой дом (первый этаж)
+                3:  # чтобы закинуть в чужой дом на свободное место (если шашка со второго и выше этажа)
+                    {
+                        1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
+                        7: 13, 8: 14, 9: 15, 10: 16, 11: 17, 12: 18
+                    },
+
+                2:  # чтобы закинуть в чужой дом на MyStack (первый этаж)
                     {
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-
-                        # 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,  # слишком лихо улетают шашки в чужой дом
-                        # (даже если они последние)
-
-                        # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-                        13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,  # сделано для красоты
-
-                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                        7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12
                     },
 
-                3:  # если шашка со второго и выше этажа
+                4:  # чтобы закинуть в чужой дом на свободное место (первый этаж)
                     {
-                        1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-                        7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                        1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8,
+                        7: 9, 8: 10, 9: 11, 10: 12, 11: 13, 12: 14
+                    },
+                1:  # чтобы закинуть в чужой дом на MyStack (второй этаж)
+                    {
+                        1: 5, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10,
+                        7: 11, 8: 12, 9: 13, 10: 14, 11: 15, 12: 16
+                    },
 
-                        # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-                        13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,  # сделано для красоты
+                5:  # если шашка со второго и выше этажа
+                    {
+                        1: 1, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
+                        7: 11, 8: 10, 9: 9, 10: 8, 11: 7, 12: 6,
+
+                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
 
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
-                4:  # если шашка из чужого дома и первого этажа
+                6:  # если шашка из чужого дома и первого этажа
+
                     {
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                     },
 
-                5:  # чтобы закинуть в свой двор (первый этаж)
+                7:  # чтобы закинуть в свой двор (первый этаж)
                     {
-                        1: 1, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12
+                        1: 1, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8
                     },
 
-                6:  # чтобы закинуть в свой двор (второй этаж)
+                8:  # чтобы закинуть в свой двор (второй этаж)
                     {
-                        1: 1, 2: 12, 3: 11, 4: 10, 5: 9, 6: 8
+                        1: 1, 2: 8, 3: 7, 4: 6, 5: 5, 6: 4
+                    },
+
+                9:  # со второго этажа в зону выброса (если там уже что-то наше есть)
+                    {
+                        1: 23, 2: 22, 3: 21, 4: 20, 5: 19, 6: 18,
+                        7: 17, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,
+                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                        19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
                     }
             }
 
@@ -672,18 +679,9 @@ class Game:
                 0:  # обычный
                     {
                         1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-                        7: 13, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
 
-                        # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-                        13: 13, 14: 12, 15: 11, 16: 10, 17: 9, 18: 8,  # сделано для красоты
-
-                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                    },
-
-                1:  # чтобы закинуть в чужой дом (с первого и второго этажа)
-                    {
-                        1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
-                        7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                        7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                        # 7: 13, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
 
                         # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,  # сделано для красоты
@@ -691,20 +689,52 @@ class Game:
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
-                2:  # чтобы закинуть в свой двор (первый этаж)
+                3:  # чтобы закинуть в чужой дом на пустое место (со второго этажа)
+                    {
+                        1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12,
+                        7: 13, 8: 14, 9: 15, 10: 16, 11: 17, 12: 18
+                    },
+
+                4:  # чтобы закинуть в чужой дом на пустое место (с первого этажа)
+                    {
+                        1: 5, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10,
+                        7: 11, 8: 12, 9: 13, 10: 14, 11: 15, 12: 16
+                    },
+
+                1:  # чтобы закинуть в чужой дом на MyStack (со второго этажа)
+                    {
+                        1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8,
+                        7: 9, 8: 10, 9: 11, 10: 12, 11: 13, 12: 14
+                    },
+
+                2:  # чтобы закинуть в чужой дом на MyStack (со первого этажа)
+                    {
+                        1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                        7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12
+                    },
+
+                5:  # чтобы закинуть в свой двор (первый этаж)
                     {
                         # 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6 # старый оригинал
                         1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12
                     },
 
-                3:  # чтобы закинуть в свой двор (второй этаж)
+                6:  # чтобы закинуть в свой двор (второй этаж)
                     {
                         1: 7, 2: 12, 3: 11, 4: 10, 5: 9, 6: 8
                     },
 
-                4:  # если шашка из чужого дома и первого этажа
+                7:  # если шашка из чужого дома
                     {
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+                    },
+
+                8:  # со второго этажа в зону выброса (если там уже что-то наше есть)
+                    {
+                        1: 23, 2: 22, 3: 21, 4: 20, 5: 19, 6: 18,
+                        7: 17, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,
+                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                        19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
                     }
 
             }
@@ -720,29 +750,43 @@ class Game:
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
-                1:  # шашка с головы
+                2:  # шашка с головы и второго этажа
                     {
                         1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
                         7: 5, 8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    },
+
+                1:  # со второго этажа в зону выброса (если там уже что-то наше есть)
+                    {
+                        1: 23, 2: 22, 3: 21, 4: 20, 5: 19, 6: 18,
+                        7: 17, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,
+                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                        19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
                     }
             }
 
         if current_phase == 4:
             return {
-                1: 23, 2: 22, 3: 21, 4: 20, 5: 19, 6: 18,
-                7: 17, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,
-                13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-                19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
+                0:
+                    {
+                        1: 23, 2: 22, 3: 21, 4: 20, 5: 19, 6: 18,
+                        7: 17, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,
+                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                        19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
+                    }
             }
 
         if current_phase == 5:
             return {
-                1: 23, 2: 22, 3: 21, 4: 20, 5: 19, 6: 18,
-                7: 17, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,
-                13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-                19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
+                0:
+                    {
+                        1: 23, 2: 22, 3: 21, 4: 20, 5: 19, 6: 18,
+                        7: 17, 8: 16, 9: 15, 10: 14, 11: 13, 12: 12,
+                        13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                        19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
+                    }
             }
 
     def get_to(self, color):
@@ -763,21 +807,28 @@ class Game:
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
-                # 1:  # шашка с головы # УБРАЛ, ПОТОМУ ЧТО СЛИШКОМ БРОСАЕТ ШАШКУ НА БЛИЗКУЮ ПОЗИЦИЮ ДАЖЕ КОГДА НЕ НАДО
-                #     {
-                #         2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
-                #         8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                #
-                #         # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
-                #         13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
-                #
-                #         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                #     },
+                1:  # шашка с головы
+                    {
+                        # 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
+                        2: 12, 3: 11, 4: 10, 5: 9, 6: 8,
+                        7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
 
-                1:  # шашка из чужого дома и первого этажа
+                        # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
+                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
+
+                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    },
+
+                2:  # шашка из чужого дома и первого этажа
+                # ПУСТЬ БУДЕТ И ВТОРОЙ ЭТАЖ
                     {
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    },
+
+                3:  # когда улетаем в зону выброса и там свободно (если там уже что-то наше есть)
+                    {
+                        19: 1, 20: 2, 21: 3, 22: 4, 23: 5, 24: 6
                     }
             }
 
@@ -794,50 +845,70 @@ class Game:
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
-                # 1:  # шашка с головы  # УБРАЛ, ПОТОМУ ЧТО СЛИШКОМ БРОСАЕТ ШАШКУ НА БЛИЗКУЮ ПОЗИЦИЮ ДАЖЕ КОГДА НЕ НАДО
-                #     {
-                #         # 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1,
-                #         2: 12, 3: 11, 4: 10, 5: 9, 6: 8, 7: 7,
-                #         # 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                #         # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
-                #
-                #         8: 8, 9: 9, 10: 10, 11: 11, 12: 12,  # сделано для красоты
-                #         13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
-                #
-                #         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                #     },
-
                 1:  # шашка из чужого дома и первого этажа
                     {
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    },
+
+                2:  # когда улетаем в зону выброса и там свободно (если там уже что-то наше есть)
+                    {
+                        19: 1, 20: 2, 21: 3, 22: 4, 23: 5, 24: 6
                     }
             }
 
         if current_phase == 3:
             return {
-                0: {
-                    2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
-                    8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
-                    13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
-                    19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                }
+                0:
+                    {
+                        2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 1,
+                        # 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                        8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
+                        13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    },
+
+                1:  # когда улетаем в зону выброса и там свободно (если там уже что-то наше есть)
+                    {
+                        19: 1, 20: 2, 21: 3, 22: 4, 23: 5, 24: 6
+                    }
             }
 
         if current_phase == 4:
             return {
-                2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
-                7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
-                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                0:
+                    {
+                        2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
+                        7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                        13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                    },
+                1:  # со второго этажа
+                    {
+                        2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                        7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                        13: 13, 14: 14, 15: 15, 16: 16, 17: 17, 18: 18,
+                        19: 19, 20: 20, 21: 21, 22: 22, 23: 23, 24: 24
+                    }
             }
 
         if current_phase == 5:
             return {
-                2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                13: 13, 14: 14, 15: 15, 16: 16, 17: 17, 18: 18,
-                19: 19, 20: 20, 21: 21, 22: 22, 23: 23, 24: 24
+                0:
+                    {
+                        2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
+                        7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
+                        13: 1, 14: 2, 15: 3, 16: 4, 17: 5, 18: 6,
+                        19: 7, 20: 8, 21: 9, 22: 10, 23: 11, 24: 12
+                    },
+                1:  # со второго этажа
+                    {
+                        2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                        7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                        13: 13, 14: 14, 15: 15, 16: 16, 17: 17, 18: 18,
+                        19: 19, 20: 20, 21: 21, 22: 22, 23: 23, 24: 24
+                    }
+
             }
 
     def compare_counts(self, tuple_12, tuple_21):
@@ -1321,7 +1392,30 @@ class Game:
         position_expression = current_checker.position + dice
 
         if self.get_exact_element(current_checker.color, position_expression) == 0:
-            return 8  # было 4
+            current_phase = self.get_phase_of_game()
+
+            quarters_ratios = {
+                1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1,
+
+                7: 2, 8: 2, 9: 2, 10: 2, 11: 2, 12: 2,
+
+                13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3,
+
+                19: 4, 20: 4, 21: 4, 22: 4, 23: 4, 24: 4
+            }
+
+            if current_phase in (1, 2):
+                if quarters_ratios[position_expression] in (1, 3):
+                    return 32
+                if quarters_ratios[position_expression] in (2, 4):
+                    return 16
+            if current_phase == 3:
+                if quarters_ratios[position_expression] in (1, 3, 4):
+                    return 16
+                if quarters_ratios[position_expression] == 2:
+                    return 32
+
+            return 8
 
         return 0
 
@@ -1471,13 +1565,19 @@ class Game:
 
         return result_is_six_checkers_in_line
 
-    def rooting(self, current_checker):
+    def rooting(self, current_checker, main_dice):
         """
         Если в 4, 5-й фазах для последней в слоте шашки есть более 2-х вариантов хода,
-        то пусть сидит на месте
+        то пусть сидит на месте (за исключением случаев, когда эта шашка снова займет пустую клетку)
         :param current_checker:
+        :param main_dice:
         :return:
         """
+
+        position_expression = current_checker.position + main_dice
+        current_position = self.get_exact_element(current_checker.color, position_expression)
+        if current_position == 0:
+            return 0
 
         color_count = 0
 
@@ -1500,8 +1600,7 @@ class Game:
             return 0
 
         ratios_dict = {
-            1: 8, 2: 16, 3: 32,
-            4: 0
+            1: 8, 2: 16, 3: 32, 4: 32
         }
 
         quarters_ratios = {
@@ -1514,7 +1613,7 @@ class Game:
             19: 4, 20: 4, 21: 4, 22: 4, 23: 4, 24: 4
         }
 
-        print(f'Сработала ф-ия rooting для {current_checker},'
+        print(f'Сработала ф-ия rooting для {current_checker}, '
               f'ВЫЧИТАЕМ {ratios_dict[quarters_ratios[current_checker.position]]}')
 
         return ratios_dict[quarters_ratios[current_checker.position]]
@@ -1570,7 +1669,28 @@ class Game:
                 if not self.extraction(lost_checker):
                     print(f'\nшашка {current_checker} помогает выбраться из жопы\n')
 
-                    return 64
+                    return 32
+        else:
+            def condition(any_checker):
+                for dice in range(1, 7):
+                    current_position = self.get_exact_element(any_checker.color, any_checker.position + dice)
+                    if isinstance(current_position, MyStack) and current_position.color == any_checker.color:
+                        return False
+                return True
+
+            far_checkers = [checker
+                            for checker in self.black_checkers
+                            if checker.position + 6 < current_checker.position
+                            and condition(checker)]
+
+            if far_checkers:
+                far_checkers.sort(key=lambda checker: checker.position, reverse=True)
+                far_checker = far_checkers[0]
+                if not self.extraction(far_checker):
+                    print(f'Шашка {far_checker} сильно отстала, и у нее мало возможности двигаться')
+                    return 16
+                print(f'Шашка {far_checker} сильно отстала, у нее есть возможность двигаться')
+                return 8
 
         return 0
 
@@ -1580,28 +1700,50 @@ class Game:
 
         if current_phase_of_game == 1:
 
-            # if checker_value.position == 1:
-            #     return 1
-
-            if 12 < checker_value.position < 19 and old_position.count == 1:
+            if checker_value.position == 1:
                 return 1
+
+            if 12 < checker_value.position < 19:  # and old_position.count == 1:
+                return 2
+
+            if self.field.get_sum_of_structure(self.field.white_yard, checker_value.color) > 0:
+                if checker_value.position + dice > 18:
+                    current_position = self.get_exact_element(checker_value.color, checker_value.position + dice)
+                    if current_position == 0:
+                        return 3
 
             return 0
 
         if current_phase_of_game == 2:
 
-            # if checker_value.position == 1:
-            #     return 1
-
             if 12 < checker_value.position < 19 and old_position.count == 1:
                 return 1
+
+            if self.field.get_sum_of_structure(self.field.white_yard, checker_value.color) > 0:
+                if checker_value.position + dice > 18:
+                    current_position = self.get_exact_element(checker_value.color, checker_value.position + dice)
+                    if current_position == 0:
+                        return 2
 
             return 0
 
         if current_phase_of_game == 3:
+
+            if self.field.get_sum_of_structure(self.field.white_yard, checker_value.color) > 0:
+                if checker_value.position + dice > 18:
+                    current_position = self.get_exact_element(checker_value.color, checker_value.position + dice)
+                    if current_position == 0:
+                        return 1
+
             return 0
 
-        return
+        if current_phase_of_game in (4, 5):
+            if old_position.count > 1:
+                return 1
+
+            return 0
+
+        return 0
 
     def get_additional_ratio_from(self, old_position, checker_value, dice):
 
@@ -1609,50 +1751,73 @@ class Game:
 
         if current_phase_of_game == 1:
 
-            if checker_value.position < 13 and checker_value.position + dice > 12:
+            if checker_value.position < 13 and 12 < checker_value.position + dice < 19:
+                current_position = self.get_exact_element(checker_value.color, checker_value.position + dice)
+                if isinstance(current_position, MyStack):
+                    if old_position.count > 1:
+                        return 1
+                    return 2
                 if old_position.count > 1:
-                    return 1
+                    return 3
 
-                return 2
-
-            if old_position.count > 1:
-                return 3
-
-            if old_position.count == 1 and 12 < checker_value.position < 19:
                 return 4
 
-            if checker_value.position < 7 and checker_value.position + dice > 6:
-                if old_position.count == 1:
-                    return 5
+            if old_position.count > 1:
+                return 5
 
+            if 12 < checker_value.position < 19:  # and old_position.count == 1:
                 return 6
+
+            if checker_value.position < 7 and 6 < checker_value.position + dice < 13:
+                if old_position.count == 1:
+                    return 7
+
+                return 8
+
+            if self.field.get_sum_of_structure(self.field.white_yard, checker_value.color) > 0:
+                if old_position.count > 1 and checker_value.position + dice > 18:
+                    return 9
 
             return 0
 
         if current_phase_of_game == 2:
 
-            if checker_value.position < 13 and checker_value.position + dice > 12:
-                return 1
-
-            if checker_value.position < 7 and checker_value.position + dice > 6:
-                if old_position.count == 1:
+            if checker_value.position < 13 and 12 < checker_value.position + dice < 19:
+                current_position = self.get_exact_element(checker_value.color, checker_value.position + dice)
+                if isinstance(current_position, MyStack):
+                    if old_position.count > 1:
+                        return 1
                     return 2
-
-                return 3
-
-            if 12 < checker_value.position < 19 and old_position.count == 1:
+                if old_position.count > 1:
+                    return 3
                 return 4
+
+            if checker_value.position < 7 and 6 < checker_value.position + dice < 13:
+                if old_position.count == 1:
+                    return 5
+
+                return 6
+
+            if 12 < checker_value.position < 19:
+                return 7
+
+            if self.field.get_sum_of_structure(self.field.white_yard, checker_value.color) > 0:
+                if old_position.count > 1 and checker_value.position + dice > 18:
+                    return 8
 
             return 0
 
         if current_phase_of_game == 3:
 
             if old_position.count > 1:
-                return 1
+                if checker_value.position + dice > 18:
+                    if self.field.get_sum_of_structure(self.field.white_yard, checker_value.color) > 0:
+                        return 1
+                return 2
 
             return 0
 
-        return
+        return 0
 
     def move(self, color, dice, recursion=False, checkers=None, between=None):
         if recursion:
@@ -1696,15 +1861,10 @@ class Game:
 
                 current_phase_of_game = self.get_phase_of_game()
 
-                if current_phase_of_game in (1, 2, 3):
+                choose_to = self.get_additional_ratio_to(old_position, checker_value, dice)
+                choose_from = self.get_additional_ratio_from(old_position, checker_value, dice)
 
-                    choose_to = self.get_additional_ratio_to(old_position, checker_value, dice)
-                    choose_from = self.get_additional_ratio_from(old_position, checker_value, dice)
-
-                    count = cell_weight[choose_to][cell_value] + checker_weight[choose_from][checker_value.position]
-
-                else:
-                    count = cell_weight[cell_value] + checker_weight[checker_value.position]
+                count = cell_weight[choose_to][cell_value] + checker_weight[choose_from][checker_value.position]
 
                 # OLD_POSITION
                 if old_position.count > 1:
@@ -1740,7 +1900,7 @@ class Game:
                             if self.compare_white_and_black_positions(color):
                                 c = 1
                                 print(f'{checker_value} сработала ф-ия liberation_and_hold, ДО {count}')
-                                count -= 8
+                                count -= 32
                                 print(f'сработала ф-ия liberation_and_hold, ПОСЛЕ {count}')
 
                     if checker_value.position < 19:
@@ -1751,7 +1911,7 @@ class Game:
                     if self.get_phase_of_game() in (4, 5):
                         if checker_value.position < 19:
                             print(f'функция rooting для {checker_value} COUNT ДО = {count}')
-                            count -= self.rooting(checker_value)
+                            count -= self.rooting(checker_value, dice)
                             print(f'функция rooting для {checker_value} COUNT ПОСЛЕ = {count}')
 
                 if self.get_phase_of_game() in (4, 5):
@@ -1781,7 +1941,7 @@ class Game:
                             if self.compare_white_and_black_positions(color):
                                 c = 1
                                 print(f'{checker_value} сработала ф-ия liberation_and_hold, ДО {count}')
-                                count += 8
+                                count += 16
                                 print(f'сработала ф-ия liberation_and_hold, ПОСЛЕ {count}')
 
                 if main_mark is None or main_mark < count:
