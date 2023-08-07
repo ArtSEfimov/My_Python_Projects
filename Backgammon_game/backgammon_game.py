@@ -960,8 +960,8 @@ class Game:
 
         if all(map(lambda x: x is not None, count_12)) and all(map(lambda x: x is not None, count_21)):
 
-            max_count_12 = max(count_12)
-            max_count_21 = max(count_21)
+            abs_count_12 = abs(count_12[0] - count_12[1])
+            abs_count_21 = abs(count_21[0] - count_21[1])
 
             count_12 = sum(count_12)
             count_21 = sum(count_21)
@@ -970,9 +970,9 @@ class Game:
             if count_21 > count_12:
                 return self.second_dice, checker_21, self.first_dice, checker_22
 
-            if max_count_12 > max_count_21:
+            if abs_count_21 > abs_count_12:
                 return self.first_dice, checker_11, self.second_dice, checker_12
-            if max_count_21 > max_count_12:
+            if abs_count_12 > abs_count_21:
                 return self.second_dice, checker_21, self.first_dice, checker_22
 
             return random.choice(
@@ -1434,15 +1434,17 @@ class Game:
 
         if old_position_value == 1:
             if self.get_phase_of_game() == 1:
+
                 ratios = {  # 1 choice
-                    1: 1, 2: 2, 3: 3, 4: 4, 5: 5,
-                    6: 6, 7: 7, 8: 8, 9: 9, 10: 10,
-                    11: 11, 12: 12, 13: 13, 14: 14, 15: 15
+                    1: 5, 2: 6, 3: 7, 4: 8, 5: 9,
+                    6: 10, 7: 11, 8: 12, 9: 13, 10: 14,
+                    11: 15, 12: 16, 13: 17, 14: 18, 15: 19
                 }
 
                 return ratios[new_position_count]
 
             if self.get_phase_of_game() == 2:
+
                 ratios = {  # 1 choice
                     1: 3, 2: 4, 3: 5, 4: 6, 5: 7,
                     6: 8, 7: 9, 8: 10, 9: 11, 10: 12,
@@ -1452,10 +1454,11 @@ class Game:
                 return ratios[new_position_count]
 
             if self.get_phase_of_game() == 3:
+
                 ratios = {  # 1 choice
-                    1: 5, 2: 6, 3: 7, 4: 8, 5: 9,
-                    6: 10, 7: 11, 8: 12, 9: 13, 10: 14,
-                    11: 15, 12: 16, 13: 17, 14: 18, 15: 19
+                    1: 1, 2: 2, 3: 3, 4: 4, 5: 5,
+                    6: 6, 7: 7, 8: 8, 9: 9, 10: 10,
+                    11: 11, 12: 12, 13: 13, 14: 14, 15: 15
                 }
 
                 return ratios[new_position_count]
@@ -1629,7 +1632,7 @@ class Game:
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and \
                                 current_checker.position + dice > last_white_checker_position:
-                            return 32
+                            return 16  # 32
                     if current_checker.position + dice > 18:
                         return -16
 
@@ -1640,7 +1643,7 @@ class Game:
                     if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
                         if 13 <= current_checker.position < last_white_checker_position:
                             if last_white_checker_position < current_checker.position + dice <= 18:
-                                return 32
+                                return 16  # 32
                         if last_white_checker_position < current_checker.position <= 18:
                             if last_white_checker_position < current_checker.position + dice <= 18:
                                 return -8
@@ -1662,7 +1665,7 @@ class Game:
 
                 if 7 <= current_checker.position <= 12:
                     if 7 <= current_checker.position + dice <= 12:
-                        return 16
+                        return  16
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and \
                                 current_checker.position + dice > last_white_checker_position:
@@ -1829,21 +1832,44 @@ class Game:
                     19: 4, 20: 4, 21: 4, 22: 4, 23: 4, 24: 4
                 }
 
-                if current_phase in (1, 2):
-                    if current_checker.position == 1 or quarters_ratios[position_expression] in (1, 3):
+                if current_phase == 1:
+                    # if current_checker.position == 1:
+                    #     return 4
+
+                    if quarters_ratios[position_expression] == 1:
                         return 16  # 32
                     if quarters_ratios[position_expression] == 2:
+                        return 4  # 16
+                    if quarters_ratios[position_expression] == 3:
                         return 8  # 16
                     if quarters_ratios[position_expression] == 4:
-                        return 4  # 8
+                        return 0  # 8
+
+                if current_phase == 2:
+                    # if current_checker.position == 1:
+                    #     return 0
+
+                    if quarters_ratios[position_expression] == 1:
+                        return 4
+                    if quarters_ratios[position_expression] == 2:
+                        return 8  # 16
+                    if quarters_ratios[position_expression] == 3:
+                        return 16
+                    if quarters_ratios[position_expression] == 4:
+                        return 0  # 8
 
                 if current_phase == 3:
+                    # if current_checker.position == 1:
+                    #     return 0
+
                     if quarters_ratios[position_expression] == 1:
-                        return 8  # 16
-                    if quarters_ratios[position_expression] in (2, 3):
+                        return 4  # 16
+                    if quarters_ratios[position_expression] == 2:
                         return 16  # 32
+                    if quarters_ratios[position_expression] == 3:
+                        return 8  # 32
                     if quarters_ratios[position_expression] == 4:
-                        return 4  # 8
+                        return 0  # 8
 
                 if current_phase in (4, 5):
 
@@ -1852,16 +1878,16 @@ class Game:
                         return 32
 
                     if quarters_ratios[position_expression] == 1:
-                        return 4
+                        return 4#4
                     if quarters_ratios[position_expression] == 2:
-                        return 8
+                        return 8#8
                     if quarters_ratios[position_expression] == 3:
                         last_white_checker_position = self.get_last_white_checker_position()
                         if last_white_checker_position is None or position_expression < last_white_checker_position:
-                            return 8
-                        return 16
+                            return 8#8
+                        return 16#16
                     if quarters_ratios[position_expression] == 4:
-                        return 32
+                        return 16#32
 
             return 0
 
