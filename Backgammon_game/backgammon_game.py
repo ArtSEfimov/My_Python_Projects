@@ -1055,14 +1055,13 @@ class Game:
 
         return last_black_checker_position
 
-
     def get_between(self, color, start_position, stop_position, step):
         for position in range(start_position, stop_position, step):
             if position != start_position:
-                if self.is_free_space(color,position):
-                    return True
+                if not self.is_free_space(color, position):
+                    return False
 
-        return False
+        return True
 
     def checking_double_move(self, fist_step_3_4_6):
         first_dice = second_dice = third_dice = fourth_dice = self.first_dice
@@ -1125,7 +1124,7 @@ class Game:
                 if isinstance(dice, tuple):
                     length = len(dice)
                     dice = sum(dice)
-                    result, checker, count = self.move('black', dice, between=dice//length)
+                    result, checker, count = self.move('black', dice, between=dice // length)
                 else:
                     result, checker, count = self.move('black', dice)
 
@@ -1724,6 +1723,11 @@ class Game:
                     return -16
 
             if phase_of_game in (4, 5):
+
+                if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
+                        self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
+                    return 0
+
                 if current_checker.position == self.get_last_black_checker_position(lower_border=1):
                     if current_checker.position + dice <= 12:
                         print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 16')
@@ -1819,6 +1823,11 @@ class Game:
                     return -32
 
             if phase_of_game in (4, 5):
+
+                if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
+                        self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
+                    return 0
+
                 if current_checker.position == self.get_last_black_checker_position(lower_border=1):
                     if current_checker.position + dice <= 12:
                         print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 0')
@@ -1883,6 +1892,10 @@ class Game:
                         return 0  # 8
 
                 if current_phase in (4, 5):
+
+                    if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
+                            self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
+                        return 0
 
                     if current_checker.position == self.get_last_black_checker_position(lower_border=1):
                         print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 32')
@@ -2499,8 +2512,8 @@ class Game:
                     continue
 
                 if between is not None:
-                    if self.get_between(checker_value.color, checker_value.position, cell_value, between):
-                        pass
+                    if not self.get_between(checker_value.color, checker_value.position, cell_value, between):
+                        continue
 
                 if 13 <= checker_value.position <= 18 and old_position.count == 1 and checker_value.position + dice > 18:
                     c = 1
