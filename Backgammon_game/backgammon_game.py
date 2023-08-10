@@ -1724,10 +1724,6 @@ class Game:
 
             if phase_of_game in (4, 5):
 
-                if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
-                        self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
-                    return 0
-
                 if current_checker.position == self.get_last_black_checker_position(lower_border=1):
                     if current_checker.position + dice <= 12:
                         print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 16')
@@ -1824,10 +1820,6 @@ class Game:
 
             if phase_of_game in (4, 5):
 
-                if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
-                        self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
-                    return 0
-
                 if current_checker.position == self.get_last_black_checker_position(lower_border=1):
                     if current_checker.position + dice <= 12:
                         print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 0')
@@ -1892,10 +1884,6 @@ class Game:
                         return 0  # 8
 
                 if current_phase in (4, 5):
-
-                    if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
-                            self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
-                        return 0
 
                     if current_checker.position == self.get_last_black_checker_position(lower_border=1):
                         print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 32')
@@ -2126,6 +2114,9 @@ class Game:
 
         return result_is_six_checkers_in_line
 
+    def get_count_of_substitution_cells(self, structure):
+        pass
+    
     def rooting(self, current_checker, main_dice):
         """
         Если в 4, 5-й фазах для последней в слоте шашки есть более 2-х вариантов хода,
@@ -2137,6 +2128,22 @@ class Game:
 
         if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
                 self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
+            if self.field.get_sum_of_structure(self.field.black_home, 'black') > 0:
+                if 1 <= current_checker.position <= 6:
+                    return -32
+                if 7 <= current_checker.position <= 12:
+                    return -16
+
+                return 0
+
+            if self.field.get_sum_of_structure(self.field.black_yard, 'black') > 0:
+                if 7 <= current_checker.position <= 12:
+                    return -32
+                if 13 <= current_checker.position <= 18:
+                    return -16
+
+                return 0
+
             return 0
 
         position_expression = current_checker.position + main_dice
@@ -2210,10 +2217,11 @@ class Game:
             19: 4, 20: 4, 21: 4, 22: 4, 23: 4, 24: 4
         }
 
-        print(f'Сработала ф-ия rooting для {current_checker}, '
-              f'ВЫЧИТАЕМ {ratios_dict[quarters_ratios[current_checker.position]]}')
+        last_checker_ratio = 2 \
+            if current_checker.position == self.get_last_black_checker_position(lower_border=1) \
+            else 1
 
-        return (ratios_dict[quarters_ratios[current_checker.position]]) // ratio
+        return ((ratios_dict[quarters_ratios[current_checker.position]]) // ratio) // last_checker_ratio
 
     def extraction(self, lost_checker,
                    forward_distance_assessment_call=False,
