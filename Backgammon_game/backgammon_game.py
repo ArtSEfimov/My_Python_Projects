@@ -2114,9 +2114,7 @@ class Game:
 
         return result_is_six_checkers_in_line
 
-    def get_count_of_substitution_cells(self, structure):
-        pass
-    
+
     def rooting(self, current_checker, main_dice):
         """
         Если в 4, 5-й фазах для последней в слоте шашки есть более 2-х вариантов хода,
@@ -2130,17 +2128,23 @@ class Game:
                 self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
             if self.field.get_sum_of_structure(self.field.black_home, 'black') > 0:
                 if 1 <= current_checker.position <= 6:
-                    return -32
-                if 7 <= current_checker.position <= 12:
                     return -16
+                if 7 <= current_checker.position <= 12:
+                    return -8
 
                 return 0
 
             if self.field.get_sum_of_structure(self.field.black_yard, 'black') > 0:
                 if 7 <= current_checker.position <= 12:
-                    return -32
-                if 13 <= current_checker.position <= 18:
                     return -16
+                if 13 <= current_checker.position <= 18:
+                    return -8
+
+                return 0
+
+            if self.field.get_sum_of_structure(self.field.white_home, 'black') > 0:
+                if 13 <= current_checker.position <= 18:
+                    return -32
 
                 return 0
 
@@ -2166,31 +2170,22 @@ class Game:
             return 0
 
         ratio = 1
-
-        if 1 <= current_checker.position <= 6:
-            if self.field.get_sum_of_structure(self.field.black_yard, 'black') == 0:
-                return 0
-            if self.field.get_occupied_of_structure(self.field.black_yard, 'black') == 1:
-                ratio = 4
-            if self.field.get_occupied_of_structure(self.field.black_yard, 'black') == 2:
-                ratio = 2
-
-        if 7 <= current_checker.position <= 12:
-            if self.field.get_sum_of_structure(self.field.white_home, 'black') == 0:
-                return 0
-            if self.field.get_occupied_of_structure(self.field.white_home, 'black') == 1:
-                ratio = 4
-            if self.field.get_occupied_of_structure(self.field.white_home, 'black') == 2:
-                ratio = 2
-
         color_count = 0
 
         for dice in range(1, 7):
 
             position_expression = current_checker.position + dice
+
+            if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
+                    self.field.get_sum_of_structure(self.field.black_yard, 'black') > 0:
+                if position_expression > 18:
+                    color_count += 1
+                    continue
+
             if position_expression > 24:
                 color_count += 1
                 continue
+
             current_position = self.get_exact_element(current_checker.color, position_expression)
 
             if isinstance(current_position, MyStack):
@@ -2203,8 +2198,13 @@ class Game:
                 if condition:
                     color_count += 1
 
-        if color_count < 2:
+        if color_count == 0:
             return 0
+
+        if color_count == 1:
+            ratio = 4
+        if color_count == 2:
+            ratio = 2
 
         ratios_dict = {
             1: 16, 2: 16, 3: 32, 4: 32
