@@ -807,7 +807,11 @@ class Game:
                 1:  # шашка с головы
                     {
                         # 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
-                        2: 12, 3: 11, 4: 10, 5: 9, 6: 8,
+
+                        # 2: 12, 3: 11, 4: 10, 5: 9, 6: 8,
+
+                        2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
 
                         # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
@@ -1531,9 +1535,9 @@ class Game:
     def encouragement(current_phase, new_position):  # поощрение за занятие пустой позиции
         if current_phase == 1:
             ratios = {
-                2: 17, 3: 16, 4: 15, 5: 14, 6: 13,
+                2: 11, 3: 10, 4: 9, 5: 8, 6: 7,
                 7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
-                13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,
+                13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
             return ratios[new_position]
@@ -1609,9 +1613,9 @@ class Game:
         old_position = self.get_exact_element(current_checker.color, current_checker.position)
         new_position = self.get_exact_element(current_checker.color, current_checker.position + dice)
 
-        if old_position.count == 1 and new_position == 0:
+        last_white_checker_position = self.get_last_white_checker_position(lower_border=1, upper_border=12)
 
-            last_white_checker_position = self.get_last_white_checker_position(lower_border=1, upper_border=12)
+        if old_position.count == 1 and new_position == 0:
 
             if phase_of_game == 1:
 
@@ -1730,8 +1734,9 @@ class Game:
                         return 16  # 32
 
                 if last_white_checker_position is not None:
-                    if current_checker.position + dice > last_white_checker_position:
-                        return 8
+                    if 13 <= current_checker.position < last_white_checker_position:
+                        if current_checker.position + dice > last_white_checker_position:
+                            return 16
 
                 return 0
 
@@ -1822,8 +1827,14 @@ class Game:
 
                 if current_checker.position == self.get_last_black_checker_position(lower_border=1):
                     if current_checker.position + dice <= 12:
-                        print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 0')
-                        return 0  # 16
+                        print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
+                        return 8  # 16
+
+                if last_white_checker_position is not None:
+                    if 13 <= current_checker.position < last_white_checker_position:
+                        if current_checker.position + dice > last_white_checker_position:
+                            return 8
+
                 return 0
 
             return 0
@@ -1851,7 +1862,7 @@ class Game:
                     if quarters_ratios[position_expression] == 1:
                         return 16  # 32
                     if quarters_ratios[position_expression] == 2:
-                        return 4  # 16
+                        return 8  # 4  # 16
                     if quarters_ratios[position_expression] == 3:
                         return 8  # 16
                     if quarters_ratios[position_expression] == 4:
@@ -1862,7 +1873,7 @@ class Game:
                     #     return 0
 
                     if quarters_ratios[position_expression] == 1:
-                        return 4
+                        return 8  # 4
                     if quarters_ratios[position_expression] == 2:
                         return 8  # 16
                     if quarters_ratios[position_expression] == 3:
@@ -1875,7 +1886,7 @@ class Game:
                     #     return 0
 
                     if quarters_ratios[position_expression] == 1:
-                        return 4  # 16
+                        return 8  # 4  # 16
                     if quarters_ratios[position_expression] == 2:
                         return 16  # 32
                     if quarters_ratios[position_expression] == 3:
@@ -2114,7 +2125,6 @@ class Game:
 
         return result_is_six_checkers_in_line
 
-
     def rooting(self, current_checker, main_dice):
         """
         Если в 4, 5-й фазах для последней в слоте шашки есть более 2-х вариантов хода,
@@ -2147,6 +2157,14 @@ class Game:
                     return -32
 
                 return 0
+
+            return 0
+
+        if self.field.get_sum_of_structure(self.field.white_home, 'black') + \
+                self.field.get_sum_of_structure(self.field.white_yard, 'black') == 15 and \
+                self.field.get_sum_of_structure(self.field.white_home, 'black') > 0:
+            if 13 <= current_checker.position <= 18:
+                return -32
 
             return 0
 
@@ -2278,7 +2296,7 @@ class Game:
 
             ratios_dict = {
                 0: 0, 1: 32, 2: 16,
-                3: 8, 4: 4, 5: 2, 6: 1
+                3: 8, 4: 4, 5: 2, 6: 0
             }
 
             return ratios_dict[empty_count]
@@ -2482,6 +2500,9 @@ class Game:
         return 0
 
     def move(self, color, dice, recursion=False, checkers=None, between=None):
+
+        if dice in (2, 4):
+            c = 1
 
         if recursion:
             checkers_list = checkers
