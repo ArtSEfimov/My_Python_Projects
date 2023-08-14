@@ -256,8 +256,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))
-                        # current_checker_number = random.randint(1, 24)
+                        # current_checker_number = int(input('Выберите номер шашки: '))
+                        current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -283,8 +283,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))
-                            # current_dice_number = random.randint(1, 24)
+                            # current_dice_number = int(input('Выберите номер ячейки: '))
+                            current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -316,8 +316,8 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))
-                            # current_checker_number = random.randint(1, 24)
+                            # current_checker_number = int(input('Выберите номер шашки: '))
+                            current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -2018,13 +2018,59 @@ class Game:
         с = 1
         return False
 
+    # def is_six_checkers_in_line(self, my_color):
+    #     """Функция должна проверять, что до того, как в зоне выброса появится шашка противника, мы не можем выстроить
+    #     6 и более шашек в своем доме и дворе"""
+    #
+    #     my_checkers = (x for x in (self.black_checkers if my_color == 'black' else self.white_checkers))
+    #
+    #     sorted_my_checkers = sorted(my_checkers, key=lambda x: x.position)
+    #
+    #     if not sorted_my_checkers:
+    #         return True
+    #
+    #     my_first_checker_position = sorted_my_checkers[0].position
+    #
+    #     pointer = my_first_checker_position
+    #
+    #     count = 0
+    #
+    #     for _ in range(2):
+    #         while pointer <= 24:
+    #             current_element = self.get_exact_element(my_color, pointer)
+    #
+    #             if isinstance(current_element, MyStack) and current_element.color == my_color:
+    #                 count += 1
+    #
+    #             else:
+    #                 count = 0
+    #                 pointer += 1
+    #                 continue
+    #
+    #             if count == 6:
+    #                 return False  # 6 в ряд, так ходить нельзя
+    #
+    #             pointer += 1
+    #
+    #         pointer = 1
+    #         current_element = self.get_exact_element(my_color, pointer)
+    #
+    #         if isinstance(current_element, MyStack) and current_element.color == my_color:
+    #             continue
+    #         else:
+    #             break
+    #
+    #     return True  # НЕТ 6 в ряд, так ходить можно
+
     def is_six_checkers_in_line(self, my_color):
         """Функция должна проверять, что до того, как в зоне выброса появится шашка противника, мы не можем выстроить
         6 и более шашек в своем доме и дворе"""
 
-        my_checkers = (x for x in (self.black_checkers if my_color == 'black' else self.white_checkers))
+        my_checkers = (x
+                       for x in (self.black_checkers if my_color == 'black' else self.white_checkers)
+                       if x.position <= 24)
 
-        sorted_my_checkers = sorted(my_checkers, key=lambda x: x.position)
+        sorted_my_checkers = sorted(my_checkers, key=lambda x: self.match_cells[x.position])
 
         if not sorted_my_checkers:
             return True
@@ -2035,30 +2081,21 @@ class Game:
 
         count = 0
 
-        for _ in range(2):
-            while pointer <= 24:
-                current_element = self.get_exact_element(my_color, pointer)
-
-                if isinstance(current_element, MyStack) and current_element.color == my_color:
-                    count += 1
-
-                else:
-                    count = 0
-                    pointer += 1
-                    continue
-
-                if count == 6:
-                    return False  # 6 в ряд, так ходить нельзя
-
-                pointer += 1
-
-            pointer = 1
+        while pointer <= 24:
             current_element = self.get_exact_element(my_color, pointer)
 
             if isinstance(current_element, MyStack) and current_element.color == my_color:
-                continue
+                count += 1
+
             else:
-                break
+                count = 0
+                pointer += 1
+                continue
+
+            if count == 6:
+                return False  # 6 в ряд, так ходить нельзя
+
+            pointer += 1
 
         return True  # НЕТ 6 в ряд, так ходить можно
 
@@ -2179,9 +2216,9 @@ class Game:
             if 1 <= current_checker.position <= 12:
                 if 1 <= position_expression <= 12:
                     return 4
-                if position_expression > last_white_checker_position:
+                if last_white_checker_position is not None and position_expression > last_white_checker_position:
                     return 8
-            if current_checker.position > last_white_checker_position:
+            if last_white_checker_position is not None and current_checker.position > last_white_checker_position:
                 return 16
 
         if self.is_my_position_lower_than_last_white(current_checker.position):
