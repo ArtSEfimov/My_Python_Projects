@@ -34,10 +34,10 @@ class Game:
         self.black_head.color = self.black_head.top.color
 
         self.match_cells = {
-            24: 1, 23: 2, 22: 3, 21: 4, 20: 5, 19: 6,
-            18: 7, 17: 8, 16: 9, 15: 10, 14: 11, 13: 12,
-            12: 13, 11: 14, 10: 15, 9: 16, 8: 17, 7: 18,
-            6: 19, 5: 20, 4: 21, 3: 22, 2: 23, 1: 24
+            1: 13, 2: 14, 3: 15, 4: 16, 5: 17, 6: 18,
+            7: 19, 8: 20, 9: 21, 10: 22, 11: 23, 12: 24,
+            13: 1, 14: 2, 15: 3, 16: 4, 17: 5, 18: 6,
+            19: 7, 20: 8, 21: 9, 22: 10, 23: 11, 24: 12
         }
 
         self.computer_end_moving_flag = self.computer_end_throwing_flag = False
@@ -256,8 +256,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        # current_checker_number = int(input('Выберите номер шашки: '))
-                        current_checker_number = random.randint(1, 24)
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                        # current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -283,8 +283,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            # current_dice_number = int(input('Выберите номер ячейки: '))
-                            current_dice_number = random.randint(1, 24)
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            # current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -316,8 +316,8 @@ class Game:
 
                     while True:
                         try:
-                            # current_checker_number = int(input('Выберите номер шашки: '))
-                            current_checker_number = random.randint(1, 24)
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                            # current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -556,11 +556,15 @@ class Game:
 
     def get_phase_of_game(self):
 
+        # if self.black_head is not None and self.black_head.count > 1 and \
+        #         self.field.get_count_of_free_cells(self.field.black_home) + \
+        #         self.get_position_color(7, reverse=True) > 0 and \
+        #         self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
+        #         self.get_position_color(7) < 5:
+        #     return 1
+
         if self.black_head is not None and self.black_head.count > 1 and \
-                self.field.get_count_of_free_cells(self.field.black_home) + \
-                self.get_position_color(7, reverse=True) > 0 and \
-                self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
-                self.get_position_color(7) < 5:
+                self.field.get_count_of_free_cells(self.field.black_home) > 0:
             return 1
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
@@ -1972,51 +1976,70 @@ class Game:
 
     def last_position_for_six_checkers_in_line(self, my_color):
 
-        my_checkers = (x for x in (self.black_checkers if my_color == 'black' else self.white_checkers))
+        my_checkers_invert_positions = (self.match_cells[x.position]
+                                        for x in (self.black_checkers if my_color == 'black' else self.white_checkers)
+                                        if x.position <= 24)
 
-        sorted_my_checkers = sorted(my_checkers, key=lambda x: x.position)
+        sorted_my_checkers_invert_positions = sorted(my_checkers_invert_positions)
 
-        if not sorted_my_checkers:
-            return True
-
-        my_first_checker_position = sorted_my_checkers[0].position
+        my_first_checker_position = sorted_my_checkers_invert_positions[0]
 
         lines = dict()
         pointer = my_first_checker_position
 
         count = 0
 
-        for _ in range(2):
-            while pointer <= 24:
-                current_element = self.get_exact_element(my_color, pointer)
+        # for _ in range(2):
+        #     while pointer <= 24:
+        #         current_element = self.get_exact_element(my_color, pointer)
+        #
+        #         if isinstance(current_element, MyStack) and current_element.color == my_color:
+        #             count += 1
+        #
+        #         else:
+        #             if count >= 6:
+        #                 lines[pointer] = count
+        #
+        #             count = 0
+        #             pointer += 1
+        #             continue
+        #
+        #         pointer += 1
+        #
+        #     pointer = 1
+        #     current_element = self.get_exact_element(my_color, pointer)
+        #     if isinstance(current_element, MyStack) and current_element.color == my_color:
+        #         continue
+        #     else:
+        #         if count >= 6:
+        #             lines[24] = count
+        #         break
 
-                if isinstance(current_element, MyStack) and current_element.color == my_color:
-                    count += 1
-
-                else:
-                    if count >= 6:
-                        lines[pointer] = count
-
-                    count = 0
-                    pointer += 1
-                    continue
-
-                pointer += 1
-
-            pointer = 1
+        while pointer <= 24:
             current_element = self.get_exact_element(my_color, pointer)
+
             if isinstance(current_element, MyStack) and current_element.color == my_color:
-                continue
+                count += 1
+
             else:
                 if count >= 6:
-                    lines[24] = count
-                break
+                    lines[pointer] = count
 
-        if lines:
-            max_position = max(lines)
-            return max_position, lines[max_position]
-        с = 1
-        return False
+                count = 0
+                pointer += 1
+                continue
+
+            pointer += 1
+
+        if count >= 6:
+            lines[24] = count
+
+        max_position = max(
+            self.match_cells[line]
+            for line in lines
+        )
+
+        return max_position, lines[self.match_cells[max_position]]
 
     # def is_six_checkers_in_line(self, my_color):
     #     """Функция должна проверять, что до того, как в зоне выброса появится шашка противника, мы не можем выстроить
@@ -2066,16 +2089,16 @@ class Game:
         """Функция должна проверять, что до того, как в зоне выброса появится шашка противника, мы не можем выстроить
         6 и более шашек в своем доме и дворе"""
 
-        my_checkers = (x
-                       for x in (self.black_checkers if my_color == 'black' else self.white_checkers)
-                       if x.position <= 24)
+        my_checkers_invert_positions = (self.match_cells[x.position]
+                                        for x in (self.black_checkers if my_color == 'black' else self.white_checkers)
+                                        if x.position <= 24)
 
-        sorted_my_checkers = sorted(my_checkers, key=lambda x: self.match_cells[x.position])
+        sorted_my_checkers_invert_positions = sorted(my_checkers_invert_positions)
 
-        if not sorted_my_checkers:
+        if not sorted_my_checkers_invert_positions:
             return True
 
-        my_first_checker_position = sorted_my_checkers[0].position
+        my_first_checker_position = sorted_my_checkers_invert_positions[0]
 
         pointer = my_first_checker_position
 
@@ -2112,6 +2135,7 @@ class Game:
             if self.is_six_checkers_in_line(checker_value.color):  # 6 В РЯД ИСЧЕЗ В РЕЗУЛЬТАТЕ ХОДА
                 self.remove_checker_from_old_position(checker_value)
                 self.move_checker_to_new_position(checker_value, reverse_flag=True)
+
                 return -32
 
             new_start_position, new_length = self.last_position_for_six_checkers_in_line(checker_value.color)
@@ -2121,6 +2145,7 @@ class Game:
 
             if old_start_position == new_start_position and new_length > old_length:
                 return 32
+
             return 0
 
         # ЕСЛИ ЕЩЕ НЕТ 6 В РЯД
