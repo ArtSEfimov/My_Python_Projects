@@ -556,16 +556,16 @@ class Game:
 
     def get_phase_of_game(self):
 
-        # if self.black_head is not None and self.black_head.count > 1 and \
-        #         self.field.get_count_of_free_cells(self.field.black_home) + \
-        #         self.get_position_color(7, reverse=True) > 0 and \
-        #         self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
-        #         self.get_position_color(7) < 5:
-        #     return 1
-
         if self.black_head is not None and self.black_head.count > 1 and \
-                self.field.get_count_of_free_cells(self.field.black_home) > 0:
+                self.field.get_count_of_free_cells(self.field.black_home) + \
+                self.get_position_color(7, reverse=True) > 0 and \
+                self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
+                self.get_position_color(7) < 5:
             return 1
+
+        # if self.black_head is not None and self.black_head.count > 1 and \
+        #         self.field.get_count_of_free_cells(self.field.black_home) > 0:
+        #     return 1
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
                 self.field.get_sum_of_structure(self.field.black_yard, 'black') > 6 and \
@@ -869,8 +869,8 @@ class Game:
                         # 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 1,
                         # 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
 
-                        2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 1,
-                        8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
+                        2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
+                        8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
 
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -1539,8 +1539,8 @@ class Game:
     def encouragement(current_phase, new_position):  # поощрение за занятие пустой позиции
         if current_phase == 1:
             ratios = {
-                2: 11, 3: 10, 4: 9, 5: 8, 6: 7,
-                7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
+                2: 6, 3: 7, 4: 8, 5: 9, 6: 10, 7: 11,
+                8: 1, 9: 2, 10: 3, 11: 4, 12: 5,
                 13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
@@ -1548,18 +1548,18 @@ class Game:
 
         if current_phase == 2:
             ratios = {
-                2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
-                7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
-                13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,
+                2: 6, 3: 7, 4: 8, 5: 9, 6: 10, 7: 11,
+                8: 1, 9: 2, 10: 3, 11: 4, 12: 5,
+                13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
             return ratios[new_position]
 
         if current_phase == 3:
             ratios = {
-                2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
-                7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
-                13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
+                2: 1, 3: 2, 4: 3, 5: 4, 6: 5,
+                7: 12, 8: 13, 9: 14, 10: 15, 11: 16, 12: 17,
+                13: 6, 14: 7, 15: 8, 16: 9, 17: 10, 18: 11,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
             return ratios[new_position]
@@ -1635,6 +1635,8 @@ class Game:
 
                 if 7 <= current_checker.position <= 12:
                     if 7 <= current_checker.position + dice <= 12:
+                        if current_checker.position == 7:
+                            return -4
                         return 8  # 8
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and \
@@ -1672,6 +1674,8 @@ class Game:
 
                 if 7 <= current_checker.position <= 12:
                     if 7 <= current_checker.position + dice <= 12:
+                        if current_checker.position == 7:
+                            return -4
                         return 8
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and \
@@ -1877,7 +1881,7 @@ class Game:
                     #     return 0
 
                     if quarters_ratios[position_expression] == 1:
-                        return 8  # 4
+                        return 16  # 8  # 4
                     if quarters_ratios[position_expression] == 2:
                         return 8  # 16
                     if quarters_ratios[position_expression] == 3:
@@ -1890,13 +1894,13 @@ class Game:
                     #     return 0
 
                     if quarters_ratios[position_expression] == 1:
-                        return 8  # 4  # 16
+                        return 16  # 8  # 4  # 16
                     if quarters_ratios[position_expression] == 2:
-                        return 16  # 32
+                        return 8  # 16  # 32
                     if quarters_ratios[position_expression] == 3:
-                        return 8  # 32
+                        return 16  # 8  # 32
                     if quarters_ratios[position_expression] == 4:
-                        return 0  # 8
+                        return 8  # 0  # 8
 
                 if current_phase in (4, 5):
 
