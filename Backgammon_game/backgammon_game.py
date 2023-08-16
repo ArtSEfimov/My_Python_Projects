@@ -563,17 +563,24 @@ class Game:
                 self.get_position_color(7) < 5:
             return 1
 
-        # if self.black_head is not None and self.black_head.count > 1 and \
-        #         self.field.get_count_of_free_cells(self.field.black_home) > 0:
-        #     return 1
+        # if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
+        #         self.field.get_sum_of_structure(self.field.black_yard, 'black') > 6 and \
+        #         self.field.get_count_of_free_cells(self.field.white_home) > 0 and \
+        #         self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4 and \
+        #         self.white_head is not None:
+        #     return 2  # сделал так, чтобы сумма моих шашек дома + во дворе были > 6, тогда можно получить фазу 2,
+        #     # если шашек меньше, фазу 2 пропускаем
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
-                self.field.get_sum_of_structure(self.field.black_yard, 'black') > 6 and \
+                self.field.get_sum_of_structure(self.field.black_yard, 'black') > \
+                self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
+                self.field.get_count_of_free_cells(self.field.black_home) + \
+                self.field.get_occupied_of_structure(self.field.black_yard, 'black') + \
+                self.field.get_count_of_free_cells(self.field.black_yard) and \
                 self.field.get_count_of_free_cells(self.field.white_home) > 0 and \
                 self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4 and \
                 self.white_head is not None:
-            return 2  # сделал так, чтобы сумма моих шашек дома + во дворе были > 6, тогда можно получить фазу 2,
-            # если шашек меньше, фазу 2 пропускаем
+            return 2
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') > \
                 self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
@@ -1603,6 +1610,21 @@ class Game:
 
         return False
 
+    @staticmethod
+    def offset(old_position, new_position):
+        old_position_ratios = {
+            1: -6, 2: -5, 3: -4, 4: -3, 5: -2, 6: -1
+        }
+
+        new_position_ratios = {
+            7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6
+        }
+
+        if old_position in old_position_ratios and new_position in new_position_ratios:
+            return old_position_ratios[old_position] + new_position_ratios[new_position]
+
+        return 0
+
     def taking_and_leaving_positions(self, current_checker, dice):
         """
         Функция помогает занимать свободные места.
@@ -2610,9 +2632,6 @@ class Game:
                     if not self.get_between(checker_value.color, checker_value.position, cell_value, between):
                         continue
 
-                if 13 <= checker_value.position <= 18 and old_position.count == 1 and checker_value.position + dice > 18:
-                    c = 1
-
                 current_phase_of_game = self.get_phase_of_game()
 
                 choose_to = self.get_additional_ratio_to(old_position, checker_value, dice)
@@ -2624,6 +2643,9 @@ class Game:
 
                 count += self.manage_the_last_quarter(checker_value.position,
                                                       punishment_flag=old_position.count == 1)
+
+                if self.get_phase_of_game() in (1, 2):
+                    count += self.offset(checker_value.position, cell_value)
 
                 if self.is_checker_in_another_yard(color):
                     count += self.liberation_and_hold_for_six_in_line(checker_value, dice)
