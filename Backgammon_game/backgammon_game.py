@@ -33,11 +33,17 @@ class Game:
         self.black_head.top.is_up = True
         self.black_head.color = self.black_head.top.color
 
-        self.match_cells = {
+        self.match_black_white_cells = {
             1: 13, 2: 14, 3: 15, 4: 16, 5: 17, 6: 18,
             7: 19, 8: 20, 9: 21, 10: 22, 11: 23, 12: 24,
             13: 1, 14: 2, 15: 3, 16: 4, 17: 5, 18: 6,
             19: 7, 20: 8, 21: 9, 22: 10, 23: 11, 24: 12
+        }
+
+        self.match_dices_cells = {
+
+            1: 24, 2: 23, 3: 22, 4: 21, 5: 20, 6: 19
+
         }
 
         self.computer_end_moving_flag = self.computer_end_throwing_flag = False
@@ -256,8 +262,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))
-                        # current_checker_number = random.randint(1, 24)
+                        # current_checker_number = int(input('Выберите номер шашки: '))
+                        current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -283,8 +289,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))
-                            # current_dice_number = random.randint(1, 24)
+                            # current_dice_number = int(input('Выберите номер ячейки: '))
+                            current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -316,8 +322,8 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))
-                            # current_checker_number = random.randint(1, 24)
+                            # current_checker_number = int(input('Выберите номер шашки: '))
+                            current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -345,20 +351,20 @@ class Game:
     def human_emergency_throw(self, color, dice):
         possible_step_variants = self.virtual_step(color, dice)
         possible_throw_variants = list()
-        current_position = self.get_exact_element(color, self.match_cells[dice])
+        current_position = self.get_exact_element(color, self.match_dices_cells[dice])
         if isinstance(current_position, MyStack):
             if current_position.color == color:
                 possible_throw_variants.append(current_position.top)
         else:
             above_flag = False
             for current_position in range(dice + 1, 7):
-                current_place = self.get_exact_element(color, self.match_cells[current_position])
+                current_place = self.get_exact_element(color, self.match_dices_cells[current_position])
                 if isinstance(current_place, MyStack) and current_place.color == color:
                     above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
                     break
 
             if not above_flag:
-                for current_position in range(self.match_cells[dice] + 1, 25):
+                for current_position in range(self.match_dices_cells[dice] + 1, 25):
                     current_place = self.get_exact_element(color, current_position)
                     if isinstance(current_place, MyStack) and current_place.color == color:
                         possible_throw_variants.append(current_place.top)
@@ -375,20 +381,20 @@ class Game:
             possible_throw_variants = list()
 
             for current_dice in (first_throw_dice, second_throw_dice):
-                current_position = self.get_exact_element(color, self.match_cells[current_dice])
+                current_position = self.get_exact_element(color, self.match_dices_cells[current_dice])
                 if isinstance(current_position, MyStack):
                     if current_position.color == color:
                         possible_throw_variants.append(current_position.top)
                 else:
                     above_flag = False
                     for current_position in range(current_dice + 1, 7):
-                        current_place = self.get_exact_element(color, self.match_cells[current_position])
+                        current_place = self.get_exact_element(color, self.match_dices_cells[current_position])
                         if isinstance(current_place, MyStack) and current_place.color == color:
                             above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
                             break
 
                     if not above_flag:
-                        for current_position in range(self.match_cells[current_dice] + 1, 25):
+                        for current_position in range(self.match_dices_cells[current_dice] + 1, 25):
                             current_place = self.get_exact_element(color, current_position)
                             if isinstance(current_place, MyStack) and current_place.color == color:
                                 possible_throw_variants.append(current_place.top)
@@ -1195,20 +1201,20 @@ class Game:
             max_dice = max(dice_1, dice_2)
 
             self.is_success_move(last_checker, min_dice)
-            current_place = self.get_exact_element(color, self.match_cells[max_dice])
+            current_place = self.get_exact_element(color, self.match_dices_cells[max_dice])
 
             if isinstance(current_place, MyStack) and current_place.color == color or \
-                    self.match_cells[max_dice] < self.get_last_black_checker_position():
+                    self.match_dices_cells[max_dice] < self.get_last_black_checker_position():
                 return max_dice
 
             self.remove_checker_from_old_position(last_checker)
             self.move_checker_to_new_position(last_checker, reverse_flag=True)
 
             self.is_success_move(last_checker, max_dice)
-            current_place = self.get_exact_element(color, self.match_cells[min_dice])
+            current_place = self.get_exact_element(color, self.match_dices_cells[min_dice])
 
             if isinstance(current_place, MyStack) and current_place.color == color or \
-                    self.match_cells[min_dice] < self.get_last_black_checker_position():
+                    self.match_dices_cells[min_dice] < self.get_last_black_checker_position():
                 return min_dice
 
             self.remove_checker_from_old_position(last_checker)
@@ -1370,6 +1376,8 @@ class Game:
                 last_checker = current_checker
             if count > 1:
                 return
+
+        с=1
 
         if last_checker is None:
             return
@@ -2002,7 +2010,7 @@ class Game:
 
     def last_position_for_six_checkers_in_line(self, my_color):
 
-        my_checkers_invert_positions = (self.match_cells[x.position]
+        my_checkers_invert_positions = (self.match_black_white_cells[x.position]
                                         for x in (self.black_checkers if my_color == 'black' else self.white_checkers)
                                         if x.position <= 24)
 
@@ -2061,11 +2069,11 @@ class Game:
             lines[24] = count
 
         max_position = max(
-            self.match_cells[line]
+            self.match_black_white_cells[line]
             for line in lines
         )
 
-        return max_position, lines[self.match_cells[max_position]]
+        return max_position, lines[self.match_black_white_cells[max_position]]
 
     # def is_six_checkers_in_line(self, my_color):
     #     """Функция должна проверять, что до того, как в зоне выброса появится шашка противника, мы не можем выстроить
@@ -2115,7 +2123,7 @@ class Game:
         """Функция должна проверять, что до того, как в зоне выброса появится шашка противника, мы не можем выстроить
         6 и более шашек в своем доме и дворе"""
 
-        my_checkers_invert_positions = (self.match_cells[x.position]
+        my_checkers_invert_positions = (self.match_black_white_cells[x.position]
                                         for x in (self.black_checkers if my_color == 'black' else self.white_checkers)
                                         if x.position <= 24)
 
@@ -2199,7 +2207,8 @@ class Game:
         last_white_checker_position = self.get_last_white_checker_position(upper_border=24)
         last_black_checker_position_in_line = self.last_position_for_six_checkers_in_line(color)[0]
         return last_white_checker_position is not None \
-            and self.match_cells[last_black_checker_position_in_line] > self.match_cells[last_white_checker_position]
+            and self.match_black_white_cells[last_black_checker_position_in_line] > \
+            self.match_black_white_cells[last_white_checker_position]
 
     def move_checker_for_six_in_line(self, checker, dice):
         self.remove_checker_from_old_position(checker)
@@ -2741,7 +2750,7 @@ class Game:
 
     def try_simple_variant(self, color, dice_1, dice_2):
         if dice_1 == dice_2:
-            current_place = self.get_exact_element(color, self.match_cells[dice_1])
+            current_place = self.get_exact_element(color, self.match_dices_cells[dice_1])
 
             if isinstance(current_place, MyStack) and current_place.color == color:
                 if current_place.count >= 4:
@@ -2755,12 +2764,12 @@ class Game:
 
             if dice_1 + dice_2 <= 6:
 
-                my_list, position_in_my_list = self.get_position(color, self.match_cells[dice_1 + dice_2])
+                my_list, position_in_my_list = self.get_position(color, self.match_dices_cells[dice_1 + dice_2])
                 my_list = my_list.data
 
                 if isinstance(my_list[position_in_my_list], MyStack) and my_list[position_in_my_list].color == color:
 
-                    current_intermediate_place = self.get_exact_element(color, self.match_cells[dice_1])
+                    current_intermediate_place = self.get_exact_element(color, self.match_dices_cells[dice_1])
                     event_1 = isinstance(current_intermediate_place, MyStack) and \
                               current_intermediate_place.color == color
                     event_2 = False
@@ -2780,8 +2789,8 @@ class Game:
 
             return False
 
-        position_1 = self.match_cells[dice_1]
-        position_2 = self.match_cells[dice_2]
+        position_1 = self.match_dices_cells[dice_1]
+        position_2 = self.match_dices_cells[dice_2]
 
         current_place_1 = self.get_exact_element(color, position_1)
         current_place_2 = self.get_exact_element(color, position_2)
@@ -2807,13 +2816,13 @@ class Game:
 
         if dice_1 + dice_2 <= 6:
 
-            my_list, position_in_my_list = self.get_position(color, self.match_cells[dice_1 + dice_2])
+            my_list, position_in_my_list = self.get_position(color, self.match_dices_cells[dice_1 + dice_2])
             my_list = my_list.data
 
             if isinstance(my_list[position_in_my_list], MyStack) and my_list[position_in_my_list].color == color:
 
-                current_intermediate_place_1 = self.get_exact_element(color, self.match_cells[dice_1])
-                current_intermediate_place_2 = self.get_exact_element(color, self.match_cells[dice_2])
+                current_intermediate_place_1 = self.get_exact_element(color, self.match_dices_cells[dice_1])
+                current_intermediate_place_2 = self.get_exact_element(color, self.match_dices_cells[dice_2])
 
                 if any(
                         map(
@@ -2859,7 +2868,7 @@ class Game:
             return
 
         above_flag = False
-        current_place = self.get_exact_element(color, self.match_cells[dice])
+        current_place = self.get_exact_element(color, self.match_dices_cells[dice])
         if isinstance(current_place, MyStack) and current_place.color == color:
             deleted_checker = current_place.top
             self.remove_checker_from_old_position(current_place.top)
@@ -2867,13 +2876,13 @@ class Game:
             return
 
         for current_position in range(dice + 1, 7):
-            current_place = self.get_exact_element(color, self.match_cells[current_position])
+            current_place = self.get_exact_element(color, self.match_dices_cells[current_position])
             if isinstance(current_place, MyStack) and current_place.color == color:
                 above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
                 break
 
         if above_flag:
-            for current_position in range(self.match_cells[dice] - 1, 18, -1):
+            for current_position in range(self.match_dices_cells[dice] - 1, 18, -1):
 
                 my_list, position_in_my_list = self.get_position(color, current_position)
                 my_list = my_list.data
@@ -2891,7 +2900,7 @@ class Game:
                         break
 
         else:
-            for current_position in range(self.match_cells[dice] + 1, 25):
+            for current_position in range(self.match_dices_cells[dice] + 1, 25):
                 current_place = self.get_exact_element(color, current_position)
                 if isinstance(current_place, MyStack) and current_place.color == color:
                     deleted_checker = current_place.top
@@ -2921,7 +2930,7 @@ class Game:
             for current_dice in (max(throw_dice_1, throw_dice_2), min(throw_dice_1, throw_dice_2)):
                 above_flag = False
 
-                current_place = self.get_exact_element(color, self.match_cells[current_dice])
+                current_place = self.get_exact_element(color, self.match_dices_cells[current_dice])
 
                 if isinstance(current_place, MyStack) and current_place.color == color:
 
@@ -2934,13 +2943,13 @@ class Game:
 
                 else:
                     for current_position in range(current_dice + 1, 7):
-                        current_place = self.get_exact_element(color, self.match_cells[current_position])
+                        current_place = self.get_exact_element(color, self.match_dices_cells[current_position])
                         if isinstance(current_place, MyStack) and current_place.color == color:
                             above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
                             break
 
                 if above_flag:
-                    for current_position in range(self.match_cells[current_dice] - 1, 18, -1):
+                    for current_position in range(self.match_dices_cells[current_dice] - 1, 18, -1):
 
                         my_list, position_in_my_list = self.get_position(color, current_position)
                         my_list = my_list.data
@@ -2959,7 +2968,7 @@ class Game:
                                 break
 
                 else:
-                    for current_position in range(self.match_cells[current_dice] + 1, 25):
+                    for current_position in range(self.match_dices_cells[current_dice] + 1, 25):
                         current_place = self.get_exact_element(color, current_position)
                         if isinstance(current_place, MyStack) and current_place.color == color:
 
