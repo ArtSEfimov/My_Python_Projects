@@ -262,8 +262,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        # current_checker_number = int(input('Выберите номер шашки: '))
-                        current_checker_number = random.randint(1, 24)
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                        # current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -289,8 +289,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            # current_dice_number = int(input('Выберите номер ячейки: '))
-                            current_dice_number = random.randint(1, 24)
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            # current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -322,8 +322,8 @@ class Game:
 
                     while True:
                         try:
-                            # current_checker_number = int(input('Выберите номер шашки: '))
-                            current_checker_number = random.randint(1, 24)
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                            # current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -1665,8 +1665,6 @@ class Game:
 
                 if 7 <= current_checker.position <= 12:
                     if 7 <= current_checker.position + dice <= 12:
-                        if current_checker.position == 7:
-                            return -4
                         return 8  # 8
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and \
