@@ -110,8 +110,8 @@ class Game:
                     self.human_head_reset = True
                     human_step_result = self.human_step(color)
                     if human_step_result is not None:
-                        for dice in human_step_result:
-                            self.human_emergency_throw(color, dice)
+                        self.human_throw(color, dices=list(human_step_result))
+
                     self.who_steps = 'computer'
                     continue
                 else:
@@ -256,14 +256,18 @@ class Game:
 
         for iteration in range(iterations_number):
 
+            if self.field.get_sum_of_structure(self.field.black_yard, color) == 15:
+                if iterations_number == 2 and iteration == 1:
+                    return first_dice, second_dice
+
             possible_variants = self.virtual_step(color, first_dice, second_dice)
             self.show_possible_variants(possible_variants)
 
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))
-                        # current_checker_number = random.randint(1, 24)
+                        # current_checker_number = int(input('Выберите номер шашки: '))
+                        current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -289,8 +293,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))
-                            # current_dice_number = random.randint(1, 24)
+                            # current_dice_number = int(input('Выберите номер ячейки: '))
+                            current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -322,8 +326,8 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))
-                            # current_checker_number = random.randint(1, 24)
+                            # current_checker_number = int(input('Выберите номер шашки: '))
+                            current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -348,69 +352,185 @@ class Game:
                 print('Вариантов хода нет')
                 return
 
-    def human_emergency_throw(self, color, dice):
-        possible_step_variants = self.virtual_step(color, dice)
-        possible_throw_variants = list()
-        current_position = self.get_exact_element(color, self.match_dices_cells[dice])
+    def get_throw_variant(self, color, current_dice):
+
+        current_position = self.get_exact_element(color, self.match_dices_cells[current_dice])
         if isinstance(current_position, MyStack):
             if current_position.color == color:
-                possible_throw_variants.append(current_position.top)
+                return current_position.top
+
         else:
             above_flag = False
-            for current_position in range(dice + 1, 7):
+            for current_position in range(current_dice + 1, 7):
                 current_place = self.get_exact_element(color, self.match_dices_cells[current_position])
                 if isinstance(current_place, MyStack) and current_place.color == color:
                     above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
                     break
 
             if not above_flag:
-                for current_position in range(self.match_dices_cells[dice] + 1, 25):
+                for current_position in range(self.match_dices_cells[current_dice] + 1, 25):
                     current_place = self.get_exact_element(color, current_position)
                     if isinstance(current_place, MyStack) and current_place.color == color:
-                        possible_throw_variants.append(current_place.top)
-                        break
+                        return current_place.top
 
-    def human_throw(self, color):
-        first_throw_dice, second_throw_dice = self.throw_dices()
+        return
 
-        iterations_number = 2 if first_throw_dice == second_throw_dice else 1
+    def human_throw(self, color, dices=None):
+        if dices is None:
+            first_throw_dice, second_throw_dice = self.throw_dices()
 
-        for _ in range(iterations_number):
+            iterations_number = 2 if first_throw_dice == second_throw_dice else 1
 
-            possible_step_variants = self.virtual_step(color, first_throw_dice, second_throw_dice)
+            dices = [first_throw_dice, second_throw_dice] \
+                if iterations_number == 1 \
+                else list(first_throw_dice for _ in range(4))
+
+        while True:
+
+            possible_step_variants = list()
             possible_throw_variants = list()
 
-            for current_dice in (first_throw_dice, second_throw_dice):
-                current_position = self.get_exact_element(color, self.match_dices_cells[current_dice])
-                if isinstance(current_position, MyStack):
-                    if current_position.color == color:
-                        possible_throw_variants.append(current_position.top)
+            for value in dices:
+
+                possible_throw_variant_result = self.get_throw_variant(color, value)
+
+                if possible_throw_variant_result is not None:
+                    possible_throw_variants.append(possible_throw_variant_result)
+
+                possible_step_variants_result = self.virtual_step(color, value)
+
+                if possible_step_variants_result:
+                    possible_step_variants.append(possible_step_variants_result)
+
+            if not possible_step_variants and not possible_throw_variants:
+                print('Вариантов для сброса и хода нет')
+                break
+
+            if possible_throw_variants:
+
+                if len(set(possible_throw_variants)) == 1:
+                    print(
+                        f'Шашка для сброса: {", ".join(set(str(x) for x in possible_throw_variants))}'
+                    )
                 else:
-                    above_flag = False
-                    for current_position in range(current_dice + 1, 7):
-                        current_place = self.get_exact_element(color, self.match_dices_cells[current_position])
-                        if isinstance(current_place, MyStack) and current_place.color == color:
-                            above_flag = True  # Значит выше есть шашки и я не могу скинуть нижнюю
+                    print(
+                        f'Шашки для сброса: {", ".join(set(str(x) for x in possible_throw_variants))}'
+                    )
+
+            if possible_step_variants:
+
+                checkers_for_move = tuple(str(x)
+                                          for dictionaries in possible_step_variants
+                                          for x in dictionaries)
+
+                if len(set(checkers_for_move)) == 1:
+                    print(f'Шашка для хода: {", ".join(set(checkers_for_move))}')
+                else:
+                    print(f'Шашки для хода: {", ".join(set(checkers_for_move))}')
+
+            while True:
+                try:
+                    current_checker_number = int(input('Выберите номер шашки: '))
+                except ValueError:
+                    print("Ты ввел херню, введи число")
+                    continue
+
+                current_checker_for_step = [checker
+                                            for checker in (x
+                                                            for dictionaries in possible_step_variants
+                                                            for x in dictionaries)
+                                            if checker.position == current_checker_number]
+
+                current_checker_for_throw = [checker
+                                             for checker in possible_throw_variants
+                                             if checker.position == current_checker_number]
+
+                if not current_checker_for_step and not current_checker_for_throw:
+                    print('Шашки с таким номером нет')
+                    continue
+
+                if current_checker_for_step:
+                    current_checker_for_step = current_checker_for_step[0]
+
+                if current_checker_for_throw:
+                    current_checker_for_throw = current_checker_for_throw[0]
+
+                break
+
+            if not current_checker_for_step:
+                self.remove_checker_from_old_position(current_checker_for_throw)
+                current_checker_for_throw.position = 25
+                dices.remove(value)
+                if dices:
+                    continue
+                break
+
+            if not current_checker_for_throw:
+                for dictionary in possible_step_variants:
+                    for key in dictionary:
+                        if key is current_checker_for_step:
+                            step_variants = list(
+                                current_checker_for_step.position + step
+                                for step in dictionary[key])
+                            print(*step_variants)
                             break
+                while True:
+                    try:
+                        current_dice_number = int(input('Выберите номер ячейки: '))
+                    except ValueError:
+                        print("Ты ввел херню, введи число")
+                        continue
+                    current_dice = current_dice_number - current_checker_for_step.position
+                    if current_dice_number not in step_variants:
+                        print('Такой ход невозможен')
+                        continue
+                    else:
+                        break
 
-                    if not above_flag:
-                        for current_position in range(self.match_dices_cells[current_dice] + 1, 25):
-                            current_place = self.get_exact_element(color, current_position)
-                            if isinstance(current_place, MyStack) and current_place.color == color:
-                                possible_throw_variants.append(current_place.top)
-                                break
+                self.is_success_move(current_checker_for_step, current_dice)
+                self.field.show_field()
 
-        if possible_throw_variants:
-            # raise StopIteration
-            # user_checker = [c for c in possible_throw_variants if c.position == input()]
-            random_checker = random.choice(possible_throw_variants)
-            self.remove_checker_from_old_position(random_checker)
+                dices.remove(value)
+                if dices:
+                    continue
+                break
+
+            for dictionary in possible_step_variants:
+                for key in dictionary:
+                    if key is current_checker_for_step:
+                        step_variants = list(
+                            current_checker_for_step.position + step
+                            for step in dictionary[key])
+                        print(*step_variants)
+                        break
+            while True:
+                try:
+                    current_dice_number = int(input('Выберите номер ячейки: '))
+                except ValueError:
+                    self.remove_checker_from_old_position(current_checker_for_throw)
+                    current_checker_for_throw.position = 25
+                    break
+                current_dice = current_dice_number - current_checker_for_step.position
+                if current_dice_number not in step_variants:
+                    self.remove_checker_from_old_position(current_checker_for_throw)
+                    current_checker_for_throw.position = 25
+                    break
+                else:
+                    self.is_success_move(current_checker_for_step, current_dice)
+                    break
+
+            self.field.show_field()
+            dices.remove(value)
+            if dices:
+                continue
+            break
 
     def computer_step(self, color):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
         # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
+        self.first_dice, self.second_dice = 1, 2
 
         double_flag = self.first_dice == self.second_dice
         if double_flag:
@@ -1376,8 +1496,6 @@ class Game:
                 last_checker = current_checker
             if count > 1:
                 return
-
-        с=1
 
         if last_checker is None:
             return
