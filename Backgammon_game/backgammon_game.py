@@ -387,20 +387,20 @@ class Game:
 
         while True:
 
-            possible_step_variants = list()
-            possible_throw_variants = list()
+            possible_step_variants = dict()
+            possible_throw_variants = dict()
 
             for value in dices:
 
                 possible_throw_variant_result = self.get_throw_variant(color, value)
 
                 if possible_throw_variant_result is not None:
-                    possible_throw_variants.append(possible_throw_variant_result)
+                    possible_throw_variants.setdefault(possible_throw_variant_result, list()).append(value)
 
                 possible_step_variants_result = self.virtual_step(color, value)
 
-                if possible_step_variants_result:
-                    possible_step_variants.append(possible_step_variants_result)
+                for key in possible_step_variants_result:
+                    possible_step_variants.setdefault(key, list()).extend(possible_step_variants_result[key])
 
             if not possible_step_variants and not possible_throw_variants:
                 print('Вариантов для сброса и хода нет')
@@ -419,14 +419,10 @@ class Game:
 
             if possible_step_variants:
 
-                checkers_for_move = tuple(str(x)
-                                          for dictionaries in possible_step_variants
-                                          for x in dictionaries)
-
-                if len(set(checkers_for_move)) == 1:
-                    print(f'Шашка для хода: {", ".join(set(checkers_for_move))}')
+                if len(possible_step_variants) == 1:
+                    print(f'Шашка для хода: {", ".join(str(x) for x in possible_step_variants)}')
                 else:
-                    print(f'Шашки для хода: {", ".join(set(checkers_for_move))}')
+                    print(f'Шашки для хода: {", ".join(str(x) for x in possible_step_variants)}')
 
             while True:
                 try:
@@ -436,9 +432,7 @@ class Game:
                     continue
 
                 current_checker_for_step = [checker
-                                            for checker in (x
-                                                            for dictionaries in possible_step_variants
-                                                            for x in dictionaries)
+                                            for checker in possible_step_variants
                                             if checker.position == current_checker_number]
 
                 current_checker_for_throw = [checker
