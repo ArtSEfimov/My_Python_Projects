@@ -452,69 +452,157 @@ class Game:
                 break
 
             if not current_checker_for_step:
-                self.remove_checker_from_old_position(current_checker_for_throw)
-                current_checker_for_throw.position = 25
-                dices.remove(value)
-                if dices:
-                    continue
-                break
+                current_throw_variants = possible_throw_variants[current_checker_for_throw]
+                if len(current_throw_variants) == 1 or len(set(current_throw_variants)) == 1:
+                    current_throw_variant = current_throw_variants[0]
+                    self.remove_checker_from_old_position(current_checker_for_throw)
+                    current_checker_for_throw.position = 25
+                    dices.remove(current_throw_variant)
+
+                    if dices:
+                        continue
+                    break
+
+                else:
+                    print(
+                        f'Значения кубиков для сброса шашки из этой ячейки: {", ".join(str(x) for x in current_throw_variants)}'
+                    )
+                    while True:
+                        try:
+                            current_dice_for_throw = int(input('Выберите значение кубика для сброса: '))
+                        except ValueError:
+                            print("Ты ввел херню, введи число")
+                            continue
+                        if current_dice_for_throw not in current_throw_variants:
+                            print('Такой ход невозможен')
+                            continue
+                        else:
+                            break
+
+                    dices.remove(current_dice_for_throw)
+
+                    if dices:
+                        continue
+                    break
 
             if not current_checker_for_throw:
-                for dictionary in possible_step_variants:
-                    for key in dictionary:
-                        if key is current_checker_for_step:
-                            step_variants = list(
-                                current_checker_for_step.position + step
-                                for step in dictionary[key])
-                            print(*step_variants)
-                            break
+                for key in possible_step_variants:
+                    if key is current_checker_for_step:
+                        current_step_variants = list(
+                            current_checker_for_step.position + step
+                            for step in possible_step_variants[key])
+                        print(*current_step_variants)
+                        break
                 while True:
                     try:
-                        current_dice_number = int(input('Выберите номер ячейки: '))
+                        current_cell_for_step = int(input('Выберите номер ячейки для хода: '))
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
-                    current_dice = current_dice_number - current_checker_for_step.position
-                    if current_dice_number not in step_variants:
+                    current_dice_for_step = current_cell_for_step - current_checker_for_step.position
+                    if current_dice_for_step not in current_step_variants:
                         print('Такой ход невозможен')
                         continue
                     else:
                         break
 
-                self.is_success_move(current_checker_for_step, current_dice)
+                self.is_success_move(current_checker_for_step, current_dice_for_step)
                 self.field.show_field()
 
-                dices.remove(value)
+                dices.remove(current_dice_for_step)
                 if dices:
                     continue
                 break
 
-            for dictionary in possible_step_variants:
-                for key in dictionary:
-                    if key is current_checker_for_step:
-                        step_variants = list(
-                            current_checker_for_step.position + step
-                            for step in dictionary[key])
-                        print(*step_variants)
-                        break
+            for key in possible_step_variants:
+                if key is current_checker_for_step:
+                    current_step_variants = list(
+                        current_checker_for_step.position + step
+                        for step in possible_step_variants[key])
+                    print(f'Варианты хода если вы хотите походить этой шашкой:')
+                    print(*current_step_variants)
+                    break
+
             while True:
                 try:
-                    current_dice_number = int(input('Выберите номер ячейки: '))
+                    current_cell_number = int(input('Выберите номер ячейки: '))
                 except ValueError:
-                    self.remove_checker_from_old_position(current_checker_for_throw)
-                    current_checker_for_throw.position = 25
-                    break
-                current_dice = current_dice_number - current_checker_for_step.position
-                if current_dice_number not in step_variants:
-                    self.remove_checker_from_old_position(current_checker_for_throw)
-                    current_checker_for_throw.position = 25
-                    break
+
+                    current_throw_variants = possible_throw_variants[current_checker_for_throw]
+
+                    if len(current_throw_variants) == 1 or len(set(current_throw_variants)) == 1:
+
+                        self.remove_checker_from_old_position(current_checker_for_throw)
+                        current_checker_for_throw.position = 25
+
+                        dices.remove(current_throw_variants[0])
+                        break
+
+                    else:
+                        print(
+                            f'Значения кубиков для сброса шашки из этой ячейки: {", ".join(str(x) for x in current_throw_variants)}'
+                        )
+                        while True:
+                            try:
+                                current_dice_for_throw = int(input('Выберите значение кубика для сброса: '))
+                            except ValueError:
+                                print("Ты ввел херню, введи число")
+                                continue
+                            if current_dice_for_throw not in current_throw_variants:
+                                print('Такой ход невозможен')
+                                continue
+                            else:
+                                break
+
+                        self.remove_checker_from_old_position(current_checker_for_throw)
+                        current_checker_for_throw.position = 25
+
+                        dices.remove(current_dice_for_throw)
+                        break
+
+                current_dice_number = current_cell_number - current_checker_for_step.position
+
+                if current_dice_number not in current_step_variants:
+
+                    current_throw_variants = possible_throw_variants[current_checker_for_throw]
+
+                    if len(current_throw_variants) == 1 or len(set(current_throw_variants)) == 1:
+                        self.remove_checker_from_old_position(current_checker_for_throw)
+                        current_checker_for_throw.position = 25
+
+                        dices.remove(current_throw_variants[0])
+                        break
+
+                    else:
+                        print(
+                            f'Значения кубиков для сброса шашки из этой ячейки: {", ".join(str(x) for x in current_throw_variants)}'
+                        )
+                        while True:
+                            try:
+                                current_dice_number = int(input('Выберите значение кубика для сброса: '))
+                            except ValueError:
+                                print("Ты ввел херню, введи число")
+                                continue
+                            if current_dice_number not in current_step_variants:
+                                print('Такой ход невозможен')
+                                continue
+                            else:
+                                break
+
+                        self.remove_checker_from_old_position(current_checker_for_throw)
+                        current_checker_for_throw.position = 25
+
+                        dices.remove(current_dice_number)
+                        break
+
+
                 else:
-                    self.is_success_move(current_checker_for_step, current_dice)
+                    self.is_success_move(current_checker_for_step, current_dice_number)
+                    dices.remove(current_dice_number)
                     break
 
             self.field.show_field()
-            dices.remove(value)
+
             if dices:
                 continue
             break
