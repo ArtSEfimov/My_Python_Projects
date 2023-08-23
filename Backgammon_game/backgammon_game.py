@@ -355,9 +355,8 @@ class Game:
     def get_throw_variant(self, color, current_dice):
 
         current_position = self.get_exact_element(color, self.match_dices_cells[current_dice])
-        if isinstance(current_position, MyStack):
-            if current_position.color == color:
-                return current_position.top
+        if isinstance(current_position, MyStack) and current_position.color == color:
+            return current_position.top
 
         else:
             above_flag = False
@@ -376,6 +375,9 @@ class Game:
         return
 
     def human_throw(self, color, dices=None):
+
+        current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
+
         if dices is None:
             first_throw_dice, second_throw_dice = self.throw_dices()
 
@@ -386,6 +388,8 @@ class Game:
                 else list(first_throw_dice for _ in range(4))
 
         while True:
+
+            print(*dices)
 
             possible_step_variants = dict()
             possible_throw_variants = dict()
@@ -452,12 +456,21 @@ class Game:
                 break
 
             if not current_checker_for_step:
+
                 current_throw_variants = possible_throw_variants[current_checker_for_throw]
+
                 if len(current_throw_variants) == 1 or len(set(current_throw_variants)) == 1:
                     current_throw_variant = current_throw_variants[0]
+
                     self.remove_checker_from_old_position(current_checker_for_throw)
                     current_checker_for_throw.position = 25
+
                     dices.remove(current_throw_variant)
+
+                    self.field.show_field()
+
+                    if self.field.get_sum_of_structure(current_structure, 'white') == 0:
+                        return
 
                     if dices:
                         continue
@@ -479,7 +492,15 @@ class Game:
                         else:
                             break
 
+                    self.remove_checker_from_old_position(current_checker_for_throw)
+                    current_checker_for_throw.position = 25
+
                     dices.remove(current_dice_for_throw)
+
+                    self.field.show_field()
+
+                    if self.field.get_sum_of_structure(current_structure, 'white') == 0:
+                        return
 
                     if dices:
                         continue
@@ -491,8 +512,22 @@ class Game:
                         current_step_variants = list(
                             current_checker_for_step.position + step
                             for step in possible_step_variants[key])
-                        print(*current_step_variants)
+                        print(*set(current_step_variants))
                         break
+                if len(current_step_variants) == 1 or len(set(current_step_variants)) == 1:
+
+                    current_dice_for_step = possible_step_variants[current_checker_for_step][0]
+
+                    self.is_success_move(current_checker_for_step, current_dice_for_step)
+                    self.field.show_field()
+
+                    dices.remove(current_dice_for_step)
+
+                    self.field.show_field()
+                    if dices:
+                        continue
+                    break
+
                 while True:
                     try:
                         current_cell_for_step = int(input('Выберите номер ячейки для хода: '))
@@ -500,7 +535,7 @@ class Game:
                         print("Ты ввел херню, введи число")
                         continue
                     current_dice_for_step = current_cell_for_step - current_checker_for_step.position
-                    if current_dice_for_step not in current_step_variants:
+                    if current_cell_for_step not in current_step_variants:
                         print('Такой ход невозможен')
                         continue
                     else:
@@ -510,6 +545,8 @@ class Game:
                 self.field.show_field()
 
                 dices.remove(current_dice_for_step)
+
+                self.field.show_field()
                 if dices:
                     continue
                 break
@@ -520,12 +557,16 @@ class Game:
                         current_checker_for_step.position + step
                         for step in possible_step_variants[key])
                     print(f'Варианты хода если вы хотите походить этой шашкой:')
-                    print(*current_step_variants)
+                    print(*set(current_step_variants))
                     break
 
             while True:
                 try:
-                    current_cell_number = int(input('Выберите номер ячейки: '))
+                    current_cell_number = int(
+                        input(
+                            'Если хотите походить, выберите номер ячейки, если нет, вводите что угодно'
+                        )
+                    )
                 except ValueError:
 
                     current_throw_variants = possible_throw_variants[current_checker_for_throw]
@@ -536,6 +577,10 @@ class Game:
                         current_checker_for_throw.position = 25
 
                         dices.remove(current_throw_variants[0])
+
+                        if self.field.get_sum_of_structure(current_structure, 'white') == 0:
+                            return
+
                         break
 
                     else:
@@ -558,6 +603,10 @@ class Game:
                         current_checker_for_throw.position = 25
 
                         dices.remove(current_dice_for_throw)
+
+                        if self.field.get_sum_of_structure(current_structure, 'white') == 0:
+                            return
+
                         break
 
                 current_dice_number = current_cell_number - current_checker_for_step.position
@@ -571,6 +620,10 @@ class Game:
                         current_checker_for_throw.position = 25
 
                         dices.remove(current_throw_variants[0])
+
+                        if self.field.get_sum_of_structure(current_structure, 'white') == 0:
+                            return
+
                         break
 
                     else:
@@ -593,8 +646,11 @@ class Game:
                         current_checker_for_throw.position = 25
 
                         dices.remove(current_dice_number)
-                        break
 
+                        if self.field.get_sum_of_structure(current_structure, 'white') == 0:
+                            return
+
+                        break
 
                 else:
                     self.is_success_move(current_checker_for_step, current_dice_number)
