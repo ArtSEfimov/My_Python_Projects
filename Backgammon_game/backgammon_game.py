@@ -92,8 +92,9 @@ class Game:
                     if self.field.get_sum_of_structure(self.field.white_yard, color) > 0:
                         self.throw_away(color)
                         self.field.show_field()
-                        self.who_steps = 'human'
-                        continue
+                        if self.field.get_sum_of_structure(self.field.white_yard, color) > 0:
+                            self.who_steps = 'human'
+                            continue
                     else:
                         self.computer_end_throwing_flag = True
 
@@ -122,8 +123,9 @@ class Game:
                     if self.field.get_sum_of_structure(self.field.black_yard, color) > 0:
                         self.human_throw(color)
                         self.field.show_field()
-                        self.who_steps = 'computer'
-                        continue
+                        if self.field.get_sum_of_structure(self.field.black_yard, color) > 0:
+                            self.who_steps = 'computer'
+                            continue
                     else:
                         self.human_end_throwing_flag = True
 
@@ -477,20 +479,7 @@ class Game:
                     break
 
                 else:
-                    print(
-                        f'Значения кубиков для сброса шашки из этой ячейки: {", ".join(str(x) for x in current_throw_variants)}'
-                    )
-                    while True:
-                        try:
-                            current_dice_for_throw = int(input('Выберите значение кубика для сброса: '))
-                        except ValueError:
-                            print("Ты ввел херню, введи число")
-                            continue
-                        if current_dice_for_throw not in current_throw_variants:
-                            print('Такой ход невозможен')
-                            continue
-                        else:
-                            break
+                    current_dice_for_throw = max(current_throw_variants)
 
                     self.remove_checker_from_old_position(current_checker_for_throw)
                     current_checker_for_throw.position = 25
@@ -584,20 +573,8 @@ class Game:
                         break
 
                     else:
-                        print(
-                            f'Значения кубиков для сброса шашки из этой ячейки: {", ".join(str(x) for x in current_throw_variants)}'
-                        )
-                        while True:
-                            try:
-                                current_dice_for_throw = int(input('Выберите значение кубика для сброса: '))
-                            except ValueError:
-                                print("Ты ввел херню, введи число")
-                                continue
-                            if current_dice_for_throw not in current_throw_variants:
-                                print('Такой ход невозможен')
-                                continue
-                            else:
-                                break
+
+                        current_dice_for_throw = max(current_throw_variants)
 
                         self.remove_checker_from_old_position(current_checker_for_throw)
                         current_checker_for_throw.position = 25
@@ -627,20 +604,8 @@ class Game:
                         break
 
                     else:
-                        print(
-                            f'Значения кубиков для сброса шашки из этой ячейки: {", ".join(str(x) for x in current_throw_variants)}'
-                        )
-                        while True:
-                            try:
-                                current_dice_number = int(input('Выберите значение кубика для сброса: '))
-                            except ValueError:
-                                print("Ты ввел херню, введи число")
-                                continue
-                            if current_dice_number not in current_step_variants:
-                                print('Такой ход невозможен')
-                                continue
-                            else:
-                                break
+
+                        current_dice_number = max(current_step_variants)
 
                         self.remove_checker_from_old_position(current_checker_for_throw)
                         current_checker_for_throw.position = 25
@@ -668,7 +633,6 @@ class Game:
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
         # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
-        self.first_dice, self.second_dice = 1, 2
 
         double_flag = self.first_dice == self.second_dice
         if double_flag:
@@ -3235,6 +3199,6 @@ class Game:
                             break
 
 
-for _ in range(100_000):
+for _ in range(1):
     g = Game()
     g.play_the_game()
