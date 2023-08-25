@@ -788,7 +788,10 @@ class Game:
                 self.field.get_count_of_free_cells(self.field.black_home) + \
                 self.get_position_color(7, reverse=True) > 0 and \
                 self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
-                self.get_position_color(7) < 5:
+                self.get_position_color(7) < 5 and \
+                self.field.get_sum_of_structure(self.field.black_home, 'black') - \
+                self.field.get_occupied_of_structure(self.field.black_home, 'black') > \
+                self.field.get_count_of_free_cells(self.field.black_yard):
             return 1
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
@@ -873,7 +876,7 @@ class Game:
                         1: 1, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
                         7: 11, 8: 10, 9: 9, 10: 8, 11: 7, 12: 6,
                         13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                        19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
                     },
 
                 6:  # если шашка из чужого дома и первого этажа
@@ -884,12 +887,16 @@ class Game:
 
                 7:  # чтобы закинуть в свой двор (первый этаж)
                     {
-                        1: 1, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8
+                        # 1: 1, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8  изменено 25.08.2023
+
+                        1: 1, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10
+
                     },
 
                 8:  # чтобы закинуть в свой двор (второй этаж)
                     {
-                        1: 1, 2: 8, 3: 7, 4: 6, 5: 5, 6: 4
+                        # 1: 1, 2: 8, 3: 7, 4: 6, 5: 5, 6: 4 изменено 25.08.2023
+                        1: 1, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6
                     },
 
                 9:  # со второго этажа в зону выброса (если там уже что-то наше есть)
@@ -981,9 +988,10 @@ class Game:
                 2:  # шашка с головы и второго этажа
                     {
                         1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
-                        7: 5, 8: 4, 9: 3, 10: 2, 11: 1, 12: 0,
+                        # 7: 5, 8: 4, 9: 3, 10: 2, 11: 1, 12: 0, изменено 25.08.2023
+                        7: 11, 8: 10, 9: 9, 10: 8, 11: 7, 12: 6,
                         13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-                        19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                        19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
                     },
 
                 1:  # со второго этажа в зону выброса (если там уже что-то наше есть)
@@ -2132,6 +2140,8 @@ class Game:
                     if quarters_ratios[position_expression] == 3:
                         return 8  # 16
                     if quarters_ratios[position_expression] == 4:
+                        if self.field.get_sum_of_structure(self.field.white_yard, 'black') > 0:
+                            return 8
                         return 0  # 8
 
                 if current_phase == 2:
@@ -2145,6 +2155,8 @@ class Game:
                     if quarters_ratios[position_expression] == 3:
                         return 16
                     if quarters_ratios[position_expression] == 4:
+                        if self.field.get_sum_of_structure(self.field.white_yard, 'black') > 0:
+                            return 8
                         return 0  # 8
 
                 if current_phase == 3:
