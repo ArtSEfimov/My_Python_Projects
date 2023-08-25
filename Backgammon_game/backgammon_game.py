@@ -268,8 +268,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        # current_checker_number = int(input('Выберите номер шашки: '))
-                        current_checker_number = random.randint(1, 24)
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                        # current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -295,8 +295,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            # current_dice_number = int(input('Выберите номер ячейки: '))
-                            current_dice_number = random.randint(1, 24)
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            # current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -328,8 +328,8 @@ class Game:
 
                     while True:
                         try:
-                            # current_checker_number = int(input('Выберите номер шашки: '))
-                            current_checker_number = random.randint(1, 24)
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                            # current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -791,14 +791,6 @@ class Game:
                 self.get_position_color(7) < 5:
             return 1
 
-        # if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
-        #         self.field.get_sum_of_structure(self.field.black_yard, 'black') > 6 and \
-        #         self.field.get_count_of_free_cells(self.field.white_home) > 0 and \
-        #         self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4 and \
-        #         self.white_head is not None:
-        #     return 2  # сделал так, чтобы сумма моих шашек дома + во дворе были > 6, тогда можно получить фазу 2,
-        #     # если шашек меньше, фазу 2 пропускаем
-
         if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
                 self.field.get_sum_of_structure(self.field.black_yard, 'black') > \
                 self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
@@ -960,7 +952,7 @@ class Game:
                         1: 7, 2: 12, 3: 11, 4: 10, 5: 9, 6: 8
                     },
 
-                7:  # если шашка из чужого дома
+                7:  # если шашка из чужого дома и первого этажа
                     {
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                     },
@@ -1068,6 +1060,12 @@ class Game:
 
                 3:  # когда улетаем в зону выброса и там свободно (если там уже что-то наше есть)
                     {
+                        19: 6, 20: 5, 21: 4, 22: 3, 23: 2, 24: 1
+                    }
+
+                    if (self.white_head if color == 'black' else self.black_head) is not None else
+
+                    {
                         19: 1, 20: 2, 21: 3, 22: 4, 23: 5, 24: 6
                     }
             }
@@ -1093,6 +1091,12 @@ class Game:
 
                 2:  # когда улетаем в зону выброса и там свободно (если там уже что-то наше есть)
                     {
+                        19: 6, 20: 5, 21: 4, 22: 3, 23: 2, 24: 1
+                    }
+
+                    if (self.white_head if color == 'black' else self.black_head) is not None else
+
+                    {
                         19: 1, 20: 2, 21: 3, 22: 4, 23: 5, 24: 6
                     }
             }
@@ -1112,6 +1116,12 @@ class Game:
                     },
 
                 1:  # когда улетаем в зону выброса и там свободно (если там уже что-то наше есть)
+                    {
+                        19: 6, 20: 5, 21: 4, 22: 3, 23: 2, 24: 1
+                    }
+
+                    if (self.white_head if color == 'black' else self.black_head) is not None else
+
                     {
                         19: 1, 20: 2, 21: 3, 22: 4, 23: 5, 24: 6
                     }
@@ -2792,7 +2802,7 @@ class Game:
 
                 return 6
 
-            if 12 < checker_value.position < 19:
+            if 12 < checker_value.position < 19 and old_position.count == 1:
                 return 7
 
             if self.field.get_sum_of_structure(self.field.white_yard, checker_value.color) > 0:
