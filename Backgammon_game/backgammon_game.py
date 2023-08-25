@@ -784,15 +784,33 @@ class Game:
 
     def get_phase_of_game(self):
 
+        # if self.black_head is not None and self.black_head.count > 1 and \
+        #         self.field.get_count_of_free_cells(self.field.black_home) + \
+        #         self.get_position_color(7, reverse=True) > 0 and \
+        #         self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
+        #         self.get_position_color(7) < 5 and \
+        #         self.field.get_sum_of_structure(self.field.black_home, 'black') - \
+        #         self.field.get_occupied_of_structure(self.field.black_home, 'black') > \
+        #         self.field.get_count_of_free_cells(self.field.black_yard):
+        #     return 1
+
         if self.black_head is not None and self.black_head.count > 1 and \
-                self.field.get_count_of_free_cells(self.field.black_home) + \
-                self.get_position_color(7, reverse=True) > 0 and \
-                self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
-                self.get_position_color(7) < 5 and \
+                self.field.get_count_of_free_cells(self.field.black_home) > 0 and \
                 self.field.get_sum_of_structure(self.field.black_home, 'black') - \
                 self.field.get_occupied_of_structure(self.field.black_home, 'black') > \
                 self.field.get_count_of_free_cells(self.field.black_yard):
             return 1
+
+        # if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
+        #         self.field.get_sum_of_structure(self.field.black_yard, 'black') > \
+        #         self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
+        #         self.field.get_count_of_free_cells(self.field.black_home) + \
+        #         self.field.get_occupied_of_structure(self.field.black_yard, 'black') + \
+        #         self.field.get_count_of_free_cells(self.field.black_yard) and \
+        #         self.field.get_count_of_free_cells(self.field.white_home) > 0 and \
+        #         self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4 and \
+        #         self.white_head is not None:
+        #     return 2
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
                 self.field.get_sum_of_structure(self.field.black_yard, 'black') > \
@@ -801,7 +819,6 @@ class Game:
                 self.field.get_occupied_of_structure(self.field.black_yard, 'black') + \
                 self.field.get_count_of_free_cells(self.field.black_yard) and \
                 self.field.get_count_of_free_cells(self.field.white_home) > 0 and \
-                self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4 and \
                 self.white_head is not None:
             return 2
 
@@ -2777,10 +2794,7 @@ class Game:
 
                 return 4
 
-            if old_position.count > 1 or self.is_my_position_lower_than_last_white(checker_value.position):
-                return 5
-
-            if 12 < checker_value.position < 19:
+            if 12 < checker_value.position < 19 and old_position.count == 1:
                 return 6
 
             if checker_value.position < 7 and 6 < checker_value.position + dice < 13:
@@ -2793,6 +2807,9 @@ class Game:
                 if (old_position.count > 1 or self.is_my_position_lower_than_last_white(checker_value.position)) \
                         and checker_value.position + dice > 18:
                     return 9
+
+            if old_position.count > 1 or self.is_my_position_lower_than_last_white(checker_value.position):
+                return 5
 
             return 0
 
