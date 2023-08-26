@@ -784,33 +784,30 @@ class Game:
 
     def get_phase_of_game(self):
 
-        # if self.black_head is not None and self.black_head.count > 1 and \
-        #         self.field.get_count_of_free_cells(self.field.black_home) + \
-        #         self.get_position_color(7, reverse=True) > 0 and \
-        #         self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
-        #         self.get_position_color(7) < 5 and \
-        #         self.field.get_sum_of_structure(self.field.black_home, 'black') - \
-        #         self.field.get_occupied_of_structure(self.field.black_home, 'black') > \
-        #         self.field.get_count_of_free_cells(self.field.black_yard):
-        #     return 1
-
         if self.black_head is not None and self.black_head.count > 1 and \
-                self.field.get_count_of_free_cells(self.field.black_home) > 0 and \
+                self.field.get_count_of_free_cells(self.field.black_home) + \
+                self.get_position_color(7, reverse=True) > 0 and \
+                self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
+                self.get_position_color(7) < 5 and \
                 self.field.get_sum_of_structure(self.field.black_home, 'black') - \
                 self.field.get_occupied_of_structure(self.field.black_home, 'black') > \
                 self.field.get_count_of_free_cells(self.field.black_yard):
             return 1
 
-        # if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
-        #         self.field.get_sum_of_structure(self.field.black_yard, 'black') > \
-        #         self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
-        #         self.field.get_count_of_free_cells(self.field.black_home) + \
-        #         self.field.get_occupied_of_structure(self.field.black_yard, 'black') + \
-        #         self.field.get_count_of_free_cells(self.field.black_yard) and \
-        #         self.field.get_count_of_free_cells(self.field.white_home) > 0 and \
-        #         self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4 and \
-        #         self.white_head is not None:
-        #     return 2
+        # if self.black_head is not None and self.black_head.count > 1 and \
+        #         (
+        #                 self.field.get_count_of_free_cells(self.field.black_home) + \
+        #                 self.get_position_color(7, reverse=True) > 0 if
+        #                 self.is_checker_in_another_yard('black') else
+        #                 self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
+        #                 self.field.get_occupied_of_structure(self.field.black_home, 'white') + \
+        #                 self.get_position_color(7, color='black') + \
+        #                 self.get_position_color(7, color='white') < 6
+        #         ) and \
+        #         self.field.get_sum_of_structure(self.field.black_home, 'black') - \
+        #         self.field.get_occupied_of_structure(self.field.black_home, 'black') > \
+        #         self.field.get_count_of_free_cells(self.field.black_yard):
+        #     return 1
 
         if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
                 self.field.get_sum_of_structure(self.field.black_yard, 'black') > \
@@ -819,6 +816,7 @@ class Game:
                 self.field.get_occupied_of_structure(self.field.black_yard, 'black') + \
                 self.field.get_count_of_free_cells(self.field.black_yard) and \
                 self.field.get_count_of_free_cells(self.field.white_home) > 0 and \
+                self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4 and \
                 self.white_head is not None:
             return 2
 
@@ -1921,10 +1919,12 @@ class Game:
                 if 7 <= current_checker.position <= 12:
                     if 7 <= current_checker.position + dice <= 12:
                         return 8  # 8
+
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and \
                                 current_checker.position + dice > last_white_checker_position:
                             return 16  # 32
+
                     if current_checker.position + dice > 18:
                         return -16
 
@@ -1960,6 +1960,7 @@ class Game:
                         if current_checker.position == 7:
                             return -4
                         return 8
+
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and \
                                 current_checker.position + dice > last_white_checker_position:
@@ -2000,6 +2001,7 @@ class Game:
 
                     if current_checker.position + dice > 18:
                         return -4
+
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
                             if last_white_checker_position < current_checker.position + dice <= 18:
@@ -2910,7 +2912,7 @@ class Game:
                 count += self.manage_the_last_quarter(checker_value.position,
                                                       punishment_flag=old_position.count == 1)
 
-                if self.get_phase_of_game() in (1, 2):
+                if self.get_phase_of_game() in (1, 2, 3):
                     count += self.offset(checker_value.position, cell_value)
 
                 if self.is_checker_in_another_yard(color):
