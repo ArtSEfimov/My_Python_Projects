@@ -771,24 +771,23 @@ class Game:
                 for checker in (self.white_checkers if color == 'white' else self.black_checkers)
                 if checker.is_up]
 
-    def get_position_color(self, position_number, color='black', reverse=False):
+    def get_position_color(self, position_number, color='black', is_position_free_flag=False):
         value, position = self.get_position(color, position_number)
         value = value.data[position]
         if isinstance(value, MyStack):
-            if reverse:
+            if is_position_free_flag:
                 return 0
             if value.color == color:
                 return 1
 
-        return 1 if reverse else 0
+        return 1 if is_position_free_flag else 0
 
     def get_phase_of_game(self):
 
         if self.black_head is not None and self.black_head.count > 1 and \
                 self.field.get_count_of_free_cells(self.field.black_home) + \
-                self.get_position_color(7, reverse=True) > 0 and \
-                self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
-                self.get_position_color(7) < 5 and \
+                self.get_position_color(7, is_position_free_flag=True) > 0 and \
+                self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4 and \
                 self.field.get_sum_of_structure(self.field.black_home, 'black') - \
                 self.field.get_occupied_of_structure(self.field.black_home, 'black') > \
                 self.field.get_count_of_free_cells(self.field.black_yard):
@@ -851,15 +850,23 @@ class Game:
         if current_phase == 1:
             return {
 
+                # 0:  # обычные
+                #     {
+                #         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                #         7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
+                #         # 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                #
+                #         13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,  # сделано для красоты
+                #         # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                #
+                #         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                #     },
+
                 0:  # обычные
                     {
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                        7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                        # 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-
-                        13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,  # сделано для красоты
-                        # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-
+                        7: 12, 8: 11, 9: 10, 10: 9, 11: 8, 12: 7,
+                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -888,7 +895,8 @@ class Game:
 
                 5:  # если шашка со второго и выше этажа
                     {
-                        1: 1, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
+                        # 1: 1, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
+                        1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
                         7: 11, 8: 10, 9: 9, 10: 8, 11: 7, 12: 6,
                         13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
@@ -904,14 +912,19 @@ class Game:
                     {
                         # 1: 1, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8  изменено 25.08.2023
 
-                        1: 1, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10
+                        # 1: 1, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10
+
+                        1: 11, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10
 
                     },
 
                 8:  # чтобы закинуть в свой двор (второй этаж)
                     {
                         # 1: 1, 2: 8, 3: 7, 4: 6, 5: 5, 6: 4 изменено 25.08.2023
-                        1: 1, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6
+
+                        # 1: 1, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6
+
+                        1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6
                     },
 
                 9:  # со второго этажа в зону выброса (если там уже что-то наше есть)
@@ -926,16 +939,24 @@ class Game:
         if current_phase == 2:
             return {
 
+                # 0:  # обычный
+                #     {
+                #         1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
+                #
+                #         # 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2, изменено 18.07.2023
+                #         7: 13, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
+                #
+                #         # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
+                #         13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,  # сделано для красоты
+                #
+                #         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
+                #     },
+
                 0:  # обычный
                     {
-                        1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-
-                        # 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2, изменено 18.07.2023
-                        7: 13, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
-
-                        # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-                        13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,  # сделано для красоты
-
+                        1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1,
+                        7: 12, 8: 11, 9: 10, 10: 9, 11: 8, 12: 7,
+                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -1874,11 +1895,11 @@ class Game:
     @staticmethod
     def offset(old_position, new_position):
         old_position_ratios = {
-            1: -6, 2: -5, 3: -4, 4: -3, 5: -2, 6: -1
+            2: -5, 3: -4, 4: -3, 5: -2, 6: -1
         }
 
         new_position_ratios = {
-            7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6
+            7: 0, 8: 1, 9: 2, 10: 3, 11: 4, 12: 5
         }
 
         if old_position in old_position_ratios and new_position in new_position_ratios:
