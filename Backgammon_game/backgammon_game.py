@@ -1948,22 +1948,26 @@ class Game:
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and \
                                 current_checker.position + dice > last_white_checker_position:
-                            return 16  # 32
+                            return 16
 
                     if current_checker.position + dice > 18:
                         return -16
 
                 if 13 <= current_checker.position <= 18:
-                    if current_checker.position + dice > 18:
-                        return -16
-
                     if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
                         if 13 <= current_checker.position < last_white_checker_position:
-                            if last_white_checker_position < current_checker.position + dice <= 18:
-                                return 16  # 32
+                            if current_checker.position + dice > last_white_checker_position:
+                                if current_checker.position + dice > 18:
+                                    return 4
+
+                                return 32
+
                         if last_white_checker_position < current_checker.position <= 18:
                             if last_white_checker_position < current_checker.position + dice <= 18:
                                 return -4  # -8
+
+                    if current_checker.position + dice > 18:
+                        return -16
 
                 if current_checker.position > 18:
                     return -16
@@ -1989,21 +1993,26 @@ class Game:
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and \
                                 current_checker.position + dice > last_white_checker_position:
-                            return 32
+                            return 16
+
                     if current_checker.position + dice > 18:
                         return -8
 
                 if 13 <= current_checker.position <= 18:
-                    if current_checker.position + dice > 18:
-                        return -8
-
                     if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
                         if 13 <= current_checker.position < last_white_checker_position:
-                            if last_white_checker_position < current_checker.position + dice <= 18:
+                            if current_checker.position + dice > last_white_checker_position:
+                                if current_checker.position + dice > 18:
+                                    return 8
+
                                 return 32
+
                         if last_white_checker_position < current_checker.position <= 18:
                             if last_white_checker_position < current_checker.position + dice <= 18:
                                 return -4
+
+                    if current_checker.position + dice > 18:
+                        return -8
 
                 if current_checker.position > 18:
                     return -16
@@ -2035,11 +2044,19 @@ class Game:
                         return -16  # -32
 
                 if 13 <= current_checker.position <= 18:
-                    if current_checker.position + dice > 18:
-                        return -4
                     if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
+                        if 13 <= current_checker.position < last_white_checker_position:
+                            if current_checker.position + dice > last_white_checker_position:
+                                if current_checker.position + dice > 18:
+                                    return 16
+
+                                return 32
+
                         if last_white_checker_position <= current_checker.position + dice <= 18:
                             return -4
+
+                    if current_checker.position + dice > 18:
+                        return -4
 
                 if current_checker.position > 18:
                     return -16
@@ -2054,7 +2071,7 @@ class Game:
                 if last_white_checker_position is not None:
                     if 13 <= current_checker.position < last_white_checker_position:
                         if current_checker.position + dice > last_white_checker_position:
-                            return 16
+                            return 32
 
                 return 0
 
@@ -2079,6 +2096,11 @@ class Game:
                         return -32
 
                 if 13 <= current_checker.position <= 18:
+                    if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
+                        if 13 <= current_checker.position < last_white_checker_position:
+                            if current_checker.position + dice > last_white_checker_position:
+                                return 16
+
                     if 13 <= current_checker.position + dice <= 18:
                         return -4
                     if current_checker.position + dice > 18:
@@ -2104,6 +2126,11 @@ class Game:
                         return -16
 
                 if 13 <= current_checker.position <= 18:
+                    if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
+                        if 13 <= current_checker.position < last_white_checker_position:
+                            if current_checker.position + dice > last_white_checker_position:
+                                return 16
+
                     if 13 <= current_checker.position + dice <= 18:
                         return -8
                     if current_checker.position + dice > 18:
@@ -2133,6 +2160,11 @@ class Game:
                         return -8
 
                 if 13 <= current_checker.position <= 18:
+                    if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
+                        if 13 <= current_checker.position < last_white_checker_position:
+                            if current_checker.position + dice > last_white_checker_position:
+                                return 16
+
                     if 13 <= current_checker.position + dice <= 18:
                         return -4
                     if current_checker.position + dice > 18:
@@ -2151,7 +2183,7 @@ class Game:
                 if last_white_checker_position is not None:
                     if 13 <= current_checker.position < last_white_checker_position:
                         if current_checker.position + dice > last_white_checker_position:
-                            return 8
+                            return 16
 
                 return 0
 
