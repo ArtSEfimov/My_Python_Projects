@@ -896,7 +896,7 @@ class Game:
                 5:  # если шашка со второго и выше этажа
                     {
                         # 1: 1, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
-                        1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
+                        1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,  # 28.08.2023 ОТКАТЫВАТЬ изменения ЗДЕСЬ
                         7: 11, 8: 10, 9: 9, 10: 8, 11: 7, 12: 6,
                         13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
@@ -914,7 +914,7 @@ class Game:
 
                         # 1: 1, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10
 
-                        1: 11, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10
+                        1: 11, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10  # 28.08.2023 ОТКАТЫВАТЬ изменения ЗДЕСЬ
 
                     },
 
@@ -924,7 +924,7 @@ class Game:
 
                         # 1: 1, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6
 
-                        1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6
+                        1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6  # 28.08.2023 ОТКАТЫВАТЬ изменения ЗДЕСЬ
                     },
 
                 9:  # со второго этажа в зону выброса (если там уже что-то наше есть)
@@ -1081,17 +1081,9 @@ class Game:
 
                 1:  # шашка с головы
                     {
-                        # 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
-
-                        # 2: 12, 3: 11, 4: 10, 5: 9, 6: 8,
-
-                        2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-
+                        2: 12, 3: 11, 4: 10, 5: 9, 6: 8,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-
-                        # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
                         13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
-
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -1893,14 +1885,26 @@ class Game:
         return False
 
     @staticmethod
-    def offset(old_position, new_position):
-        old_position_ratios = {
-            2: -5, 3: -4, 4: -3, 5: -2, 6: -1
-        }
+    def offset(old_position, new_position, current_phase):
+        if current_phase == 3:
 
-        new_position_ratios = {
-            7: 0, 8: 1, 9: 2, 10: 3, 11: 4, 12: 5
-        }
+            old_position_ratios = {
+                2: -5, 3: -4, 4: -3, 5: -2, 6: -1
+            }
+
+            new_position_ratios = {
+                7: 0, 8: 1, 9: 2, 10: 3, 11: 4, 12: 5
+            }
+
+        else:
+
+            old_position_ratios = {
+                1: -6, 2: -5, 3: -4, 4: -3, 5: -2, 6: -1
+            }
+
+            new_position_ratios = {
+                7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6
+            }
 
         if old_position in old_position_ratios and new_position in new_position_ratios:
             return old_position_ratios[old_position] + new_position_ratios[new_position]
@@ -2934,7 +2938,7 @@ class Game:
                                                       punishment_flag=old_position.count == 1)
 
                 if self.get_phase_of_game() in (1, 2, 3):
-                    count += self.offset(checker_value.position, cell_value)
+                    count += self.offset(checker_value.position, cell_value, self.get_phase_of_game())
 
                 if self.is_checker_in_another_yard(color):
                     count += self.liberation_and_hold_for_six_in_line(checker_value, dice)
