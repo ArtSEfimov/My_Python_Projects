@@ -268,8 +268,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))
-                        # current_checker_number = random.randint(1, 24)
+                        # current_checker_number = int(input('Выберите номер шашки: '))
+                        current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -295,8 +295,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))
-                            # current_dice_number = random.randint(1, 24)
+                            # current_dice_number = int(input('Выберите номер ячейки: '))
+                            current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -328,8 +328,8 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))
-                            # current_checker_number = random.randint(1, 24)
+                            # current_checker_number = int(input('Выберите номер шашки: '))
+                            current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -1457,6 +1457,62 @@ class Game:
             self.remove_checker_from_old_position(checker)
             self.move_checker_to_new_position(checker, reverse_flag=True)
 
+    def get_ratio_for_double_check(self, current_checker, current_dice):
+        ratio = 2
+
+        position_expression = current_checker.position + current_dice
+
+        if self.get_exact_element(current_checker.color, position_expression) != 0:
+            return 0
+
+        if self.get_phase_of_game() <= 3:
+            if position_expression == 7 and \
+                    self.field.get_count_of_free_cells(self.field.black_home) == 0 and \
+                    self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4:
+                ratio = 4
+
+            if position_expression < 7 and \
+                    self.field.get_count_of_free_cells(self.field.black_home) < 3 and \
+                    self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4:
+                ratio = 4
+
+            if 13 <= position_expression <= 18:
+                last_white_checker_position = self.get_last_white_checker_position(upper_border=6)
+                if last_white_checker_position == 13:
+                    if self.field.get_count_of_free_cells(self.field.white_home) < 3 and \
+                            self.field.get_occupied_of_structure(self.field.white_home, 'black') < 4:
+                        ratio = 4
+
+        if self.get_phase_of_game() > 3:
+            if 13 <= current_checker.position <= 24:
+
+                last_white_checker_position = self.get_last_white_checker_position(upper_border=12)
+
+                if last_white_checker_position is not None:
+                    if current_checker.position < last_white_checker_position < position_expression:
+                        ratio = 8
+
+                    if current_checker.position > last_white_checker_position:
+                        if self.get_exact_element(current_checker.color, current_checker.position).count > 1:
+                            ratio = 4
+
+            if current_checker.position <= 12:
+
+                if position_expression >= 13:
+                    last_white_checker_position = self.get_last_white_checker_position(upper_border=12)
+
+                    if last_white_checker_position is not None:
+                        if self.get_exact_element(current_checker.color, current_checker.position).count > 1:
+                            if position_expression > last_white_checker_position:
+                                ratio = 4
+
+                if position_expression <= 12:
+                    if self.get_exact_element(current_checker.color, current_checker.position).count > 1:
+                        ratio = 4
+        if ratio != 2:
+            c=1
+        return ratio
+
     def checking_move(self):
         color = 'black'
 
@@ -1583,7 +1639,9 @@ class Game:
             #     for x in count_21
             # )
 
-            if common_step_count > (max(single_count_1, single_count_2) * 0.8):
+            ratio = self.get_ratio_for_double_check(common_step_checker, self.first_dice + self.second_dice)
+            k = (10 - ratio) / 10
+            if common_step_count > (max(single_count_1, single_count_2) * k):
                 print(
                     f'\n\nДВОЙНОЙ ХОД\n\nchecker = {common_step_checker} dice = {self.first_dice + self.second_dice} COUNT = {common_step_count}')
                 self.is_success_move(common_step_checker, self.first_dice + self.second_dice)
@@ -1682,7 +1740,17 @@ class Game:
                 return last_checker, dice_2, None
         return
 
-    def get_plus_ratio(self, count):
+    def get_plus_ratio(self, old_position_value, new_position_value, old_position_count):
+
+        if 13 <= old_position_value <= 24:
+            last_white_checker_position = self.get_last_white_checker_position(lower_border=1, upper_border=12)
+            if last_white_checker_position is None or old_position_value < last_white_checker_position:
+                return 0
+
+        if 13 <= new_position_value <= 24:
+            last_white_checker_position = self.get_last_white_checker_position(lower_border=1, upper_border=12)
+            if last_white_checker_position is None or new_position_value < last_white_checker_position:
+                return 0
 
         ratios = {  # 1 choice
             2: 8, 3: 9, 4: 10, 5: 11,
@@ -1691,22 +1759,25 @@ class Game:
         }
 
         if self.black_head is not None and self.black_head.count >= 4:
-            if count >= self.black_head.count // 2:
+            if old_position_count >= self.black_head.count // 2:
                 ratios = {  # 1 choice
                     2: 14, 3: 15, 4: 16, 5: 17,
                     6: 18, 7: 19, 8: 20, 9: 21, 10: 22,
                     11: 23, 12: 24, 13: 25, 25: 26, 15: 27
                 }
 
+                return ratios[old_position_count]
 
-        if self.black_head is None:
-            # ЗАКОММЕНТИРОВАНО 09.09.2023
-            # ratios = {
-            #     2: 14, 3: 15, 4: 16, 5: 17,
-            #     6: 18, 7: 19, 8: 20, 9: 21, 10: 22,
-            #     11: 23, 12: 24, 13: 25, 25: 26, 15: 27
-            # }
+        # # ЗАКОММЕНТИРОВАНО 09.09.2023
+        # if self.black_head is None:
+        #
+        #     # ratios = {
+        #     #     2: 14, 3: 15, 4: 16, 5: 17,
+        #     #     6: 18, 7: 19, 8: 20, 9: 21, 10: 22,
+        #     #     11: 23, 12: 24, 13: 25, 25: 26, 15: 27
+        #     # }
 
+        if self.get_phase_of_game() > 3:
             # ДОБАВЛЕНО 09.09.2023
             ratios = {
                 2: 2, 3: 3, 4: 4, 5: 5,
@@ -1714,19 +1785,25 @@ class Game:
                 11: 11, 12: 12, 13: 13, 14: 14, 15: 15
             }
 
+            return ratios[old_position_count]
 
+        return ratios[old_position_count]  # trying_2
 
-        return ratios[count]  # trying_2
+    def get_minus_ratio(self, old_position_value, new_position_value, new_position_count):
 
-    def get_minus_ratio(self, old_position_count, old_position_value, new_position_count):
-
-        if self.get_phase_of_game() in (4, 5):
-            if 13 <= old_position_value <= 24:
-                last_white_checker_position = self.get_last_white_checker_position(lower_border=1, upper_border=12)
-                if last_white_checker_position is None or old_position_value < last_white_checker_position:
-                    return 0
-            if old_position_count > 1:
+        if 13 <= old_position_value <= 24:
+            last_white_checker_position = self.get_last_white_checker_position(lower_border=1, upper_border=12)
+            if last_white_checker_position is None or old_position_value < last_white_checker_position:
                 return 0
+
+        if 13 <= new_position_value <= 24:
+            last_white_checker_position = self.get_last_white_checker_position(lower_border=1, upper_border=12)
+            if last_white_checker_position is None or new_position_value < last_white_checker_position:
+                return 0
+
+        if self.get_phase_of_game() > 3:
+            # if old_position_count > 1:
+            #     return 0
 
             ratios = {  # 1 choice
                 1: 1, 2: 2, 3: 3, 4: 4, 5: 5,
@@ -1897,21 +1974,41 @@ class Game:
 
         return False
 
+    # def offset(self, current_checker, current_dice):
+    #
+    #     head_black_checker_position_for_offset = self.get_last_black_checker_position(
+    #         lower_border=2,
+    #         upper_border=12,
+    #         reverse=True
+    #     )
+    #
+    #     if head_black_checker_position_for_offset is None:
+    #         return 0
+    #     if current_checker.position == head_black_checker_position_for_offset:
+    #         if current_checker.position + current_dice <= 12:
+    #             if current_dice == min(self.first_dice, self.second_dice):
+    #                 return 4
+    #             if current_dice == max(self.first_dice, self.second_dice):
+    #                 return 8
+    #
+    #     return 0
+
     def offset(self, current_checker, current_dice):
+
         head_black_checker_position_for_offset = self.get_last_black_checker_position(
-            lower_border=2,
-            upper_border=12,
+            lower_border=1,
+            upper_border=6,
             reverse=True
         )
 
         if head_black_checker_position_for_offset is None:
             return 0
         if current_checker.position == head_black_checker_position_for_offset:
-            if current_checker.position + current_dice <= 12:
+            if current_checker.position <= 6 and current_checker.position + current_dice <= 12:
                 if current_dice == min(self.first_dice, self.second_dice):
-                    return 2
+                    return 4
                 if current_dice == max(self.first_dice, self.second_dice):
-                    return 14
+                    return 8
 
         return 0
 
@@ -1958,7 +2055,7 @@ class Game:
 
                 if 7 <= current_checker.position <= 12:
                     if 7 <= current_checker.position + dice <= 12:
-                        return 8
+                        return 4  # 8
 
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
@@ -2040,8 +2137,9 @@ class Game:
                 if 7 <= current_checker.position <= 12:
                     if 7 <= current_checker.position + dice <= 12:
                         if current_checker.position == 7:
-                            return -4
-                        return 8
+                            if self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4:
+                                return -4
+                        return 4  # 8
 
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
@@ -2117,7 +2215,7 @@ class Game:
                         if current_checker.position == 7:
                             if self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4:
                                 return -4
-                        return 8
+                        return 4  # 8
 
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
@@ -2361,7 +2459,7 @@ class Game:
                 if current_checker.position == self.get_last_black_checker_position(lower_border=1):
                     if current_checker.position + dice <= 12:
                         print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
-                        return 16  # 8  # 16
+                        return 8  # 16
 
                 if last_white_checker_position is not None:
                     if 13 <= current_checker.position < last_white_checker_position:
@@ -2392,9 +2490,12 @@ class Game:
 
                 if current_phase == 1:
                     # if current_checker.position == 1:
-                    #     return 4
+                    #     return 0
 
-                    if quarters_ratios[position_expression] == 1 or position_expression == 7:
+                    if quarters_ratios[position_expression] == 1 or \
+                            (position_expression == 7 and \
+                             self.field.get_count_of_free_cells(self.field.black_home) == 0 and \
+                             self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4):
                         return 16  # 32
                     if quarters_ratios[position_expression] == 2:
                         return 8  # 4  # 16
@@ -2409,7 +2510,7 @@ class Game:
                     # if current_checker.position == 1:
                     #     return 0
 
-                    if quarters_ratios[position_expression] == 1 or position_expression == 7:
+                    if quarters_ratios[position_expression] == 1:
                         return 16  # 8  # 4
                     if quarters_ratios[position_expression] == 2:
                         return 8  # 16
@@ -2424,7 +2525,7 @@ class Game:
                     # if current_checker.position == 1:
                     #     return 0
 
-                    if quarters_ratios[position_expression] == 1:  # or position_expression == 7:
+                    if quarters_ratios[position_expression] == 1:
                         return 16  # 8  # 4  # 16
                     if quarters_ratios[position_expression] == 2:
                         return 8  # 16  # 32
@@ -2436,7 +2537,7 @@ class Game:
                 if current_phase in (4, 5):
 
                     if current_checker.position == self.get_last_black_checker_position(lower_border=1):
-                        print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 32')
+                        print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 16')
                         return 16  # 32
 
                     if quarters_ratios[position_expression] == 1:
@@ -3176,7 +3277,7 @@ class Game:
                 print(f'сработала ф-ия manage_the_last_quarter для {checker_value}, COUNT ПОСЛЕ = {count}')
 
                 print(f'сработала ф-ия offset для {checker_value}, COUNT ДО = {count}')
-                if self.get_phase_of_game() < 3 and old_position.count == 1:
+                if self.get_phase_of_game() < 3:
                     count += self.offset(checker_value, dice)
                 print(f'сработала ф-ия offset для {checker_value}, COUNT ПОСЛЕ = {count}')
 
@@ -3193,7 +3294,7 @@ class Game:
                 if old_position.count > 1:
                     if checker_value.position != 1:
                         print(f'сработала ф-ия get_plus_ratio для {checker_value}, COUNT ДО = {count}')
-                        count += self.get_plus_ratio(old_position.count)
+                        count += self.get_plus_ratio(checker_value.position, cell_value, old_position.count)
                         print(f'сработала ф-ия get_plus_ratio для {checker_value}, COUNT ПОСЛЕ = {count}')
 
                     else:
@@ -3237,7 +3338,7 @@ class Game:
                 if isinstance(new_position, MyStack):
 
                     print(f'сработала ф-ия get_minus_ratio для {checker_value}, COUNT ДО = {count}')
-                    count -= self.get_minus_ratio(old_position.count, checker_value.position, new_position.count)
+                    count -= self.get_minus_ratio(checker_value.position, cell_value, new_position.count)
                     print(f'сработала ф-ия get_minus_ratio для {checker_value}, COUNT ПОСЛЕ = {count}')
 
                 else:
