@@ -268,8 +268,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        # current_checker_number = int(input('Выберите номер шашки: '))
-                        current_checker_number = random.randint(1, 24)
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                        # current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -295,8 +295,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            # current_dice_number = int(input('Выберите номер ячейки: '))
-                            current_dice_number = random.randint(1, 24)
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            # current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -328,8 +328,8 @@ class Game:
 
                     while True:
                         try:
-                            # current_checker_number = int(input('Выберите номер шашки: '))
-                            current_checker_number = random.randint(1, 24)
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                            # current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -1509,8 +1509,7 @@ class Game:
                 if position_expression <= 12:
                     if self.get_exact_element(current_checker.color, current_checker.position).count > 1:
                         ratio = 4
-        if ratio != 2:
-            c=1
+
         return ratio
 
     def checking_move(self):
@@ -2003,8 +2002,12 @@ class Game:
 
         if head_black_checker_position_for_offset is None:
             return 0
+
+        if self.field.get_occupied_of_structure(self.field.black_yard, 'black') > 0:
+            return 0
+
         if current_checker.position == head_black_checker_position_for_offset:
-            if current_checker.position <= 6 and current_checker.position + current_dice <= 12:
+            if current_checker.position <= 6:
                 if current_dice == min(self.first_dice, self.second_dice):
                     return 4
                 if current_dice == max(self.first_dice, self.second_dice):
