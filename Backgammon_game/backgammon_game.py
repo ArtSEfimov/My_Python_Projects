@@ -1538,7 +1538,7 @@ class Game:
                 if phase_of_game == 3:
 
                     if 7 <= position_expression <= 12:
-                        return 4
+                        return 3
 
                 if 13 <= position_expression <= 24:
 
@@ -3009,8 +3009,19 @@ class Game:
 
         ratios_dict = {
             1: 8,  # 16
-            2: 16,
-            3: 16,  # 32
+
+            2: 16 if self.field.get_occupied_of_structure(self.field.black_home, 'black') == 0 else 32,
+
+            3: 16 if all(
+                map(
+                    lambda structure: structure == 0,
+                    (
+                        self.field.get_occupied_of_structure(self.field.black_home, 'black'),
+                        self.field.get_occupied_of_structure(self.field.black_yard, 'black')
+                    )
+                )
+            ) else 32,  # 32
+
             4: 32
         }
 
