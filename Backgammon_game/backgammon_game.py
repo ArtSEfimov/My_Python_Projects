@@ -2057,7 +2057,7 @@ class Game:
                 if current_dice == min(self.first_dice, self.second_dice):
                     return 2
                 if current_dice == max(self.first_dice, self.second_dice):
-                    return 12
+                    return 10
 
         return 0
 
@@ -3101,23 +3101,18 @@ class Game:
             return ratios_dict[empty_count]
 
         if extraction_call:
-            if color_count > 2 or empty_count > 2:
+            if color_count > 3:
                 return 0
-            if color_count + empty_count > 2:
-                if color_count == 2:  # empty_count in (1, 2)
-                    return 0
-                if color_count == 1:  # empty_count == 2
-                    return 2
+            if empty_count > 3:
+                return 2
+            if color_count + empty_count > 3:
+                return 4
+            if color_count + empty_count == 3:
+                return 8
             if color_count + empty_count == 2:
-                if color_count == 2:  # empty_count == 0
-                    return 4
-                if color_count == 1:  # empty_count == 1
-                    return 8
+                return 16
             if color_count + empty_count == 1:
-                if color_count == 1:  # empty_count == 0
-                    return 16
-                if color_count == 0:  # empty_count == 1
-                    return 32
+                return 32
 
             return 0
 
