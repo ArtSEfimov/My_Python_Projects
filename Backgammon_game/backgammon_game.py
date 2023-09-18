@@ -1915,29 +1915,11 @@ class Game:
 
     @staticmethod
     def punishment(current_phase, old_position):  # штраф за оставление позиции
-        if current_phase == 1:
+        if current_phase <= 3:
             ratios = {
-                1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0,
-                7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
-                13: 1, 14: 2, 15: 3, 16: 4, 17: 5, 18: 6,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-            }
-            return ratios[old_position]
-
-        if current_phase == 2:
-            ratios = {
-                1: 0, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1,
-                7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0,
-                13: 6, 14: 7, 15: 8, 16: 9, 17: 10, 18: 11,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-            }
-            return ratios[old_position]
-
-        if current_phase == 3:
-            ratios = {
-                1: 0, 2: 11, 3: 10, 4: 9, 5: 8, 6: 7,
-                7: 1, 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
-                13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,
+                1: 18, 2: 17, 3: 16, 4: 15, 5: 14, 6: 13,
+                7: 12, 8: 11, 9: 10, 10: 9, 11: 8, 12: 7,
+                13: 6, 14: 5, 15: 4, 16: 3, 17: 2, 18: 1,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
             return ratios[old_position]
@@ -1955,27 +1937,18 @@ class Game:
     def encouragement(current_phase, new_position):  # поощрение за занятие пустой позиции
         if current_phase == 1:
             ratios = {
-                2: 1, 3: 2, 4: 3, 5: 4, 6: 5,
-                7: 6, 8: 7, 9: 8, 10: 9, 11: 10, 12: 11,
-                13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,
+                2: 14, 3: 15, 4: 16, 5: 17, 6: 18,
+                7: 8, 8: 9, 9: 10, 10: 11, 11: 12, 12: 13,
+                13: 7, 14: 6, 15: 5, 16: 4, 17: 3, 18: 2,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
             return ratios[new_position]
 
-        if current_phase == 2:
+        if current_phase <= 3:
             ratios = {
-                2: 1, 3: 2, 4: 3, 5: 4, 6: 5,
-                7: 6, 8: 7, 9: 8, 10: 9, 11: 10, 12: 11,
-                13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,
-                19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-            }
-            return ratios[new_position]
-
-        if current_phase == 3:
-            ratios = {
-                2: 1, 3: 2, 4: 3, 5: 4, 6: 5,
-                7: 6, 8: 7, 9: 8, 10: 9, 11: 10, 12: 11,
-                13: 17, 14: 16, 15: 15, 16: 14, 17: 13, 18: 12,
+                2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
+                7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
+                13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,
                 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
             }
             return ratios[new_position]
@@ -2324,14 +2297,14 @@ class Game:
 
                 last_black_checker_position = self.get_last_black_checker_position(lower_border=1, upper_border=12)
 
-                if last_black_checker_position is not None:
-                    if current_checker.position == last_black_checker_position:
-                        if current_checker.position + dice <= 12:
-                            if 1 <= current_checker.position <= 6:
-                                print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
-                                return 8
-                            print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 16')
-                            return 16  # 32
+                # if last_black_checker_position is not None:
+                #     if current_checker.position == last_black_checker_position:
+                #         if current_checker.position + dice <= 12:
+                #             # if 1 <= current_checker.position <= 6:
+                #             #     print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
+                #             #     return 8
+                #             print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 16')
+                #             return 16  # 32
 
                 if last_white_checker_position is not None:
                     if 13 <= current_checker.position < last_white_checker_position:
@@ -2514,14 +2487,14 @@ class Game:
 
                 last_black_checker_position = self.get_last_black_checker_position(lower_border=1, upper_border=12)
 
-                if last_black_checker_position is not None:
-                    if current_checker.position == last_black_checker_position:
-                        if current_checker.position + dice <= 12:
-                            if 1 <= current_checker.position <= 6:
-                                print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 4')
-                                return 4
-                            print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
-                            return 8  # 16
+                # if last_black_checker_position is not None:
+                #     if current_checker.position == last_black_checker_position:
+                #         if current_checker.position + dice <= 12:
+                #             # if 1 <= current_checker.position <= 6:
+                #             #     print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 4')
+                #             #     return 4
+                #             print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
+                #             return 8  # 16
 
                 if last_white_checker_position is not None:
                     if 13 <= current_checker.position < last_white_checker_position:
@@ -2596,10 +2569,10 @@ class Game:
 
                 last_black_checker_position = self.get_last_black_checker_position(lower_border=1, upper_border=12)
 
-                if last_black_checker_position is not None:
-                    if current_checker.position == last_black_checker_position:
-                        print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 32')
-                        return 32
+                # if last_black_checker_position is not None:
+                #     if current_checker.position == last_black_checker_position:
+                #         print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 32')
+                #         return 32
 
                 if quarters_ratios[position_expression] == 1:
                     return 8  # 4
@@ -2905,23 +2878,29 @@ class Game:
 
         if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
                 self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
-            if self.field.get_sum_of_structure(self.field.black_home, 'black') > 0:
+
+            if self.field.get_occupied_of_structure(self.field.black_home, 'black') > 0:
                 if 1 <= current_checker.position <= 6:
                     return 16
-                if 7 <= current_checker.position <= 12:
-                    return 8
 
-            if self.field.get_sum_of_structure(self.field.black_yard, 'black') > 0:
+                return 0
+
+            if self.field.get_occupied_of_structure(self.field.black_yard, 'black') > 0:
                 if 7 <= current_checker.position <= 12:
                     return 16
-                if 13 <= current_checker.position <= 18:
-                    return 8
+
+                return 0
 
         if self.field.get_sum_of_structure(self.field.white_home, 'black') + \
                 self.field.get_sum_of_structure(self.field.white_yard, 'black') == 15 and \
-                self.field.get_sum_of_structure(self.field.white_home, 'black') > 0:
+                self.field.get_occupied_of_structure(self.field.white_home, 'black') > 0:
+
             if 13 <= current_checker.position <= 18:
-                return 32
+                return 16
+
+        if self.field.get_occupied_of_structure(self.field.white_home, 'white') == 0:
+            if 1 <= current_checker.position <= 6:
+                return 16
 
         return 0
 
@@ -2933,6 +2912,10 @@ class Game:
         :param main_dice:
         :return:
         """
+
+        if self.is_checker_in_another_yard(current_checker.color):
+            if not self.move_checker_for_six_in_line(current_checker, main_dice):
+                return 0
 
         if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
                 self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
@@ -3008,7 +2991,7 @@ class Game:
             ratio = 2
 
         ratios_dict = {
-            1: 8,  # 16
+            1: 8 if self.field.get_occupied_of_structure(self.field.white_home, 'white') == 0 else 16,
 
             2: 16 if self.field.get_occupied_of_structure(self.field.black_home, 'black') == 0 else 32,
 
@@ -3347,14 +3330,9 @@ class Game:
                 count += self.taking_and_leaving_positions(checker_value, dice)
                 print(f'сработала ф-ия taking_and_leaving_positions для {checker_value}, COUNT ПОСЛЕ = {count}')
 
-                # DEBAG
-                count_1 = count
                 print(f'сработала ф-ия escape для {checker_value}, COUNT ДО = {count}')
                 count += self.escape(checker_value)
                 print(f'сработала ф-ия escape для {checker_value}, COUNT ПОСЛЕ = {count}')
-                if count > count_1:
-                    c = 1
-                # /DEBAG
 
                 print(f'сработала ф-ия manage_the_last_quarter для {checker_value}, COUNT ДО = {count}')
                 count += self.manage_the_last_quarter(checker_value.position,
