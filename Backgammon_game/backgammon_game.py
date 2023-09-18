@@ -1513,7 +1513,7 @@ class Game:
                     return 3
 
                 if last_white_checker_position is not None:
-                    if 13 <= current_checker.position < last_white_checker_position:
+                    if current_checker.position < last_white_checker_position:
                         if position_expression > last_white_checker_position:
                             return 4
 
