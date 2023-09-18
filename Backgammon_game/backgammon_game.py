@@ -2887,7 +2887,7 @@ class Game:
 
             if self.field.get_occupied_of_structure(self.field.black_yard, 'black') > 0:
                 if 7 <= current_checker.position <= 12:
-                    return 16
+                    return 32  # 16
 
                 return 0
 
@@ -2896,7 +2896,7 @@ class Game:
                 self.field.get_occupied_of_structure(self.field.white_home, 'black') > 0:
 
             if 13 <= current_checker.position <= 18:
-                return 16
+                return 32  # 16
 
         if self.field.get_occupied_of_structure(self.field.white_home, 'white') == 0:
             if 1 <= current_checker.position <= 6:
