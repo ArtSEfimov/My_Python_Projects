@@ -3436,7 +3436,6 @@ class Game:
 
             _, main_checker, main_mark = self.move(color, dice, recursion=True, checkers=list(marks.values())[0])
 
-
             if between is not None:
                 raw_ratio = self.get_ratio_for_double_check(main_checker, dice)
                 match raw_ratio:
