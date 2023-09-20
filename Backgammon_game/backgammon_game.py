@@ -1347,6 +1347,9 @@ class Game:
         return last_black_checker_position
 
     def get_between(self, color, start_position, stop_position, step):
+        if isinstance(step, tuple):
+            step = step[0] // step[1]
+
         for position in range(start_position, stop_position, step):
             if position != start_position:
                 if not self.is_free_space(color, position):
@@ -1415,7 +1418,7 @@ class Game:
                 if isinstance(dice, tuple):
                     length = len(dice)
                     dice = sum(dice)
-                    result, checker, count = self.move('black', dice, between=dice // length)
+                    result, checker, count = self.move('black', dice, between=(dice, length))
                 else:
                     result, checker, count = self.move('black', dice)
 
@@ -1443,7 +1446,10 @@ class Game:
                 self.computer_first_step_flag = True
 
         for checker, dice in checkers_and_dices:
-            print(f'\n\nФУНКЦИЯ ПРОВЕРКИ ДВОЙНОГО ХОДА\nХОДИМ: checker = {checker}, dice = {dice}\n\n')
+            print(f'\n\nФУНКЦИЯ ПРОВЕРКИ ДВОЙНОГО ХОДА\nХОДИМ: checker = {checker}, dice = {dice}\n')
+            print(f'ИСХОДНЫЕ: DICE_1 = {self.first_dice} DICE_2 = {self.second_dice}\nCOUNT = {common_count}')
+            if self.second_dice != dice:
+                с = 1
             self.is_success_move(checker, dice)
 
         return True
@@ -1688,6 +1694,7 @@ class Game:
             # k = (10 - ratio) / 10
 
             if common_step_count > max(single_count_1, single_count_2):
+                c = 1
                 print(
                     f'\n\nДВОЙНОЙ ХОД\n\nchecker = {common_step_checker} dice = {self.first_dice + self.second_dice} COUNT = {common_step_count}')
                 self.is_success_move(common_step_checker, self.first_dice + self.second_dice)
@@ -3446,7 +3453,11 @@ class Game:
                     case _:
                         ratio = 1 / 4
 
-                main_mark *= 1 + ratio
+                if isinstance(between, tuple):
+                    # main_mark *= pow((1 + ratio), (between[1] - 1))
+                    main_mark *= 1 + ratio
+                else:
+                    main_mark *= 1 + ratio
 
             self.is_success_move(main_checker, dice)
             return True, main_checker, main_mark
@@ -3464,7 +3475,11 @@ class Game:
                         case _:
                             ratio = 1 / 4
 
-                    main_mark *= 1 + ratio
+                    if isinstance(between, tuple):
+                        # main_mark *= pow((1 + ratio), (between[1] - 1))
+                        main_mark *= 1 + ratio
+                    else:
+                        main_mark *= 1 + ratio
 
                 self.is_success_move(main_checker, dice)
 
