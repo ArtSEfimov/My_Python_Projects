@@ -268,8 +268,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))
-                        # current_checker_number = random.randint(1, 24)
+                        # current_checker_number = int(input('Выберите номер шашки: '))
+                        current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -295,8 +295,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))
-                            # current_dice_number = random.randint(1, 24)
+                            # current_dice_number = int(input('Выберите номер ячейки: '))
+                            current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -328,8 +328,8 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))
-                            # current_checker_number = random.randint(1, 24)
+                            # current_checker_number = int(input('Выберите номер шашки: '))
+                            current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -1513,7 +1513,7 @@ class Game:
                     return 3
 
                 if last_white_checker_position is not None:
-                    if current_checker.position < last_white_checker_position:
+                    if 13 <= current_checker.position < last_white_checker_position:
                         if position_expression > last_white_checker_position:
                             return 4
 
@@ -1684,9 +1684,10 @@ class Game:
             #     for x in count_21
             # )
 
-            ratio = self.get_ratio_for_double_check(common_step_checker, self.first_dice + self.second_dice)
-            k = (10 - ratio) / 10
-            if common_step_count > (max(single_count_1, single_count_2) * k):
+            # ratio = self.get_ratio_for_double_check(common_step_checker, self.first_dice + self.second_dice)
+            # k = (10 - ratio) / 10
+
+            if common_step_count > max(single_count_1, single_count_2):
                 print(
                     f'\n\nДВОЙНОЙ ХОД\n\nchecker = {common_step_checker} dice = {self.first_dice + self.second_dice} COUNT = {common_step_count}')
                 self.is_success_move(common_step_checker, self.first_dice + self.second_dice)
@@ -3280,6 +3281,7 @@ class Game:
 
         if recursion:
             checkers_list = checkers
+            recursion_count = 0
         else:
             checkers_list = self.get_possible_checker_list(color)
 
@@ -3374,7 +3376,9 @@ class Game:
                 elif old_position.count == 1:
 
                     if recursion:
-                        count -= self.punishment(self.get_phase_of_game(), checker_value.position)
+                        punishment = self.punishment(self.get_phase_of_game(), checker_value.position)
+                        count -= punishment
+                        recursion_count += punishment
 
                     print(f'сработала ф-ия checker_is_bridge для {checker_value}, COUNT ДО = {count}')
                     count -= self.checker_is_bridge(checker_value)
@@ -3406,7 +3410,9 @@ class Game:
                 else:
 
                     if recursion:
-                        count += self.encouragement(self.get_phase_of_game(), cell_value)
+                        encouragement = self.encouragement(self.get_phase_of_game(), cell_value)
+                        count += encouragement
+                        recursion_count -= encouragement
 
                 if main_mark is None or main_mark < count:
                     marks = None
@@ -3425,15 +3431,47 @@ class Game:
             if recursion:
                 main_mark = list(marks.keys())[0]
                 main_checker = random.choice(list(marks.values())[0])
+                main_mark += recursion_count
                 return None, main_checker, main_mark
 
             _, main_checker, main_mark = self.move(color, dice, recursion=True, checkers=list(marks.values())[0])
+
+
+            if between is not None:
+                raw_ratio = self.get_ratio_for_double_check(main_checker, dice)
+                match raw_ratio:
+                    case 3:
+                        ratio = 1 / 3
+                    case 4:
+                        ratio = 2 / 3
+                    case _:
+                        ratio = 1 / 4
+
+                main_mark *= 1 + ratio
+
             self.is_success_move(main_checker, dice)
             return True, main_checker, main_mark
 
         if main_mark is not None:
             if not recursion:
+
+                if between is not None:
+                    raw_ratio = self.get_ratio_for_double_check(main_checker, dice)
+                    match raw_ratio:
+                        case 3:
+                            ratio = 1 / 3
+                        case 4:
+                            ratio = 2 / 3
+                        case _:
+                            ratio = 1 / 4
+
+                    main_mark *= 1 + ratio
+
                 self.is_success_move(main_checker, dice)
+
+            else:
+                main_mark += recursion_count
+
             return True, main_checker, main_mark
 
         return False, None, None  # ход не удался
