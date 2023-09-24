@@ -378,6 +378,10 @@ class Game:
 
     def human_throw(self, color, dices=None):
 
+        # DEBAG
+        return
+        # /DEBAG
+
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
 
         if dices is None:
@@ -1347,9 +1351,6 @@ class Game:
         return last_black_checker_position
 
     def get_between(self, color, start_position, stop_position, step):
-        if isinstance(step, tuple):
-            step = step[0] // step[1]
-
         for position in range(start_position, stop_position, step):
             if position != start_position:
                 if not self.is_free_space(color, position):
@@ -1364,16 +1365,20 @@ class Game:
 
         common_count = 0
         checkers_and_dices = list()
+        success_steps = 0
 
         for index, dice in enumerate(main_variant):
             result, checker, count = self.move('black', dice)
 
+            if result:
+                common_count += count
+                checkers_and_dices.append((checker, dice))
+                success_steps += 1
+
             if not result:
-                if checkers_and_dices:
-                    self.return_to_the_homeland(checkers_and_dices)
-                    if fist_step_3_4_6:
-                        self.computer_first_step_flag = True
-                return False
+                if success_steps == 0:
+                    return False
+                break
 
             if fist_step_3_4_6 and index == 0:
                 self.computer_first_step_flag = False
@@ -1383,10 +1388,8 @@ class Game:
                 return_value = main_variant[index + 1:]
                 return return_value if return_value else True
 
-            common_count += count
-            checkers_and_dices.append((checker, dice))
-
-        self.return_to_the_homeland(checkers_and_dices)
+        if checkers_and_dices:
+            self.return_to_the_homeland(checkers_and_dices)
 
         if fist_step_3_4_6:
             self.computer_first_step_flag = True
@@ -1413,14 +1416,25 @@ class Game:
 
             tmp_count = 0
             tmp_steps_results = list()
+            tmp_success_steps = 0
 
             for index, dice in enumerate(tuple_dice):
                 if isinstance(dice, tuple):
                     length = len(dice)
                     dice = sum(dice)
-                    result, checker, count = self.move('black', dice, between=(dice, length))
+                    result, checker, count = self.move('black', dice, between=dice // length)
+                    if result:
+                        tmp_success_steps += length
+                        if length == 4:
+                            if count > 0:
+                                count *= 1.1
+                            else:
+                                count *= 0.9
+
                 else:
                     result, checker, count = self.move('black', dice)
+                    if result:
+                        tmp_success_steps += 1
 
                 if not result:
                     break
@@ -1436,9 +1450,24 @@ class Game:
                 tmp_count += count
                 tmp_steps_results.append((checker, dice))
 
-            self.return_to_the_homeland(tmp_steps_results)
+            if tmp_steps_results:
+                self.return_to_the_homeland(tmp_steps_results)
+
+            if tmp_success_steps < success_steps:
+                continue
+
+            # DEBAG
+            if length == 4:
+                c = 1
+            # /DEBAG
 
             if tmp_count > common_count:
+                # DEBAG
+                if length == 4:
+                    self.field.show_field()
+                    c = 1
+                # /DEBAG
+
                 common_count = tmp_count
                 checkers_and_dices = tmp_steps_results.copy()
 
@@ -1448,8 +1477,12 @@ class Game:
         for checker, dice in checkers_and_dices:
             print(f'\n\nФУНКЦИЯ ПРОВЕРКИ ДВОЙНОГО ХОДА\nХОДИМ: checker = {checker}, dice = {dice}\n')
             print(f'ИСХОДНЫЕ: DICE_1 = {self.first_dice} DICE_2 = {self.second_dice}\nCOUNT = {common_count}')
+
+            # DEBAG
             if self.second_dice != dice:
                 с = 1
+            # /DEBAG
+
             self.is_success_move(checker, dice)
 
         return True
@@ -1769,7 +1802,7 @@ class Game:
                 if self.is_checker_in_another_yard(last_checker.color):
                     event_dice_1 = True
                 else:
-                    event_dice_1 = not self.move_checker_for_six_in_line(last_checker, dice_1)
+                    event_dice_1 = not self.move_checker_for_six_in_line(last_checker, dice_1, fact_verify_flag=True)
             else:
                 event_dice_1 = isinstance(current_place_1, MyStack) and current_place_1.color == color
 
@@ -1779,7 +1812,7 @@ class Game:
                 if self.is_checker_in_another_yard(last_checker.color):
                     event_dice_2 = True
                 else:
-                    event_dice_2 = not self.move_checker_for_six_in_line(last_checker, dice_2)
+                    event_dice_2 = not self.move_checker_for_six_in_line(last_checker, dice_2, fact_verify_flag=True)
             else:
                 event_dice_2 = isinstance(current_place_2, MyStack) and current_place_2.color == color
 
@@ -2831,10 +2864,18 @@ class Game:
                 self.remove_checker_from_old_position(checker_value)
                 self.move_checker_to_new_position(checker_value, reverse_flag=True)
 
-                if self.match_black_white_cells[new_end_position] > self.match_black_white_cells[old_end_position]:
+                if new_end_position > old_end_position:
+
+                    # DEBAG
+                    self.field.show_field()
+                    print(checker_value, dice)
+                    if checker_value.position > 12:
+                        c = -1
+                    # /DEBAG
+
                     return 32
 
-                if self.match_black_white_cells[new_end_position] < self.match_black_white_cells[old_end_position]:
+                if new_end_position < old_end_position:
                     return -32
 
             return 0
@@ -2870,17 +2911,27 @@ class Game:
             self.match_black_white_cells[last_black_checker_position_in_line] > \
             self.match_black_white_cells[last_white_checker_position]
 
-    def move_checker_for_six_in_line(self, checker, dice):
-        self.remove_checker_from_old_position(checker)
-        checker.position += dice
-        self.move_checker_to_new_position(checker)
+    def move_checker_for_six_in_line(self, checker, dice, fact_verify_flag=False):
 
-        result_is_six_checkers_in_line = self.is_six_checkers_in_line(checker.color)
+        # verify_block
 
-        self.remove_checker_from_old_position(checker)
-        self.move_checker_to_new_position(checker, reverse_flag=True)
+        if fact_verify_flag:
+            # 6_В_РЯД ЛИБО ПОЯВИЛСЯ В РЕЗУЛЬТАТЕ ХОДА, ЛИБО НЕТ
 
-        return result_is_six_checkers_in_line
+            self.remove_checker_from_old_position(checker)
+            checker.position += dice
+            self.move_checker_to_new_position(checker)
+
+            result_is_six_checkers_in_line = self.is_six_checkers_in_line(checker.color)
+
+            self.remove_checker_from_old_position(checker)
+            self.move_checker_to_new_position(checker, reverse_flag=True)
+
+            return result_is_six_checkers_in_line
+
+        # / verify_block
+
+        return self.liberation_and_hold_for_six_in_line(checker, dice) != 32
 
     def escape(self, current_checker):
 
@@ -2923,6 +2974,14 @@ class Game:
 
         if self.is_checker_in_another_yard(current_checker.color):
             if not self.move_checker_for_six_in_line(current_checker, main_dice):
+
+                # DEBAG
+                self.field.show_field()
+                print(current_checker, main_dice)
+                if current_checker.position > 12:
+                    c = -1
+                # /DEBAG
+
                 return 0
 
         if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
@@ -3311,7 +3370,7 @@ class Game:
 
                 if not self.is_checker_in_another_yard(color):
                     if self.get_exact_element(color, checker_value.position + dice) == 0:
-                        if not self.move_checker_for_six_in_line(checker_value, dice):
+                        if not self.move_checker_for_six_in_line(checker_value, dice, fact_verify_flag=True):
                             continue
 
                 old_position, position = self.get_position(color, checker_value.position)
@@ -3445,19 +3504,21 @@ class Game:
 
             if between is not None:
                 raw_ratio = self.get_ratio_for_double_check(main_checker, dice)
-                match raw_ratio:
-                    case 3:
-                        ratio = 1 / 3
-                    case 4:
-                        ratio = 2 / 3
-                    case _:
-                        ratio = 1 / 4
+                if main_mark >= 0:
+                    match raw_ratio:
+                        case 3:
+                            ratio = 3 / 7
+                        case 4:
+                            ratio = 2 / 3
+                        case _:
+                            ratio = 1 / 4
 
-                if isinstance(between, tuple):
-                    # main_mark *= pow((1 + ratio), (between[1] - 1))
                     main_mark *= 1 + ratio
+                    main_mark = 0.1 if main_mark == 0 else main_mark
+
                 else:
-                    main_mark *= 1 + ratio
+                    ratio = (10 - raw_ratio) / 10
+                    main_mark *= ratio
 
             self.is_success_move(main_checker, dice)
             return True, main_checker, main_mark
@@ -3467,23 +3528,25 @@ class Game:
 
                 if between is not None:
                     raw_ratio = self.get_ratio_for_double_check(main_checker, dice)
-                    match raw_ratio:
-                        case 3:
-                            ratio = 1 / 3
-                        case 4:
-                            ratio = 2 / 3
-                        case _:
-                            ratio = 1 / 4
+                    if main_mark >= 0:
+                        match raw_ratio:
+                            case 3:
+                                ratio = 3 / 7
+                            case 4:
+                                ratio = 2 / 3
+                            case _:
+                                ratio = 1 / 4
 
-                    if isinstance(between, tuple):
-                        # main_mark *= pow((1 + ratio), (between[1] - 1))
                         main_mark *= 1 + ratio
+                        main_mark = 0.1 if main_mark == 0 else main_mark
+
                     else:
-                        main_mark *= 1 + ratio
+                        ratio = (10 - raw_ratio) / 10
+                        main_mark *= ratio
 
                 self.is_success_move(main_checker, dice)
 
-            else:
+            if recursion:
                 main_mark += recursion_count
 
             return True, main_checker, main_mark
@@ -3527,7 +3590,8 @@ class Game:
 
                     if current_intermediate_place == 0:
                         if self.is_checker_in_another_yard(color) or \
-                                not self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice_1):
+                                not self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice_1,
+                                                                      fact_verify_flag=True):
                             event_2 = True
 
                     if event_1 or event_2:
@@ -3590,7 +3654,8 @@ class Game:
 
                 if current_intermediate_place_1 == 0:
                     if self.is_checker_in_another_yard(color) or \
-                            not self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice_1):
+                            not self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice_1,
+                                                                  fact_verify_flag=True):
                         deleted_checker = my_list[position_in_my_list].top
                         self.remove_checker_from_old_position(my_list[position_in_my_list].top)
                         deleted_checker.position = 25
@@ -3598,7 +3663,8 @@ class Game:
 
                 if current_intermediate_place_2 == 0:
                     if self.is_checker_in_another_yard(color) or \
-                            not self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice_2):
+                            not self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice_2,
+                                                                  fact_verify_flag=True):
                         deleted_checker = my_list[position_in_my_list].top
                         self.remove_checker_from_old_position(my_list[position_in_my_list].top)
                         deleted_checker.position = 25
@@ -3646,7 +3712,8 @@ class Game:
                             break
 
                     elif self.is_checker_in_another_yard(color) or \
-                            not self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice):
+                            not self.move_checker_for_six_in_line(my_list[position_in_my_list].top, dice,
+                                                                  fact_verify_flag=True):
                         self.is_success_move(my_list[position_in_my_list].top, dice)
                         break
 
@@ -3714,7 +3781,7 @@ class Game:
                                     break
                             elif self.is_checker_in_another_yard(color) or \
                                     not self.move_checker_for_six_in_line(my_list[position_in_my_list].top,
-                                                                          current_dice):
+                                                                          current_dice, fact_verify_flag=True):
                                 self.is_success_move(my_list[position_in_my_list].top, current_dice)
                                 break
 
