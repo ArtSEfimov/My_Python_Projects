@@ -268,8 +268,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        # current_checker_number = int(input('Выберите номер шашки: '))
-                        current_checker_number = random.randint(1, 24)
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                        # current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -295,8 +295,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            # current_dice_number = int(input('Выберите номер ячейки: '))
-                            current_dice_number = random.randint(1, 24)
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            # current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -328,8 +328,8 @@ class Game:
 
                     while True:
                         try:
-                            # current_checker_number = int(input('Выберите номер шашки: '))
-                            current_checker_number = random.randint(1, 24)
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                            # current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -378,9 +378,9 @@ class Game:
 
     def human_throw(self, color, dices=None):
 
-        # DEBAG
-        return
-        # /DEBAG
+        # # DEBAG
+        # return
+        # # /DEBAG
 
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
 
@@ -1456,17 +1456,17 @@ class Game:
             if tmp_success_steps < success_steps:
                 continue
 
-            # DEBAG
-            if length == 4:
-                c = 1
-            # /DEBAG
-
-            if tmp_count > common_count:
-                # DEBAG
-                if length == 4:
-                    self.field.show_field()
-                    c = 1
-                # /DEBAG
+            # # DEBAG
+            # if length == 4:
+            #     c = 1
+            # # /DEBAG
+            #
+            # if tmp_count > common_count:
+            #     # DEBAG
+            #     if length == 4:
+            #         self.field.show_field()
+            #         c = 1
+            #     # /DEBAG
 
                 common_count = tmp_count
                 checkers_and_dices = tmp_steps_results.copy()
@@ -2338,14 +2338,14 @@ class Game:
 
                 last_black_checker_position = self.get_last_black_checker_position(lower_border=1, upper_border=12)
 
-                # if last_black_checker_position is not None:
-                #     if current_checker.position == last_black_checker_position:
-                #         if current_checker.position + dice <= 12:
-                #             # if 1 <= current_checker.position <= 6:
-                #             #     print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
-                #             #     return 8
-                #             print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 16')
-                #             return 16  # 32
+                if last_black_checker_position is not None:
+                    if current_checker.position == last_black_checker_position:
+                        if current_checker.position + dice <= 12:
+                            # if 1 <= current_checker.position <= 6:
+                            #     print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
+                            #     return 8
+                            print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
+                            return 8  # 16  # 32
 
                 if last_white_checker_position is not None:
                     if 13 <= current_checker.position < last_white_checker_position:
@@ -2528,14 +2528,14 @@ class Game:
 
                 last_black_checker_position = self.get_last_black_checker_position(lower_border=1, upper_border=12)
 
-                # if last_black_checker_position is not None:
-                #     if current_checker.position == last_black_checker_position:
-                #         if current_checker.position + dice <= 12:
-                #             # if 1 <= current_checker.position <= 6:
-                #             #     print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 4')
-                #             #     return 4
-                #             print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
-                #             return 8  # 16
+                if last_black_checker_position is not None:
+                    if current_checker.position == last_black_checker_position:
+                        if current_checker.position + dice <= 12:
+                            # if 1 <= current_checker.position <= 6:
+                            #     print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 4')
+                            #     return 4
+                            print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 4')
+                            return 4  # 8  # 16
 
                 if last_white_checker_position is not None:
                     if 13 <= current_checker.position < last_white_checker_position:
@@ -2610,10 +2610,10 @@ class Game:
 
                 last_black_checker_position = self.get_last_black_checker_position(lower_border=1, upper_border=12)
 
-                # if last_black_checker_position is not None:
-                #     if current_checker.position == last_black_checker_position:
-                #         print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 32')
-                #         return 32
+                if last_black_checker_position is not None:
+                    if current_checker.position == last_black_checker_position:
+                        print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 16')
+                        return 16  # 32
 
                 if quarters_ratios[position_expression] == 1:
                     return 8  # 4
