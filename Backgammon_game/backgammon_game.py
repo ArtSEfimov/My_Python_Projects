@@ -268,8 +268,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        current_checker_number = int(input('Выберите номер шашки: '))
-                        # current_checker_number = random.randint(1, 24)
+                        # current_checker_number = int(input('Выберите номер шашки: '))
+                        current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -295,8 +295,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            current_dice_number = int(input('Выберите номер ячейки: '))
-                            # current_dice_number = random.randint(1, 24)
+                            # current_dice_number = int(input('Выберите номер ячейки: '))
+                            current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -328,8 +328,8 @@ class Game:
 
                     while True:
                         try:
-                            current_checker_number = int(input('Выберите номер шашки: '))
-                            # current_checker_number = random.randint(1, 24)
+                            # current_checker_number = int(input('Выберите номер шашки: '))
+                            current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -378,9 +378,9 @@ class Game:
 
     def human_throw(self, color, dices=None):
 
-        # # DEBAG
-        # return
-        # # /DEBAG
+        # DEBAG
+        return
+        # /DEBAG
 
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
 
@@ -1456,17 +1456,17 @@ class Game:
             if tmp_success_steps < success_steps:
                 continue
 
-            # # DEBAG
-            # if length == 4:
-            #     c = 1
-            # # /DEBAG
-            #
-            # if tmp_count > common_count:
-            #     # DEBAG
-            #     if length == 4:
-            #         self.field.show_field()
-            #         c = 1
-            #     # /DEBAG
+                # # DEBAG
+                # if length == 4:
+                #     c = 1
+                # # /DEBAG
+                #
+                # if tmp_count > common_count:
+                #     # DEBAG
+                #     if length == 4:
+                #         self.field.show_field()
+                #         c = 1
+                #     # /DEBAG
 
                 common_count = tmp_count
                 checkers_and_dices = tmp_steps_results.copy()
@@ -3343,6 +3343,23 @@ class Game:
 
         return 0
 
+    # NEW_FUNC
+
+    def yard_config(self, checker, dice):
+        if self.is_checker_in_another_yard(checker.color):
+            return 0
+
+        if checker.position + dice <= 12:
+
+            if self.get_position_color(7, is_position_free_flag=True):
+                return 16
+            if self.get_position_color(8, is_position_free_flag=True):
+                return 8
+
+        return 0
+
+    # NEW_FUNC
+
     def move(self, color, dice, recursion=False, checkers=None, between=None):
 
         if recursion:
@@ -3411,6 +3428,24 @@ class Game:
                 if self.get_phase_of_game() < 3:
                     count += self.offset(checker_value, dice)
                 print(f'сработала ф-ия offset для {checker_value}, COUNT ПОСЛЕ = {count}')
+
+                # TRY_NEW_FUNC
+                print(f'сработала ф-ия yard_config для {checker_value}, COUNT ДО = {count}')
+                if self.get_phase_of_game() > 3:
+                    # DEBAG
+                    count1 = count
+                    # /DEBAG
+                    count += self.yard_config(checker_value, dice)
+                    # DEBAG
+                    if count1 < count:
+                        self.field.show_field()
+                        c = 1
+                    # /DEBAG
+
+                print(f'сработала ф-ия yard_config для {checker_value}, COUNT ПОСЛЕ = {count}')
+
+
+                # TRY_NEW_FUNC
 
                 if self.is_checker_in_another_yard(color):
                     print(f'сработала ф-ия liberation_and_hold_for_six_in_line для {checker_value}, COUNT ДО = {count}')
