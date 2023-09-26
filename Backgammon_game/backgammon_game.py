@@ -3345,16 +3345,46 @@ class Game:
 
     # NEW_FUNC
 
+    def get_position_color_closer(self, position):
+        color = 'black'
+        is_position_free_flag = True
+
+        return self.get_position_color(position, color, is_position_free_flag)
+
     def yard_config(self, checker, dice):
         if self.is_checker_in_another_yard(checker.color):
             return 0
 
-        if checker.position + dice <= 12:
+        if self.field.get_count_of_free_cells(self.field.black_yard) != 1:
+            return 0
 
-            if self.get_position_color(7, is_position_free_flag=True):
-                return 16
-            if self.get_position_color(8, is_position_free_flag=True):
-                return 8
+        value = 0
+
+        for position in range(7, 13):
+            if self.get_position_color_closer(position):
+                if position > 8:
+
+                    self.remove_checker_from_old_position(checker)
+                    checker.position += dice
+                    self.move_checker_to_new_position(checker)
+
+                    if self.get_position_color(
+                            8, color='black', is_position_free_flag=True
+                    ):
+                        value = 8
+
+                    if self.get_position_color(
+                            7, color='black', is_position_free_flag=True
+                    ):
+                        value = 16
+
+                    self.remove_checker_from_old_position(checker)
+                    self.move_checker_to_new_position(checker, reverse_flag=True)
+
+                    return value
+
+                else:
+                    pass
 
         return 0
 
@@ -3443,7 +3473,6 @@ class Game:
                     # /DEBAG
 
                 print(f'сработала ф-ия yard_config для {checker_value}, COUNT ПОСЛЕ = {count}')
-
 
                 # TRY_NEW_FUNC
 
