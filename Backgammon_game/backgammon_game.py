@@ -104,8 +104,11 @@ class Game:
 
             # human part
             if color == 'white':
+
+                # # DEBAG
                 # self.who_steps = 'computer'
                 # continue
+                # # /DEBAG
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
@@ -378,9 +381,9 @@ class Game:
 
     def human_throw(self, color, dices=None):
 
-        # DEBAG
-        return
-        # /DEBAG
+        # # DEBAG
+        # return
+        # # /DEBAG
 
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
 
@@ -2568,11 +2571,15 @@ class Game:
                 # if current_checker.position == 1:
                 #     return 0
 
-                if quarters_ratios[position_expression] == 1 or \
-                        (position_expression == 7 and \
-                         self.field.get_count_of_free_cells(self.field.black_home) == 0 and \
-                         self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4):
+                if quarters_ratios[position_expression] == 1:
                     return 16  # 32
+                if position_expression == 7:
+                    if self.field.get_count_of_free_cells(self.field.black_home) == 0 and \
+                            self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4:
+                        return 16
+                    if self.condition_for_seventh_cell(dice):
+                        return 16
+
                 if quarters_ratios[position_expression] == 2:
                     return 8  # 4  # 16
                 if quarters_ratios[position_expression] == 3:
@@ -2632,6 +2639,11 @@ class Game:
             return 0
 
         return 0
+
+    def condition_for_seventh_cell(self, dice):
+        another_dice = self.first_dice if self.second_dice == dice else self.second_dice
+
+        return any(map(lambda checker: checker.position + another_dice > 12, self.black_checkers))
 
     def manage_the_last_quarter(self, old_position, punishment_flag=False):
         """Если на позициях с 13 по 24 есть белые шашки, смотрим на расположение последней из них относительно черных
@@ -3361,30 +3373,42 @@ class Game:
         value = 0
 
         for position in range(7, 13):
+
             if self.get_position_color_closer(position):
-                if position > 8:
 
-                    self.remove_checker_from_old_position(checker)
-                    checker.position += dice
-                    self.move_checker_to_new_position(checker)
+                if position == 7:
+                    return 0
 
-                    if self.get_position_color(
-                            8, color='black', is_position_free_flag=True
-                    ):
-                        value = 8
+                self.remove_checker_from_old_position(checker)
+                checker.position += dice
+                self.move_checker_to_new_position(checker)
 
-                    if self.get_position_color(
-                            7, color='black', is_position_free_flag=True
-                    ):
-                        value = 16
+                if self.field.get_count_of_free_cells(self.field.black_yard) == 1:
 
-                    self.remove_checker_from_old_position(checker)
-                    self.move_checker_to_new_position(checker, reverse_flag=True)
+                    if self.get_position_color_closer(7):
+                        if position > 7:
+                            value = 32
 
-                    return value
+                    if self.get_position_color_closer(8):
+                        if position > 8:
+                            value = 16
 
-                else:
-                    pass
+                    if self.get_position_color_closer(9):
+                        if position > 9:
+                            value = 8
+
+                    if self.get_position_color_closer(10):
+                        if position > 10:
+                            value = 4
+
+                    if self.get_position_color_closer(11):
+                        if position > 11:
+                            value = 2
+
+                self.remove_checker_from_old_position(checker)
+                self.move_checker_to_new_position(checker, reverse_flag=True)
+
+                return value
 
         return 0
 
