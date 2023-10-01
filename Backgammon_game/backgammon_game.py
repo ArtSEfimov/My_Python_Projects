@@ -381,9 +381,9 @@ class Game:
 
     def human_throw(self, color, dices=None):
 
-        # # DEBAG
-        # return
-        # # /DEBAG
+        # DEBAG
+        return
+        # /DEBAG
 
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
 
@@ -2036,25 +2036,6 @@ class Game:
 
         return False
 
-    # def offset(self, current_checker, current_dice):
-    #
-    #     head_black_checker_position_for_offset = self.get_last_black_checker_position(
-    #         lower_border=2,
-    #         upper_border=12,
-    #         reverse=True
-    #     )
-    #
-    #     if head_black_checker_position_for_offset is None:
-    #         return 0
-    #     if current_checker.position == head_black_checker_position_for_offset:
-    #         if current_checker.position + current_dice <= 12:
-    #             if current_dice == min(self.first_dice, self.second_dice):
-    #                 return 4
-    #             if current_dice == max(self.first_dice, self.second_dice):
-    #                 return 8
-    #
-    #     return 0
-
     def offset(self, current_checker, current_dice):
 
         head_black_checker_position_for_offset = self.get_last_black_checker_position(
@@ -3100,6 +3081,36 @@ class Game:
 
         return ((ratios_dict[quarters_ratios[current_checker.position]]) // ratio) // last_checker_ratio
 
+    def forced_forward_distance_assessment(self, lost_checker):
+
+        count = 0
+
+        for dice in range(1, 7):
+
+            position_expression = lost_checker.position + dice
+
+            if position_expression > 24:
+                count += 1
+                continue
+
+            current_position = self.get_exact_element(lost_checker.color, position_expression)
+
+            if isinstance(current_position, MyStack):
+                if current_position.color == lost_checker.color:
+                    count += 1
+
+            else:
+                count += 1
+
+        ratios_dict = {
+            0: 0,
+            1: 32,
+            2: 16,
+            3: 0, 4: 0, 5: 0, 6: 0
+        }
+
+        return ratios_dict[count]
+
     def extraction(self, lost_checker,
                    forward_distance_assessment_call=False,
                    checker_is_bridge_call=False,
@@ -3132,7 +3143,7 @@ class Game:
                     empty_count += 1
 
         if forward_distance_assessment_call:
-            ratios_dict = {  # ноль здесь нужен, чтобы если нет своих шашек чтобы выбраться, может есть пустые
+            ratios_dict = {
                 0: 0,
                 1: 16,  # 32
                 2: 8,  # 16
@@ -3547,12 +3558,26 @@ class Game:
                         count -= self.rooting(checker_value, dice)
                         print(f'функция rooting для {checker_value} COUNT ПОСЛЕ = {count}')
 
-                    if checker_value.position < 19:
+                    if checker_value.position < 13: # было < 19
                         if self.is_evacuation_necessary(checker_value):
                             print('ДО', count)
                             print(f'шашка {checker_value} в жопе, надо вытаскивать')
                             count += self.extraction(checker_value, extraction_call=True)
                             print(f'ПОСЛЕ', count)
+
+                    if checker_value.position < 19 and checker_value.position + dice > 18:
+                        if self.is_my_position_lower_than_last_white(checker_value.position):
+                            print(
+                                f'сработала ф-ия forced_forward_distance_assessment для {checker_value}, COUNT ДО = {count}')
+                            # DEBAG
+                            count_1 = count
+                            count += self.forced_forward_distance_assessment(checker_value)
+                            if count > count_1:
+                                self.field.show_field()
+                                c = 1
+                            # /DEBAG
+                            print(
+                                f'сработала ф-ия forced_forward_distance_assessment для {checker_value}, COUNT ПОСЛЕ = {count}')
 
                 # NEW_POSITION
                 if isinstance(new_position, MyStack):
