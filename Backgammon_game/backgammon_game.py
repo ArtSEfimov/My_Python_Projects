@@ -3106,7 +3106,8 @@ class Game:
             0: 0,
             1: 32,
             2: 16,
-            3: 0, 4: 0, 5: 0, 6: 0
+            3: 8,  # 0
+            4: 0, 5: 0, 6: 0
         }
 
         return ratios_dict[count]
@@ -3147,7 +3148,8 @@ class Game:
                 0: 0,
                 1: 16,  # 32
                 2: 8,  # 16
-                3: 0, 4: 0, 5: 0, 6: 0
+                3: 4,  # 0
+                4: 0, 5: 0, 6: 0
             }
 
             return ratios_dict[color_count + empty_count]
@@ -3495,6 +3497,7 @@ class Game:
                 print(f'сработала ф-ия offset для {checker_value}, COUNT ПОСЛЕ = {count}')
 
                 # TRY_NEW_FUNC
+
                 print(f'сработала ф-ия yard_config для {checker_value}, COUNT ДО = {count}')
                 if self.get_phase_of_game() > 3:
                     # DEBAG
@@ -3509,7 +3512,25 @@ class Game:
 
                 print(f'сработала ф-ия yard_config для {checker_value}, COUNT ПОСЛЕ = {count}')
 
+                # /TRY_NEW_FUNC
+
                 # TRY_NEW_FUNC
+
+                if checker_value.position < 19 and checker_value.position + dice > 18:
+                    if self.is_my_position_lower_than_last_white(checker_value.position):
+                        print(
+                            f'сработала ф-ия forced_forward_distance_assessment для {checker_value}, COUNT ДО = {count}')
+                        # DEBAG
+                        count_1 = count
+                        count += self.forced_forward_distance_assessment(checker_value)
+                        if count > count_1:
+                            self.field.show_field()
+                            c = 1
+                        # /DEBAG
+                        print(
+                            f'сработала ф-ия forced_forward_distance_assessment для {checker_value}, COUNT ПОСЛЕ = {count}')
+
+                # /TRY_NEW_FUNC
 
                 if self.is_checker_in_another_yard(color):
                     print(f'сработала ф-ия liberation_and_hold_for_six_in_line для {checker_value}, COUNT ДО = {count}')
@@ -3558,26 +3579,12 @@ class Game:
                         count -= self.rooting(checker_value, dice)
                         print(f'функция rooting для {checker_value} COUNT ПОСЛЕ = {count}')
 
-                    if checker_value.position < 13: # было < 19
+                    if checker_value.position < 13:  # было < 19
                         if self.is_evacuation_necessary(checker_value):
                             print('ДО', count)
                             print(f'шашка {checker_value} в жопе, надо вытаскивать')
                             count += self.extraction(checker_value, extraction_call=True)
                             print(f'ПОСЛЕ', count)
-
-                    if checker_value.position < 19 and checker_value.position + dice > 18:
-                        if self.is_my_position_lower_than_last_white(checker_value.position):
-                            print(
-                                f'сработала ф-ия forced_forward_distance_assessment для {checker_value}, COUNT ДО = {count}')
-                            # DEBAG
-                            count_1 = count
-                            count += self.forced_forward_distance_assessment(checker_value)
-                            if count > count_1:
-                                self.field.show_field()
-                                c = 1
-                            # /DEBAG
-                            print(
-                                f'сработала ф-ия forced_forward_distance_assessment для {checker_value}, COUNT ПОСЛЕ = {count}')
 
                 # NEW_POSITION
                 if isinstance(new_position, MyStack):
