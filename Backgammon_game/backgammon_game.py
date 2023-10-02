@@ -271,8 +271,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        # current_checker_number = int(input('Выберите номер шашки: '))
-                        current_checker_number = random.randint(1, 24)
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                        # current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -298,8 +298,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            # current_dice_number = int(input('Выберите номер ячейки: '))
-                            current_dice_number = random.randint(1, 24)
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            # current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -331,8 +331,8 @@ class Game:
 
                     while True:
                         try:
-                            # current_checker_number = int(input('Выберите номер шашки: '))
-                            current_checker_number = random.randint(1, 24)
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                            # current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -381,9 +381,9 @@ class Game:
 
     def human_throw(self, color, dices=None):
 
-        # DEBAG
-        return
-        # /DEBAG
+        # # DEBAG
+        # return
+        # # /DEBAG
 
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
 
@@ -2334,10 +2334,10 @@ class Game:
                 if last_white_checker_position is not None:
                     if 13 <= current_checker.position < last_white_checker_position:
                         if current_checker.position + dice > last_white_checker_position:
-                            return 16  # 32 ИЗМЕНЕНО 13.09.2023
+                            return 8  # 16  # 32 ИЗМЕНЕНО 13.09.2023, 02.10.2023
                         if current_checker.position + dice < last_white_checker_position:
                             c = 1
-                            return 8  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023
+                            return 4  # 8  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023, 02.10.2023
 
                 return 0
 
@@ -2524,9 +2524,9 @@ class Game:
                 if last_white_checker_position is not None:
                     if 13 <= current_checker.position < last_white_checker_position:
                         if current_checker.position + dice > last_white_checker_position:
-                            return 8  # 16 ИЗМЕНЕНО 13.09.2023
+                            return 4  # 8  # 16 ИЗМЕНЕНО 13.09.2023, 02.10.2023
                         if current_checker.position + dice < last_white_checker_position:
-                            return 4  # 8  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023
+                            return 0  # 4  # 8  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023, 02.10.2023
 
                 return 0
 
@@ -2929,7 +2929,7 @@ class Game:
     def escape(self, current_checker):
 
         if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
-                self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
+                self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15 or self.human_end_moving_flag:
 
             if self.field.get_occupied_of_structure(self.field.black_home, 'black') > 0:
                 if 1 <= current_checker.position <= 6:
@@ -2978,7 +2978,7 @@ class Game:
                 return 0
 
         if self.field.get_sum_of_structure(self.field.black_home, 'white') + \
-                self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15:
+                self.field.get_sum_of_structure(self.field.black_yard, 'white') == 15 or self.human_end_moving_flag:
             if 1 <= current_checker.position <= 18:
                 return 0
 
@@ -3104,9 +3104,9 @@ class Game:
 
         ratios_dict = {
             0: 0,
-            1: 32,
-            2: 16,
-            3: 8,  # 0
+            1: 16,
+            2: 8,
+            3: 4,
             4: 0, 5: 0, 6: 0
         }
 
@@ -3148,7 +3148,7 @@ class Game:
                 0: 0,
                 1: 16,  # 32
                 2: 8,  # 16
-                3: 4,  # 0
+                3: 4,
                 4: 0, 5: 0, 6: 0
             }
 
