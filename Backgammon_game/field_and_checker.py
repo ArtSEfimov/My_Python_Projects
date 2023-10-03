@@ -80,14 +80,18 @@ class Field:
         self.black_yard.connect_elements(previous_element=self.black_home, next_element=self.white_home)
 
     def show_field(self):
+        print(f'\n{15*"="}\n')
+        count = 1
         start = self.white_home
-        for _ in range(4):
+        for e in range(4):
             tmp_data = start.data
             for element in tmp_data:
-                if type(element) == MyList:
-                    print(*element)
-                else:
-                    print(element)
-            print()
+                # if type(element) == MyStack:
+                #     print(*element)
+                print(f'{count:2d}|\t {element}')
+                count += 1
+            if e < 3:
+                print()
 
             start = start.next_element
+        print(f'\n{15*"="}\n')
