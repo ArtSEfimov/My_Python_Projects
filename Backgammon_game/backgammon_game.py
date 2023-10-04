@@ -271,8 +271,8 @@ class Game:
             if possible_variants:
                 while True:
                     try:
-                        # current_checker_number = int(input('Выберите номер шашки: '))
-                        current_checker_number = random.randint(1, 24)
+                        current_checker_number = int(input('Выберите номер шашки: '))
+                        # current_checker_number = random.randint(1, 24)
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -298,8 +298,8 @@ class Game:
                 else:
                     while True:
                         try:
-                            # current_dice_number = int(input('Выберите номер ячейки: '))
-                            current_dice_number = random.randint(1, 24)
+                            current_dice_number = int(input('Выберите номер ячейки: '))
+                            # current_dice_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -331,8 +331,8 @@ class Game:
 
                     while True:
                         try:
-                            # current_checker_number = int(input('Выберите номер шашки: '))
-                            current_checker_number = random.randint(1, 24)
+                            current_checker_number = int(input('Выберите номер шашки: '))
+                            # current_checker_number = random.randint(1, 24)
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -381,9 +381,9 @@ class Game:
 
     def human_throw(self, color, dices=None):
 
-        # DEBAG
-        return
-        # /DEBAG
+        # # DEBAG
+        # return
+        # # /DEBAG
 
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
 
@@ -2557,15 +2557,17 @@ class Game:
                 if position_expression == 7:
                     if self.field.get_count_of_free_cells(self.field.black_home) == 0 and \
                             self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4:
-                        с=1
+                        с = 1
                         return 16
+                    if self.condition_for_seventh_cell_4(current_checker, dice):
+                        c = 1
+                        return 4
                     if self.condition_for_seventh_cell_8(current_checker, dice):
-                        c=1
+                        c = 1
                         return 8
                     if self.condition_for_seventh_cell_16(dice):
-                        с=1
+                        с = 1
                         return 16
-
 
                 if quarters_ratios[position_expression] == 2:
                     return 8  # 4  # 16
@@ -2634,11 +2636,25 @@ class Game:
 
     def condition_for_seventh_cell_8(self, checker, dice):
         self.field.show_field()
-        c=1
+        c = 1
         another_dice = self.first_dice if self.second_dice == dice else self.second_dice
 
         first_part = self.field.get_occupied_of_structure(self.field.black_home, 'black') < 3 and \
                      self.field.get_count_of_free_cells(self.field.black_home) < 3
+
+        another_position = self.get_exact_element('black', checker.position + another_dice)
+
+        second_part = 2 <= checker.position + another_dice <= 6 and another_position == 0
+
+        return first_part and second_part
+
+    def condition_for_seventh_cell_4(self, checker, dice):
+        self.field.show_field()
+        c = 1
+        another_dice = self.first_dice if self.second_dice == dice else self.second_dice
+
+        first_part = self.field.get_occupied_of_structure(self.field.black_home, 'black') < 2 and \
+                     self.field.get_count_of_free_cells(self.field.black_home) < 2
 
         another_position = self.get_exact_element('black', checker.position + another_dice)
 
