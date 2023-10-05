@@ -381,9 +381,9 @@ class Game:
 
     def human_throw(self, color, dices=None):
 
-        # DEBAG
-        return
-        # /DEBAG
+        # # DEBAG
+        # return
+        # # /DEBAG
 
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
 
@@ -2975,7 +2975,7 @@ class Game:
 
             if self.field.get_occupied_of_structure(self.field.black_yard, 'black') > 0:
                 if 7 <= current_checker.position <= 12:
-                    return 32  # 16
+                    return 16
 
                 return 0
 
