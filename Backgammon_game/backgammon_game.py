@@ -381,9 +381,9 @@ class Game:
 
     def human_throw(self, color, dices=None):
 
-        # # DEBAG
-        # return
-        # # /DEBAG
+        # DEBAG
+        return
+        # /DEBAG
 
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
 
