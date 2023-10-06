@@ -1,12 +1,16 @@
 import random
-import statistics
-import time
 
 from data_structures import MyStack
 from field_and_checker import Checker, Field
 
 
 class Game:
+    """
+    Функция создает новый объект игры.
+    Содержит служебные флаги и структуры.
+    Создает новое поле и служебные структуры, расставляет шашки, инициирует новую игру.
+    """
+
     def __init__(self):
         self.field = Field()
         self.field.init_field_and_create_field_structure()
@@ -22,14 +26,18 @@ class Game:
         self.first_dice = self.second_dice = None
 
         self.white_head = self.field.white_home.data[1] = MyStack()
+
         for checker in self.white_checkers:
             self.white_head.add_element(checker)
+
         self.white_head.top.is_up = True
         self.white_head.color = self.white_head.top.color
 
         self.black_head = self.field.black_home.data[1] = MyStack()
+
         for checker in self.black_checkers:
             self.black_head.add_element(checker)
+
         self.black_head.top.is_up = True
         self.black_head.color = self.black_head.top.color
 
@@ -51,11 +59,20 @@ class Game:
 
     @staticmethod
     def throw_dices():
+        """
+        Функция генерирует случайные числа то 1 до 6 (имитирует бросок кубиков)
+        :return: целые числа от 1 до 6
+        """
         first_dice = random.randint(1, 6)
         second_dice = random.randint(1, 6)
         return first_dice, second_dice
 
     def is_movement_over(self, color):
+        """
+        Проверяет завершения фазы перемещения шашек в зону выброса
+        :param color: цвет игрока ['white', 'black']
+        :return: [True, False]
+        """
         if color == 'black':
             return self.field.get_sum_of_structure(self.field.black_home, color) + self.field.get_sum_of_structure(
                 self.field.black_yard, color) + self.field.get_sum_of_structure(self.field.white_home, color) == 0
@@ -65,6 +82,11 @@ class Game:
                 self.field.white_yard, color) + self.field.get_sum_of_structure(self.field.black_home, color) == 0
 
     def play_the_game(self):
+        """
+        Главная функция игры.
+        Определяет порядок хода игроков, проверяет условия оконцания хода, проверяет условия завершения игры.
+        :return: None
+        """
 
         while True:
             color = 'black' if self.who_steps == 'computer' else 'white'
@@ -105,10 +127,10 @@ class Game:
             # human part
             if color == 'white':
 
-                # # DEBAG
+                # # test block
                 # self.who_steps = 'computer'
                 # continue
-                # # /DEBAG
+                # # /test block
 
                 if not self.is_movement_over(color):
                     self.human_head_reset = True
@@ -140,6 +162,7 @@ class Game:
         print("ВСЁ!")
 
     def checker_filter(self, first_dice, second_dice):
+
         def inner_func(checker):
             first_current_place = second_current_place = None
             event_1 = event_2 = False
@@ -249,12 +272,12 @@ class Game:
 
     def human_step(self, color):
         first_dice, second_dice = self.throw_dices()
-        # first_dice, second_dice = [int(x) for x in input('HUMAN ').split()]
-        print('human: ', first_dice, second_dice)
 
-        # надо написать функцию отображения поля с номерами ячеек
-        # в данном случае надо оставить только ячейки, где есть шашки из нашего списка,
-        # остальные пометить, например, крестами
+        # # test block
+        # first_dice, second_dice = [int(x) for x in input('HUMAN ').split()]
+        # # /test block
+
+        print('human: ', first_dice, second_dice)
 
         double_flag = first_dice == second_dice
         iterations_number = 2 if double_flag else 1
@@ -272,7 +295,11 @@ class Game:
                 while True:
                     try:
                         current_checker_number = int(input('Выберите номер шашки: '))
+
+                        # # test block
                         # current_checker_number = random.randint(1, 24)
+                        # # /test block
+
                     except ValueError:
                         print("Ты ввел херню, введи число")
                         continue
@@ -299,7 +326,11 @@ class Game:
                     while True:
                         try:
                             current_dice_number = int(input('Выберите номер ячейки: '))
+
+                            # # test block
                             # current_dice_number = random.randint(1, 24)
+                            # # /test block
+
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -332,7 +363,11 @@ class Game:
                     while True:
                         try:
                             current_checker_number = int(input('Выберите номер шашки: '))
+
+                            # # test block
                             # current_checker_number = random.randint(1, 24)
+                            # # /test block
+
                         except ValueError:
                             print("Ты ввел херню, введи число")
                             continue
@@ -381,9 +416,9 @@ class Game:
 
     def human_throw(self, color, dices=None):
 
-        # # DEBAG
+        # # test block
         # return
-        # # /DEBAG
+        # # /test block
 
         current_structure = self.field.white_yard if color == 'black' else self.field.black_yard
 
@@ -639,7 +674,10 @@ class Game:
         self.first_dice, self.second_dice = self.throw_dices()
         print(f'computer: {self.first_dice}, {self.second_dice}')
         print()
+
+        # # test block
         # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
+        # # /test block
 
         double_flag = self.first_dice == self.second_dice
         if double_flag:
@@ -672,7 +710,6 @@ class Game:
 
         if type(step_result) == bool:
             if step_result:
-                # print(step_result)
                 if double_flag:
                     if self.computer_first_step_flag and self.first_dice in (3, 4, 6):
                         self.computer_first_step_flag = False
@@ -743,8 +780,10 @@ class Game:
         new_home, position_in_mylist = self.get_position(color, position)
         new_home = new_home.data
 
-        if new_home[position_in_mylist] == 0:  # это значит,что там ноль, а не стэк, значит стэк нужно создавать заново
+        # это значит,что там ноль, а не стэк, значит стэк нужно создавать заново
+        if new_home[position_in_mylist] == 0:
             new_home[position_in_mylist] = MyStack()
+
         # это значит что там уже стэк
         new_home[position_in_mylist].add_element(checker)
         if self.black_head is not None:
@@ -800,21 +839,6 @@ class Game:
                 self.field.get_count_of_free_cells(self.field.black_yard):
             return 1
 
-        # if self.black_head is not None and self.black_head.count > 1 and \
-        #         (
-        #                 self.field.get_count_of_free_cells(self.field.black_home) + \
-        #                 self.get_position_color(7, reverse=True) > 0 if
-        #                 self.is_checker_in_another_yard('black') else
-        #                 self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
-        #                 self.field.get_occupied_of_structure(self.field.black_home, 'white') + \
-        #                 self.get_position_color(7, color='black') + \
-        #                 self.get_position_color(7, color='white') < 6
-        #         ) and \
-        #         self.field.get_sum_of_structure(self.field.black_home, 'black') - \
-        #         self.field.get_occupied_of_structure(self.field.black_home, 'black') > \
-        #         self.field.get_count_of_free_cells(self.field.black_yard):
-        #     return 1
-
         if self.field.get_sum_of_structure(self.field.black_home, 'black') + \
                 self.field.get_sum_of_structure(self.field.black_yard, 'black') > \
                 self.field.get_occupied_of_structure(self.field.black_home, 'black') + \
@@ -834,8 +858,7 @@ class Game:
                 self.field.get_sum_of_structure(self.field.black_home, 'black') > 0:
             return 3
 
-        if self.field.get_sum_of_structure(self.field.black_home,
-                                           'black') > 0:  # and self.field.get_sum_of_structure(self.field.black_yard, 'black') > 0:
+        if self.field.get_sum_of_structure(self.field.black_home, 'black') > 0:
             return 4
 
         if self.field.get_sum_of_structure(self.field.white_yard, 'black') <= 15:
@@ -851,29 +874,17 @@ class Game:
             start_for_next_part = max(field_map.keys())
         return field_map
 
-    def get_from(self, color):  # может быть color понадобится для определения фазы игры в зависимости от цвета
+    def get_from(self):
         current_phase = self.get_phase_of_game()
 
         if current_phase == 1:
             return {
 
-                # 0:  # обычные
-                #     {
-                #         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
-                #         7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2,
-                #         # 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                #
-                #         13: 12, 14: 11, 15: 10, 16: 9, 17: 8, 18: 7,  # сделано для красоты
-                #         # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-                #
-                #         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                #     },
-
                 0:  # обычные
                     {
                         1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 12, 8: 11, 9: 10, 10: 9, 11: 8, 12: 7,
-                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
+                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -894,6 +905,7 @@ class Game:
                         1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8,
                         7: 9, 8: 10, 9: 11, 10: 12, 11: 13, 12: 14
                     },
+
                 1:  # чтобы закинуть в чужой дом на MyStack (второй этаж)
                     {
                         1: 5, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10,
@@ -902,36 +914,25 @@ class Game:
 
                 5:  # если шашка со второго и выше этажа
                     {
-                        # 1: 1, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
-                        1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,  # 28.08.2023 ОТКАТЫВАТЬ изменения ЗДЕСЬ
+                        1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
                         7: 11, 8: 10, 9: 9, 10: 8, 11: 7, 12: 6,
                         13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
                     },
 
                 6:  # если шашка из чужого дома и первого этажа
-
                     {
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                     },
 
                 7:  # чтобы закинуть в свой двор (первый этаж)
                     {
-                        # 1: 1, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8  изменено 25.08.2023
-
-                        # 1: 1, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10
-
-                        1: 11, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10  # 28.08.2023 ОТКАТЫВАТЬ изменения ЗДЕСЬ
-
+                        1: 11, 2: 6, 3: 7, 4: 8, 5: 9, 6: 10
                     },
 
                 8:  # чтобы закинуть в свой двор (второй этаж)
                     {
-                        # 1: 1, 2: 8, 3: 7, 4: 6, 5: 5, 6: 4 изменено 25.08.2023
-
-                        # 1: 1, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6
-
-                        1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6  # 28.08.2023 ОТКАТЫВАТЬ изменения ЗДЕСЬ
+                        1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6
                     },
 
                 9:  # со второго этажа в зону выброса (если там уже что-то наше есть)
@@ -945,19 +946,6 @@ class Game:
 
         if current_phase == 2:
             return {
-
-                # 0:  # обычный
-                #     {
-                #         1: 7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2,
-                #
-                #         # 7: 7, 8: 6, 9: 5, 10: 4, 11: 3, 12: 2, изменено 18.07.2023
-                #         7: 13, 8: 12, 9: 11, 10: 10, 11: 9, 12: 8,
-                #
-                #         # 13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
-                #         13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,  # сделано для красоты
-                #
-                #         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
-                #     },
 
                 0:  # обычный
                     {
@@ -993,7 +981,6 @@ class Game:
 
                 5:  # чтобы закинуть в свой двор (первый этаж)
                     {
-                        # 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6 # старый оригинал
                         1: 7, 2: 8, 3: 9, 4: 10, 5: 11, 6: 12
                     },
 
@@ -1031,7 +1018,6 @@ class Game:
                 2:  # шашка с головы и второго этажа
                     {
                         1: 11, 2: 10, 3: 9, 4: 8, 5: 7, 6: 6,
-                        # 7: 5, 8: 4, 9: 3, 10: 2, 11: 1, 12: 0, изменено 25.08.2023
                         7: 11, 8: 10, 9: 9, 10: 8, 11: 7, 12: 6,
                         13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
                         19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
@@ -1079,25 +1065,19 @@ class Game:
                     {
                         2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                         8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-
-                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
-                        # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
-
+                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
                 1:  # шашка с головы
                     {
-                        # 2: 12, 3: 11, 4: 10, 5: 9, 6: 8,
-
                         2: 2, 3: 3, 4: 4, 5: 5, 6: 6,
                         7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
+                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
-                2:  # шашка из чужого дома и первого этажа
-                # ПУСТЬ БУДЕТ И ВТОРОЙ ЭТАЖ
+                2:  # шашка из чужого дома и первого (и второго) этажа
                     {
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
@@ -1121,10 +1101,7 @@ class Game:
                     {
                         2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                         8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-
-                        # 13: 19, 14: 18, 15: 17, 16: 16, 17: 15, 18: 14,
-                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,  # сделано для красоты
-
+                        13: 18, 14: 17, 15: 16, 16: 15, 17: 14, 18: 13,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
 
@@ -1150,12 +1127,8 @@ class Game:
             return {
                 0:
                     {
-                        # 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 1,
-                        # 8: 2, 9: 3, 10: 4, 11: 5, 12: 6,
-
                         2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                         8: 8, 9: 9, 10: 10, 11: 11, 12: 12,
-
                         13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0,
                         19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0
                     },
@@ -1214,7 +1187,8 @@ class Game:
 
             }
 
-    def compare_common_counts(self, data_tuple_1, data_tuple_2):
+    @staticmethod
+    def compare_common_counts(data_tuple_1, data_tuple_2):
         common_step_result_1, common_step_checker_1, common_step_count_1 = data_tuple_1
         common_step_result_2, common_step_checker_2, common_step_count_2 = data_tuple_2
 
@@ -1459,18 +1433,6 @@ class Game:
             if tmp_success_steps < success_steps:
                 continue
 
-                # # DEBAG
-                # if length == 4:
-                #     c = 1
-                # # /DEBAG
-                #
-                # if tmp_count > common_count:
-                #     # DEBAG
-                #     if length == 4:
-                #         self.field.show_field()
-                #         c = 1
-                #     # /DEBAG
-
                 common_count = tmp_count
                 checkers_and_dices = tmp_steps_results.copy()
 
@@ -1480,11 +1442,6 @@ class Game:
         for checker, dice in checkers_and_dices:
             print(f'\n\nФУНКЦИЯ ПРОВЕРКИ ДВОЙНОГО ХОДА\nХОДИМ: checker = {checker}, dice = {dice}\n')
             print(f'ИСХОДНЫЕ: DICE_1 = {self.first_dice} DICE_2 = {self.second_dice}\nCOUNT = {common_count}')
-
-            # DEBAG
-            if self.second_dice != dice:
-                с = 1
-            # /DEBAG
 
             self.is_success_move(checker, dice)
 
@@ -1500,7 +1457,6 @@ class Game:
             self.move_checker_to_new_position(checker, reverse_flag=True)
 
     def get_ratio_for_double_check(self, current_checker, current_dice):
-        # ratio = 2
 
         phase_of_game = self.get_phase_of_game()
 
@@ -1640,13 +1596,8 @@ class Game:
 
         result_11, checker_11, count_1 = self.move('black', self.first_dice)
         result_12, checker_12, count_2 = self.move('black', self.second_dice)
-        # print('\n','ПРЯМОЙ порядок хода (ПЕРВЫЙ -> ВТОРОЙ)')
-        # print(f'\nchecker = {checker_11}, count = {count_1}')
-        # print(f'\nchecker = {checker_12}, count = {count_2}')
 
         count_12 = (count_1, count_2)
-
-        # print(count_12)
 
         if result_12:
             self.remove_checker_from_old_position(checker_12)
@@ -1660,13 +1611,8 @@ class Game:
 
         result_21, checker_21, count_2 = self.move('black', self.second_dice)
         result_22, checker_22, count_1 = self.move('black', self.first_dice)
-        # print('\n', 'ПРЯМОЙ порядок хода (ВТОРОЙ -> ПЕРВЫЙ)')
-        # print(f'\nchecker = {checker_21}, count = {count_2}')
-        # print(f'\nchecker = {checker_22}, count = {count_1}')
 
         count_21 = (count_2, count_1)  # порядок хода такой: второй, первый
-
-        # print(count_21)
 
         if result_22:
             self.remove_checker_from_old_position(checker_22)
@@ -1711,47 +1657,41 @@ class Game:
                 for x in count_12
             )
 
-            # single_count_1 = max(
-            #     0 if x is None else x
-            #     for x in count_12
-            # )
-
             single_count_2 = sum(
                 0 if x is None else x
                 for x in count_21
             )
 
-            # single_count_2 = max(
-            #     0 if x is None else x
-            #     for x in count_21
-            # )
-
-            # ratio = self.get_ratio_for_double_check(common_step_checker, self.first_dice + self.second_dice)
-            # k = (10 - ratio) / 10
-
             if common_step_count > max(single_count_1, single_count_2):
-                c = 1
-                print(
-                    f'\n\nДВОЙНОЙ ХОД\n\nchecker = {common_step_checker} dice = {self.first_dice + self.second_dice} COUNT = {common_step_count}')
+                # # test block
+                # print(f'\nДВОЙНОЙ ХОД\nchecker = {common_step_checker} dice = {self.first_dice + self.second_dice}'
+                #       f'COUNT = {common_step_count}')
+                # # /test block
+
                 self.is_success_move(common_step_checker, self.first_dice + self.second_dice)
                 return True
 
         # ОКОНЧАНИЕ БЛОКА ПРОВЕРКИ ХОДА-ПРОБРОСА СРАЗУ НА ДВА ОЧКА
 
-        print(f'НА ПРОВЕРКУ ОТПРАВЛЯЮТСЯ СЧЕТЧИКИ:\n{count_12}, {count_21}')
+        # # test block
+        # print(f'НА ПРОВЕРКУ ОТПРАВЛЯЮТСЯ СЧЕТЧИКИ:\n{count_12}, {count_21}')
+        # # /test block
+
         dice_1, checker_1, dice_2, checker_2 = self.compare_counts((count_12, checker_11, checker_12),
                                                                    (count_21, checker_21, checker_22)
                                                                    )
 
         if all(map(lambda dice: dice is not None, (dice_1, dice_2))):
-            print(
-                f'\nХОД БУДЕТ ТАКОЙ: {checker_1} ХОДИТ НА {checker_1.position + dice_1}\n'
-            )
+            # # test block
+            # print(f'\nХОД БУДЕТ ТАКОЙ: {checker_1} ХОДИТ НА {checker_1.position + dice_1}\n')
+            # # /test block
+
             self.is_success_move(checker_1, dice_1)
 
-            print(
-                f'\nХОД БУДЕТ ТАКОЙ: {checker_2} ХОДИТ НА {checker_2.position + dice_2}\n'
-            )
+            # # test block
+            # print(f'\nХОД БУДЕТ ТАКОЙ: {checker_2} ХОДИТ НА {checker_2.position + dice_2}\n')
+            # # /test block
+
             self.is_success_move(checker_2, dice_2)
             return True
 
@@ -1841,7 +1781,7 @@ class Game:
             if last_white_checker_position is None or new_position_value < last_white_checker_position:
                 return 0
 
-        ratios = {  # 1 choice
+        ratios = {
             2: 8, 3: 9, 4: 10, 5: 11,
             6: 12, 7: 13, 8: 14, 9: 15, 10: 16,
             11: 17, 12: 18, 13: 19, 14: 20, 15: 21
@@ -1849,7 +1789,7 @@ class Game:
 
         if self.black_head is not None and self.black_head.count >= 4:
             if old_position_count >= self.black_head.count // 2:
-                ratios = {  # 1 choice
+                ratios = {
                     2: 14, 3: 15, 4: 16, 5: 17,
                     6: 18, 7: 19, 8: 20, 9: 21, 10: 22,
                     11: 23, 12: 24, 13: 25, 25: 26, 15: 27
@@ -1857,17 +1797,7 @@ class Game:
 
                 return ratios[old_position_count]
 
-        # # ЗАКОММЕНТИРОВАНО 09.09.2023
-        # if self.black_head is None:
-        #
-        #     # ratios = {
-        #     #     2: 14, 3: 15, 4: 16, 5: 17,
-        #     #     6: 18, 7: 19, 8: 20, 9: 21, 10: 22,
-        #     #     11: 23, 12: 24, 13: 25, 25: 26, 15: 27
-        #     # }
-
         if self.get_phase_of_game() > 3:
-            # ДОБАВЛЕНО 09.09.2023
             ratios = {
                 2: 2, 3: 3, 4: 4, 5: 5,
                 6: 6, 7: 7, 8: 8, 9: 9, 10: 10,
@@ -1876,7 +1806,7 @@ class Game:
 
             return ratios[old_position_count]
 
-        return ratios[old_position_count]  # trying_2
+        return ratios[old_position_count]
 
     def get_minus_ratio(self, old_position_value, new_position_value, new_position_count):
 
@@ -1891,10 +1821,7 @@ class Game:
                 return 0
 
         if self.get_phase_of_game() > 3:
-            # if old_position_count > 1:
-            #     return 0
-
-            ratios = {  # 1 choice
+            ratios = {
                 1: 1, 2: 2, 3: 3, 4: 4, 5: 5,
                 6: 6, 7: 7, 8: 8, 9: 9, 10: 10,
                 11: 11, 12: 12, 13: 13, 14: 14, 15: 15
@@ -1904,7 +1831,7 @@ class Game:
 
         if old_position_value == 1:
             if self.get_phase_of_game() == 1:
-                ratios = {  # 1 choice
+                ratios = {
                     1: 5, 2: 6, 3: 7, 4: 8, 5: 9,
                     6: 10, 7: 11, 8: 12, 9: 13, 10: 14,
                     11: 15, 12: 16, 13: 17, 14: 18, 15: 19
@@ -1913,7 +1840,7 @@ class Game:
                 return ratios[new_position_count]
 
             if self.get_phase_of_game() == 2:
-                ratios = {  # 1 choice
+                ratios = {
                     1: 3, 2: 4, 3: 5, 4: 6, 5: 7,
                     6: 8, 7: 9, 8: 10, 9: 11, 10: 12,
                     11: 13, 12: 14, 13: 15, 14: 16, 15: 17
@@ -1922,7 +1849,7 @@ class Game:
                 return ratios[new_position_count]
 
             if self.get_phase_of_game() == 3:
-                ratios = {  # 1 choice
+                ratios = {
                     1: 1, 2: 2, 3: 3, 4: 4, 5: 5,
                     6: 6, 7: 7, 8: 8, 9: 9, 10: 10,
                     11: 11, 12: 12, 13: 13, 14: 14, 15: 15
@@ -1932,22 +1859,16 @@ class Game:
 
             return 0
 
-        ratios = {  # 1 choice
+        ratios = {
             1: 7, 2: 8, 3: 9, 4: 10, 5: 11,
             6: 12, 7: 13, 8: 14, 9: 15, 10: 16,
             11: 17, 12: 18, 13: 19, 14: 20, 15: 21
         }
 
-        return ratios[new_position_count]  # trying_2
+        return ratios[new_position_count]
 
     @staticmethod
     def get_head_ratio(count):
-
-        # ratios = { ORIGINAL
-        #     1: 20, 2: 19, 3: 18, 4: 17, 5: 16,
-        #     6: 15, 7: 14, 8: 13, 9: 14, 10: 15,
-        #     11: 16, 12: 17, 13: 18, 14: 19, 15: 20
-        # }
 
         ratios = {
             1: 27, 2: 26, 3: 25, 4: 24, 5: 23,
@@ -1955,7 +1876,7 @@ class Game:
             11: 17, 12: 18, 13: 19, 14: 20, 15: 21
         }
 
-        return ratios[count]  # trying_2
+        return ratios[count]
 
     @staticmethod
     def punishment(current_phase, old_position):  # штраф за оставление позиции
@@ -2060,13 +1981,6 @@ class Game:
         return 0
 
     def taking_and_leaving_positions(self, current_checker, dice):
-        """
-        Функция помогает занимать свободные места.
-        Работает только с шашками, которые НЕ являются последними на своих позициях.
-        :param current_checker:
-        :param dice:
-        :return:
-        """
 
         phase_of_game = self.get_phase_of_game()
 
@@ -2081,7 +1995,7 @@ class Game:
 
                 if 2 <= current_checker.position <= 6:
                     if 2 <= current_checker.position + dice <= 6:
-                        return -4  # -8
+                        return -4
 
                     if 7 <= current_checker.position + dice <= 12:
                         return -4
@@ -2102,7 +2016,7 @@ class Game:
 
                 if 7 <= current_checker.position <= 12:
                     if 7 <= current_checker.position + dice <= 12:
-                        return 4  # 8
+                        return 4
 
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
@@ -2126,14 +2040,14 @@ class Game:
                                     return 4
 
                                 if current_checker.position + dice <= 18:
-                                    return 16  # 32 ИЗМЕНЕНО 13.09.2023
+                                    return 16
 
                             if current_checker.position + dice < last_white_checker_position:
-                                return 8  # 16  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023
+                                return 8
 
                         if current_checker.position > last_white_checker_position:
                             if last_white_checker_position < current_checker.position + dice <= 18:
-                                return -4  # -8
+                                return -4
 
                     if current_checker.position + dice > 18:
                         if last_white_checker_position is not None and last_white_checker_position > 18:
@@ -2162,7 +2076,7 @@ class Game:
 
                 if 2 <= current_checker.position <= 6:
                     if 2 <= current_checker.position + dice <= 6:
-                        return -4  # -8
+                        return -4
 
                     if 7 <= current_checker.position + dice <= 12:
                         return -4
@@ -2186,7 +2100,7 @@ class Game:
                         if current_checker.position == 7:
                             if self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4:
                                 return -4
-                        return 4  # 8
+                        return 4
 
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
@@ -2209,10 +2123,10 @@ class Game:
                                     return 8
 
                                 if current_checker.position + dice <= 18:
-                                    return 16  # 32 ИЗМЕНЕНО 13.09.2023
+                                    return 16
 
                             if current_checker.position + dice < last_white_checker_position:
-                                return 8  # 16  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023
+                                return 8
 
                         if current_checker.position > last_white_checker_position:
                             if last_white_checker_position < current_checker.position + dice <= 18:
@@ -2239,7 +2153,7 @@ class Game:
                             if current_checker.position + dice > last_white_checker_position:
                                 return 4
 
-                    return -8  # -16
+                    return -8
 
             if phase_of_game == 3:
 
@@ -2262,14 +2176,14 @@ class Game:
                         if current_checker.position == 7:
                             if self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4:
                                 return -4
-                        return 4  # 8
+                        return 4
 
                     if 13 <= current_checker.position + dice <= 18:
                         if last_white_checker_position is not None and 13 <= last_white_checker_position <= 18:
                             if current_checker.position + dice > last_white_checker_position:
-                                return 16  # 32
+                                return 16
 
-                        return -16  # -32
+                        return -16
 
                     if current_checker.position + dice > 18:
                         if last_white_checker_position is not None and 19 <= last_white_checker_position <= 24:
@@ -2286,10 +2200,10 @@ class Game:
                                     return 16
 
                                 if current_checker.position + dice <= 18:
-                                    return 16  # 32 ИЗМЕНЕНО 13.09.2023
+                                    return 16
 
                             if current_checker.position + dice < last_white_checker_position:
-                                return 8  # 16  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023
+                                return 8
 
                         if current_checker.position + dice > last_white_checker_position:
                             if last_white_checker_position < current_checker.position + dice <= 18:
@@ -2316,7 +2230,7 @@ class Game:
                             if current_checker.position + dice > last_white_checker_position:
                                 return 4
 
-                    return -4  # -16
+                    return -4
 
             if phase_of_game in (4, 5):
 
@@ -2325,19 +2239,15 @@ class Game:
                 if last_black_checker_position is not None:
                     if current_checker.position == last_black_checker_position:
                         if current_checker.position + dice <= 12:
-                            # if 1 <= current_checker.position <= 6:
-                            #     print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
-                            #     return 8
                             print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 8')
-                            return 8  # 16  # 32
+                            return 8
 
                 if last_white_checker_position is not None:
                     if 13 <= current_checker.position < last_white_checker_position:
                         if current_checker.position + dice > last_white_checker_position:
-                            return 8  # 16  # 32 ИЗМЕНЕНО 13.09.2023, 02.10.2023
+                            return 8
                         if current_checker.position + dice < last_white_checker_position:
-                            c = 1
-                            return 4  # 8  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023, 02.10.2023
+                            return 4
 
                 return 0
 
@@ -2349,11 +2259,11 @@ class Game:
 
                 if 2 <= current_checker.position <= 6:
                     if 2 <= current_checker.position + dice <= 6:
-                        return -8  # -4
+                        return -8
                     if 7 <= current_checker.position + dice <= 12:
-                        return -8  # -4
+                        return -8
                     if 13 <= current_checker.position + dice <= 18:
-                        return -8  # -4
+                        return -8
                     if current_checker.position + dice > 18:
                         return -32
 
@@ -2369,13 +2279,13 @@ class Game:
                                     return 0
 
                                 if current_checker.position + dice <= 18:
-                                    return 8  # 16 ИЗМЕНЕНО 13.09.2023
+                                    return 8
 
                             if current_checker.position + dice < last_white_checker_position:
-                                return 4  # 8  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023
+                                return 4
 
                     if 13 <= current_checker.position + dice <= 18:
-                        return -8  # -4
+                        return -8
 
                     if current_checker.position + dice > 18:
                         if last_white_checker_position is not None and last_white_checker_position > 18:
@@ -2402,11 +2312,11 @@ class Game:
 
                 if 2 <= current_checker.position <= 6:
                     if 2 <= current_checker.position + dice <= 6:
-                        return -8  # -16
+                        return -8
                     if 7 <= current_checker.position + dice <= 12:
                         return -8
                     if 13 <= current_checker.position + dice <= 18:
-                        return -8  # -4
+                        return -8
                     if current_checker.position + dice > 18:
                         return -16
 
@@ -2422,10 +2332,10 @@ class Game:
                                     return 4
 
                                 if current_checker.position + dice <= 18:
-                                    return 8  # 16 ИЗМЕНЕНО 13.09.2023
+                                    return 8
 
                             if current_checker.position + dice < last_white_checker_position:
-                                return 4  # 8  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023
+                                return 4
 
                     if 13 <= current_checker.position + dice <= 18:
                         return -8
@@ -2449,17 +2359,17 @@ class Game:
                             if current_checker.position + dice > last_white_checker_position:
                                 return 4
 
-                    return -16  # -32
+                    return -16
 
             if phase_of_game == 3:
 
                 if 2 <= current_checker.position <= 6:
                     if 2 <= current_checker.position + dice <= 6:
-                        return -8  # -16
+                        return -8
                     if 7 <= current_checker.position + dice <= 12:
                         return -8
                     if 13 <= current_checker.position + dice <= 18:
-                        return -8  # -4
+                        return -8
                     if current_checker.position + dice > 18:
                         return -8
 
@@ -2479,13 +2389,13 @@ class Game:
                                     return 8
 
                                 if current_checker.position + dice <= 18:
-                                    return 8  # 16 ИЗМЕНЕНО 13.09.2023
+                                    return 8
 
                             if current_checker.position + dice < last_white_checker_position:
-                                return 4  # 8  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023
+                                return 4
 
                     if 13 <= current_checker.position + dice <= 18:
-                        return -8  # -4
+                        return -8
 
                     if current_checker.position + dice > 18:
                         if last_white_checker_position is not None and last_white_checker_position > 18:
@@ -2506,7 +2416,7 @@ class Game:
                             if current_checker.position + dice > last_white_checker_position:
                                 return 8
 
-                    return -8  # -32
+                    return -8
 
             if phase_of_game in (4, 5):
 
@@ -2515,18 +2425,15 @@ class Game:
                 if last_black_checker_position is not None:
                     if current_checker.position == last_black_checker_position:
                         if current_checker.position + dice <= 12:
-                            # if 1 <= current_checker.position <= 6:
-                            #     print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 4')
-                            #     return 4
                             print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 4')
-                            return 4  # 8  # 16
+                            return 4
 
                 if last_white_checker_position is not None:
                     if 13 <= current_checker.position < last_white_checker_position:
                         if current_checker.position + dice > last_white_checker_position:
-                            return 4  # 8  # 16 ИЗМЕНЕНО 13.09.2023, 02.10.2023
+                            return 4
                         if current_checker.position + dice < last_white_checker_position:
-                            return 0  # 4  # 8  # ДОБАВЛЕНО 03.09.2023 ИЗМЕНЕНО 13.09.2023, 02.10.2023
+                            return 0
 
                 return 0
 
@@ -2536,9 +2443,6 @@ class Game:
 
             position_expression = current_checker.position + dice
 
-            # if self.get_exact_element(current_checker.color, position_expression) == 0:
-            #     if self.is_my_position_lower_than_last_white(position_expression):
-            #         return 0
             current_phase = self.get_phase_of_game()
 
             quarters_ratios = {
@@ -2549,58 +2453,51 @@ class Game:
             }
 
             if current_phase == 1:
-                # if current_checker.position == 1:
-                #     return 0
 
                 if quarters_ratios[position_expression] == 1:
-                    return 16  # 32
+                    return 16
                 if position_expression == 7:
                     if self.field.get_count_of_free_cells(self.field.black_home) == 0 and \
                             self.field.get_occupied_of_structure(self.field.black_home, 'black') < 4:
-                        с = 1
                         return 16
+
                     if self.condition_for_seventh_cell_4(current_checker, dice):
-                        c = 1
                         return 4
+
                     if self.condition_for_seventh_cell_8(current_checker, dice):
-                        c = 1
                         return 8
+
                     if self.condition_for_seventh_cell_16(dice):
-                        с = 1
                         return 16
 
                 if quarters_ratios[position_expression] == 2:
-                    return 8  # 4  # 16
-                if quarters_ratios[position_expression] == 3:
-                    return 16  # 8
-                if quarters_ratios[position_expression] == 4:
-                    return 8  # 0 # 8
-
-            if current_phase == 2:
-                # if current_checker.position == 1:
-                #     return 0
-
-                if quarters_ratios[position_expression] == 1:
-                    return 16  # 8  # 4
-                if quarters_ratios[position_expression] == 2:
-                    return 8  # 16
+                    return 8
                 if quarters_ratios[position_expression] == 3:
                     return 16
                 if quarters_ratios[position_expression] == 4:
-                    return 8  # 0  # 8
+                    return 8
 
-            if current_phase == 3:
-                # if current_checker.position == 1:
-                #     return 0
+            if current_phase == 2:
 
                 if quarters_ratios[position_expression] == 1:
-                    return 16  # 8  # 4  # 16
+                    return 16
                 if quarters_ratios[position_expression] == 2:
-                    return 8  # 16  # 32
+                    return 8
                 if quarters_ratios[position_expression] == 3:
-                    return 16  # 8  # 32
+                    return 16
                 if quarters_ratios[position_expression] == 4:
-                    return 8  # 0  # 8
+                    return 8
+
+            if current_phase == 3:
+
+                if quarters_ratios[position_expression] == 1:
+                    return 16
+                if quarters_ratios[position_expression] == 2:
+                    return 8
+                if quarters_ratios[position_expression] == 3:
+                    return 16
+                if quarters_ratios[position_expression] == 4:
+                    return 8
 
             if current_phase in (4, 5):
 
@@ -2609,16 +2506,15 @@ class Game:
                 if last_black_checker_position is not None:
                     if current_checker.position == last_black_checker_position:
                         print(f'ПЛЮСУЕМ ПОСЛЕДНЕЙ ШАШКЕ {current_checker.position} 16')
-                        return 16  # 32
+                        return 16
 
                 if quarters_ratios[position_expression] == 1:
-                    return 8  # 4
+                    return 8
                 if quarters_ratios[position_expression] == 2:
-                    return 8  # 8
+                    return 8
                 if quarters_ratios[position_expression] == 3:
 
                     if last_white_checker_position is None or position_expression < last_white_checker_position:
-                        c = 1
                         return 8
 
                     return 16
@@ -2636,7 +2532,7 @@ class Game:
 
     def condition_for_seventh_cell_8(self, checker, dice):
         self.field.show_field()
-        c = 1
+
         another_dice = self.first_dice if self.second_dice == dice else self.second_dice
 
         first_part = self.field.get_occupied_of_structure(self.field.black_home, 'black') < 3 and \
@@ -2650,7 +2546,6 @@ class Game:
 
     def condition_for_seventh_cell_4(self, checker, dice):
         self.field.show_field()
-        c = 1
         another_dice = self.first_dice if self.second_dice == dice else self.second_dice
 
         first_part = self.field.get_occupied_of_structure(self.field.black_home, 'black') < 2 and \
@@ -2663,8 +2558,6 @@ class Game:
         return first_part and second_part
 
     def manage_the_last_quarter(self, old_position, punishment_flag=False):
-        """Если на позициях с 13 по 24 есть белые шашки, смотрим на расположение последней из них относительно черных
-        шашек. Можем двигать черные шашки только если их позиция меньше последней белой"""
 
         punishment = {
             13: -11, 14: -10, 15: -9, 16: -8, 17: -7, 18: -6,
@@ -2675,36 +2568,40 @@ class Game:
             13: 11, 14: 10, 15: 9, 16: 8, 17: 7, 18: 6,
             19: 5, 20: 4, 21: 3, 22: 2, 23: 1, 24: 0
         }
-        # encouragement = {
-        # }
 
         last_white_checker_position = self.get_last_white_checker_position()
 
         if self.get_phase_of_game() in (1, 2, 3):
             if last_white_checker_position is None or last_white_checker_position > old_position:
                 if old_position in encouragement:
+
+                    # # test block
                     print(f'ПООЩРЕНИЕ\nСработала ф-ия управления последней четверти\nПозиция {old_position}')
+                    # # /test block
+
                     return encouragement[old_position]
 
         if self.get_phase_of_game() in (4, 5):
             if last_white_checker_position is not None:
                 if punishment_flag and old_position in punishment and old_position > last_white_checker_position:
+
+                    # # test block
                     print(f'НАКАЗАНИЕ\nСработала ф-ия управления последней четверти\nПозиция {old_position}')
+                    # # /test block
+
                     return punishment[old_position]
 
         return 0
 
     def forward_distance_assessment(self, current_checker):
-        """Оценка количества возможных ходов
-        Если есть редкая (2 и менее вариантов из 6) возможность походить,
-        то надо этой возможностью пользоваться.
-        Работает для шашек, которые не являются последними на своих местах"""
 
+        # # test block
         print(f'сработала ф-ия forward_distance_assessment для {current_checker}')
+        # # /test block
+
         return self.extraction(current_checker, forward_distance_assessment_call=True)
 
     def is_checker_in_another_yard(self, line_color):
-        """Функция должна проверять, есть ли во дворе шашка противника"""
 
         enemy_color = 'white' if line_color == 'black' else 'black'
         my_structure = self.field.white_yard if enemy_color == 'black' else self.field.black_yard
