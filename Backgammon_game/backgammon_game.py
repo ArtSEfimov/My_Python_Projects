@@ -273,11 +273,11 @@ class Game:
     def human_step(self, color):
         first_dice, second_dice = self.throw_dices()
 
-        # # test block
-        # first_dice, second_dice = [int(x) for x in input('HUMAN ').split()]
-        # # /test block
+        # test block
+        first_dice, second_dice = [int(x) for x in input('HUMAN ').split()]
+        # /test block
 
-        print('human: ', first_dice, second_dice)
+        print('HUMAN: ', first_dice, second_dice)
 
         double_flag = first_dice == second_dice
         iterations_number = 2 if double_flag else 1
@@ -289,12 +289,19 @@ class Game:
                     return first_dice, second_dice
 
             possible_variants = self.virtual_step(color, first_dice, second_dice)
+
+
+            if possible_variants:
+                print()
+
             self.show_possible_variants(possible_variants)
 
             if possible_variants:
                 while True:
                     try:
+                        print()
                         current_checker_number = int(input('Выберите номер шашки: '))
+                        print()
 
                         # # test block
                         # current_checker_number = random.randint(1, 24)
@@ -313,19 +320,22 @@ class Game:
                         print('Шашки с таким номером нет')
                         continue
 
-                print(
-                    *[
-                        current_checker.position + dice
-                        for dice in possible_variants[current_checker]
-                    ]
-                )
-
                 if len(possible_variants[current_checker]) == 1 or first_dice == second_dice:
                     current_dice = possible_variants[current_checker][0]
                 else:
+
+                    print(
+                        *[
+                            current_checker.position + dice
+                            for dice in possible_variants[current_checker]
+                        ]
+                    )
+
                     while True:
                         try:
+                            print()
                             current_dice_number = int(input('Выберите номер ячейки: '))
+                            print()
 
                             # # test block
                             # current_dice_number = random.randint(1, 24)
@@ -356,13 +366,16 @@ class Game:
                     return another_dice,
 
                 possible_variants = self.virtual_step(color, another_dice)
+
                 self.show_possible_variants(possible_variants)
 
                 if possible_variants:
 
                     while True:
                         try:
+                            print()
                             current_checker_number = int(input('Выберите номер шашки: '))
+                            print()
 
                             # # test block
                             # current_checker_number = random.randint(1, 24)
@@ -390,6 +403,8 @@ class Game:
 
             else:
                 print('Вариантов хода нет')
+                print()
+
                 return
 
     def get_throw_variant(self, color, current_dice):
@@ -672,8 +687,10 @@ class Game:
 
     def computer_step(self, color):  # black checkers
         self.first_dice, self.second_dice = self.throw_dices()
-        print(f'computer: {self.first_dice}, {self.second_dice}')
-        print()
+
+        # test block
+        print(f'COMPUTER: {self.first_dice}, {self.second_dice}')
+        # /test block
 
         # # test block
         # self.first_dice, self.second_dice = [int(i) for i in input('COMPUTER ').split()]
@@ -686,8 +703,10 @@ class Game:
             )
             if type(step_result) == bool:
                 if step_result:
-                    print(step_result)
-                    print()
+                    # # test block
+                    # print(step_result)
+                    # # /test block
+
                     self.field.show_field()
                     return
             else:
@@ -730,11 +749,15 @@ class Game:
             if double_flag:
                 self.throw_away(color, dice=self.first_dice)
 
-        print('computer: ', self.first_dice, self.second_dice)
-        print()
+        # # test block
+        # print('computer: ', self.first_dice, self.second_dice)
+        # # /test block
+
         self.field.show_field()
-        print('phase ', self.get_phase_of_game())
-        print()
+
+        # # test block
+        # print('phase ', self.get_phase_of_game())
+        # # /test block
 
     # функция для описания четвертей поля в зависимиости от цвета шашки
     def get_quarters(self, color):
@@ -1433,15 +1456,14 @@ class Game:
             if tmp_success_steps < success_steps:
                 continue
 
-                common_count = tmp_count
-                checkers_and_dices = tmp_steps_results.copy()
-
             if fist_step_3_4_6:
                 self.computer_first_step_flag = True
 
         for checker, dice in checkers_and_dices:
-            print(f'\n\nФУНКЦИЯ ПРОВЕРКИ ДВОЙНОГО ХОДА\nХОДИМ: checker = {checker}, dice = {dice}\n')
-            print(f'ИСХОДНЫЕ: DICE_1 = {self.first_dice} DICE_2 = {self.second_dice}\nCOUNT = {common_count}')
+            # # test block
+            # print(f'\n\nФУНКЦИЯ ПРОВЕРКИ ДВОЙНОГО ХОДА\nХОДИМ: checker = {checker}, dice = {dice}\n')
+            # print(f'ИСХОДНЫЕ: DICE_1 = {self.first_dice} DICE_2 = {self.second_dice}\nCOUNT = {common_count}')
+            # # /test block
 
             self.is_success_move(checker, dice)
 
@@ -2528,7 +2550,6 @@ class Game:
         return any(map(lambda checker: checker.position + another_dice > 12, self.black_checkers))
 
     def condition_for_seventh_cell_8(self, checker, dice):
-        self.field.show_field()
 
         another_dice = self.first_dice if self.second_dice == dice else self.second_dice
 
@@ -2542,7 +2563,6 @@ class Game:
         return first_part and second_part
 
     def condition_for_seventh_cell_4(self, checker, dice):
-        self.field.show_field()
         another_dice = self.first_dice if self.second_dice == dice else self.second_dice
 
         first_part = self.field.get_occupied_of_structure(self.field.black_home, 'black') < 2 and \
@@ -3815,6 +3835,7 @@ class Game:
                             break
 
 
+print()
 for _ in range(100_000):
     g = Game()
     g.play_the_game()
